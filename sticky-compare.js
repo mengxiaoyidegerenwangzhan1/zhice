@@ -27,7 +27,6 @@
     page.classList.toggle('is-sticky-scrolling',y>0);
     page.classList.toggle('is-sticky-engaged',y>state.threshold);
     const compactHeight=row.getBoundingClientRect().height/scale;
-    page.style.setProperty('--zc-compact-height',`${compactHeight}px`);
     const actions=page.querySelector('.zc-actions');
     const expandedHeight=y>state.threshold&&actions?(actions.getBoundingClientRect().bottom-selector.getBoundingClientRect().top)/scale:selector.getBoundingClientRect().height/scale;
     page.style.setProperty('--zc-sticky-selector-height',`${compact?compactHeight:expandedHeight}px`);
