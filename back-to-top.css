@@ -1,0 +1,40 @@
+.site-back-to-top {
+  position: fixed;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 105;
+  display: grid;
+  width: 60px;
+  height: 60px;
+  place-items: center;
+  pointer-events: none;
+}
+
+.site-back-to-top[hidden] {
+  display: none;
+}
+
+.site-back-to-top button {
+  display: grid;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 99px;
+  background: #fff;
+  box-shadow: 0 0 12px #00000014;
+  color: #999;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.site-back-to-top button:hover,
+.site-back-to-top button:focus-visible {
+  color: #555759;
+}
+
+.site-back-to-top button:focus-visible {
+  outline: 2px solid #6865a7;
+  outline-offset: 2px;
+}
