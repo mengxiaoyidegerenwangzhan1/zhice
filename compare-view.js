@@ -1,12 +1,28 @@
 (()=>{
 const A='./assets/compare-figma/';const img=(n,w=14,h=w)=>`<img src="${A+n}.svg" width="${w}" height="${h}" alt="">`;
-const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',color:'#8586f3',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'023514',type:'债券型',color:'#63cdb5',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'023514',type:'QDII',color:'#ddc15b',abbr:'yfdnsdk100etfljqdii' },{id:'d',name:'宝盈中证A500指数增强 C',code:'023515',type:'股票型',color:'#e58da5',abbr:'byzza500zszqc'}];
+const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',color:'#8695dd',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'023514',type:'债券型',color:'#e89c71',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'023514',type:'QDII',color:'#7ec3d8',abbr:'yfdnsdk100etfljqdii'},{id:'d',name:'宝盈中证A500指数增强 C',code:'023515',type:'股票型',color:'#e8b871',abbr:'byzza500zszqc'}];
 let funds=[],compared=false,pinned=null,sequence=0,noticeTimer=null,noticeUntil=0,tab=0,mode=0,period='共同时段',start='2025-05-02',end='2026-05-01',cal=false,anchor=null,hover=null,months=[],units=['月','月'],calendarMenu=null,charts=[],container;
 const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const date=s=>new Date(s+'T12:00:00');const today=fmt(new Date());const min='2022-01-01';
 function download(name,body,type){const u=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 const refreshButton=t=>`<button class="zc-text" data-refresh="${t}"><span class="zc-action-icon zc-refresh-icon" aria-hidden="true"></span>刷新</button>`;
 function heading(t,help=false,dl=false){return `<div class="zc-section-head"><h2>${t}${help?`<span title="展示所选基金在选定时间段内的模拟收益与动态回撤">${img('47-50886_imgFrame',16)}</span>`:''}</h2><div>${dl?`<button class="zc-text" data-download><span class="zc-action-icon zc-download-icon" aria-hidden="true"></span>下载</button>`:''}${refreshButton(t)}</div></div>`}
-function fundCards(){return `<div class="zc-fund-row"><div class="zc-pk">基金${img('47-50726_imgGroup2',33,17.314)}</div><div class="zc-fund-slots">${Array.from({length:4},(_,i)=>{const f=funds[i];return f?`<article class="zc-fund ${f.visible?'':'is-hidden'}" style="--series:${f.color}"><div class="zc-card-tools"><div><button aria-label="${pinned===f.id?'取消置前':'置前'} ${f.name}" aria-pressed="${pinned===f.id}" data-pin="${f.id}">${img(pinned===f.id?'47-50726_imgProperty2':'47-50726_imgProperty3')}</button><button aria-label="${f.visible?'隐藏':'显示'} ${f.name}" aria-pressed="${f.visible}" data-eye="${f.id}">${f.visible?img('47-50726_imgProperty1'):`${img('eye-hidden')}`}</button></div><button aria-label="移除 ${f.name}" data-remove="${f.id}">${img('47-50726_imgFrame2036082637')}</button></div><strong>${f.name}</strong><div class="zc-fund-code">${f.code}<span>${f.type}</span></div></article>`:`<article class="zc-fund zc-search-slot">${true?`<label class="zc-search"><input data-search="${i}" autocomplete="off" placeholder="输入基金代码、名称或简拼" aria-label="搜索添加基金">${img('47-50726_imgFrame',20)}</label><div class="zc-search-results" data-results="${i}" hidden></div>`:''}</article>`}).join('')}</div></div>`}
+function fundCards(){
+  const slots=Array.from({length:4},(_,i)=>{
+    const f=funds[i];
+    if(!f)return `<article class="zc-fund zc-search-slot">
+      <label class="zc-search"><input data-search="${i}" autocomplete="off" placeholder="输入基金代码、名称或简拼" aria-label="搜索添加基金">${img('47-50726_imgFrame',20)}</label>
+      <div class="zc-search-results" data-results="${i}" hidden></div>
+    </article>`;
+    return `<article class="zc-fund ${f.visible?'':'is-hidden'}" style="--series:${f.color}">
+      <div class="zc-card-tools"><div>
+        <button aria-label="${pinned===f.id?'取消置前':'置前'} ${f.name}" aria-pressed="${pinned===f.id}" data-pin="${f.id}">${img(pinned===f.id?'47-50726_imgProperty2':'47-50726_imgProperty3')}</button>
+        <button aria-label="${f.visible?'隐藏':'显示'} ${f.name}" aria-pressed="${f.visible}" data-eye="${f.id}">${img(f.visible?'47-50726_imgProperty1':'eye-hidden')}</button>
+      </div><button aria-label="移除 ${f.name}" data-remove="${f.id}">${img('47-50726_imgFrame2036082637')}</button></div>
+      <strong title="${f.name}">${f.name}</strong><div class="zc-fund-code">${f.code}<span>${f.type}</span></div>
+    </article>`;
+  }).join('');
+  return `<div class="zc-fund-row"><div class="zc-pk" role="img" aria-label="基金 PK"></div><div class="zc-fund-slots">${slots}</div></div>`;
+}
 function pill(labels,value,attr){return `<div class="zc-pill">${labels.map((l,i)=>`<button ${attr}="${i}" class="${i===value?'selected':''}">${l}</button>`).join('')}</div>`}
 function controls(){return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((x,i)=>`<button role="tab" aria-selected="${i===tab}" data-tab="${i}" class="${i===tab?'active':''}">${x}</button>`).join('')}</div><div class="zc-filters">${pill(['基金间比较','相对自身基准'],mode,'data-mode')}<div class="zc-quick-wrap"><div class="zc-pill zc-quick">${['共同时段','近1年','近3年'].map(x=>`<button data-period="${x}" class="${period===x?'selected':''}">${x}</button>`).join('')}<button id="zc-more" class="${!['共同时段','近1年','近3年','自定义'].includes(period)?'selected':''}" aria-expanded="false">${['共同时段','近1年','近3年','自定义'].includes(period)?'更多':period}<span class="zc-down">${img('117-5531_imgFrame2036082628',10)}</span></button></div><div class="zc-more-panel" hidden><div><small>区间</small>${['近1月','近3月','近6月'].map(x=>`<button data-period="${x}">${x}</button>`).join('')}</div><div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(x=>`<button data-period="${x}">${x}</button>`).join('')}</div></div></div><div class="zc-date-wrap"><button id="zc-date" class="zc-date ${cal?'open':''}" aria-expanded="${cal}" aria-label="选择日期范围"><span>${start}</span><small>至</small><span>${end}</span>${img(cal?'100-4801_imgFrame2036082748':'117-5531_imgFrame2036082748',12.6348,12.1194)}</button><div id="zc-calendar" ${cal?'':'hidden'}></div></div></div></div>`}
 function table(rows,returns=false){return `<div class="zc-table-wrap"><table class="zc-table ${returns?'zc-returns':''}"><colgroup><col style="width:120px">${'<col>'.repeat(4)}</colgroup><tbody>${rows.map((r,ri)=>`<tr><th scope="row">${r[0]}</th>${Array.from({length:4},(_,i)=>`<td class="${returns&&funds[i]?.visible&&funds[i]?.id==='a'&&![4,5,6,7].includes(ri)?'best':''}">${funds[i]?.visible?(typeof r[1]==='function'?r[1](i):r[seed.findIndex(f=>f.id===funds[i].id)+1]??r[1]):''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
@@ -14,7 +30,27 @@ function returnsTable(){return table(['今年以来','近1月','近3月','近6�
 function stars(i){return Array.from({length:5},(_,j)=>img(j<(i===0?2:1)?'47-51123_imgProperty1':'47-51123_imgProperty2',14.8)).join('')}
 function basic(){return table([['基金代码',i=>funds[i].code],['基金简称',i=>`<a href="#/fund/${funds[i].code}">${funds[i].name}</a>`],['基金类型',i=>funds[i].type==='股票型'?'股票型 | 增强指数股票型':funds[i].type],['基金星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金经理',i=>`<a href="#/fund/${funds[i].code}">${funds[i].id==='c'?'蔡丹':'蔡丹 | 阳之璇'}</a>`],['经理星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金公司','宝盈基金管理有限公司','宝盈基金管理有限公司','易方达基金管理有限公司'],['成立日期','2025-12-09'],['最新单位净值','0.9019'],['最新规模','3864.22万','5528.64万','3864.22万'],['申购状态','可申购','终止','可申购'],['赎回状态','可赎回','终止','可赎回'],['管理费率','0.8%','--','0.8%'],['托管费率','0.15%','--','0.15%'],['业绩比较基准','中证A500指数收益率×95%+银行活期存款利率(税后)×5%']])}
 function content(){if(!funds.length)return `<div class="zc-empty"><strong>添加基金，开始比较</strong><p>通过上方搜索框选择最多 4 只基金</p></div>`;if(tab===0)return `<section>${heading('业绩走势',true,true)}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('区间收益')}${returnsTable()}</section><section>${heading('基本信息')}${basic()}</section>`;if(tab===1)return `<section>${heading('收益与风险比较',true,true)}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('风险指标')}${table([['年化收益率','8.52%','3.16%','12.64%'],['年化波动率','18.62%','2.18%','23.71%'],['最大回撤','-22.14%','-2.38%','-23.16%'],['夏普比率','0.46','1.12','0.53'],['卡玛比率','0.38','1.33','0.55']])}</section>`;return `<section>${heading(tab===2?'资产配置比较':'收益归因比较',true,true)}<div id="zc-bar-chart" class="zc-chart zc-bar"></div></section><section>${heading(tab===2?'资产配置明细':'收益来源明细')}${table(tab===2?[['股票','82.5%','0.0%','95.2%'],['债券','10.2%','94.6%','0.0%'],['现金','6.3%','4.4%','3.8%'],['其他','1.0%','1.0%','1.0%']]:[['市场收益','6.32%','2.41%','8.62%'],['行业配置','1.42%','0.32%','2.16%'],['个股选择','0.56%','0.21%','1.32%'],['其他','0.22%','0.22%','0.54%']])}</section>`}
-function render(){setupHeader();setScale();charts.forEach(c=>c.dispose());charts=[];container.innerHTML=`<div class="zc-compare ${compared?'has-results':'is-empty'}"><nav class="zc-breadcrumb">公募基金 <span>›</span> 基金分析 <span>›</span> <b>基金比较</b></nav><section class="zc-selector">${fundCards()}<div class="zc-actions"><button class="zc-primary" id="zc-start" ${funds.length<2?'disabled':''}>开始比较</button><button class="zc-secondary" id="zc-clear">清空</button>${compared?`<button class="zc-secondary" id="zc-export">导出对比</button>`:''}</div></section>${compared?`<div class="zc-results-card">${controls()}<div class="zc-content">${content()}</div></div>`:emptyState()}</div>`;bind();if(compared)draw();if(cal&&compared)calendar();showTypeNotice();requestAnimationFrame(syncControlsLayout)}
+function render(){
+  setupHeader();
+  setScale();
+  charts.forEach(c=>c.dispose());
+  charts=[];
+  const selector=`<section class="zc-selector">${fundCards()}<div class="zc-actions">
+    <button class="zc-primary" id="zc-start" ${funds.length<2?'disabled':''}>开始比较</button>
+    <button class="zc-secondary" id="zc-clear">清空</button>
+    ${compared?'<button class="zc-secondary" id="zc-export">导出对比</button>':''}
+  </div></section>`;
+  const layout=compared
+    ? `<div class="zc-sticky-region"><div class="zc-sticky-panel">${selector}${controls()}</div></div>
+       <div class="zc-results-card"><div class="zc-content">${content()}</div></div>`
+    : `<nav class="zc-breadcrumb">公募基金 <span>›</span> 基金分析 <span>›</span> <b>基金比较</b></nav>${selector}${emptyState()}`;
+  container.innerHTML=`<div class="zc-compare ${compared?'has-results':'is-empty'}">${layout}</div>`;
+  bind();
+  if(compared)draw();
+  if(cal&&compared)calendar();
+  showTypeNotice();
+  requestAnimationFrame(syncControlsLayout);
+}
 function isChartVisible(f,kind){return f.visible&&f.chartVisible?.[kind]!==false}
 function chartLegend(kind){return `<div class="zc-chart-legend" aria-label="${kind==='return'?'收益走势':'动态回撤'}曲线显隐">${funds.map(f=>{const active=isChartVisible(f,kind);return `<button type="button" data-chart-legend="${f.id}" data-chart-kind="${kind}" aria-pressed="${active}" aria-label="${active?'隐藏':'显示'} ${f.name} 曲线" class="${active?'':'is-hidden'}" ${f.visible?'':'disabled title="请先显示基金卡片"'}><i style="background:${active?f.color:'#bdbdbd'}"></i><span>${f.name}</span></button>`}).join('')}</div>`}
 const escapeTooltip=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -136,7 +172,24 @@ function calendar(){
   const menu=el.querySelector('.zc-calendar-options');if(menu){const item=menu.querySelector('[aria-selected="true"]');if(item)menu.scrollTop=Math.max(0,item.offsetTop-2*item.offsetHeight);}
 }
 function syncControlsLayout(){const control=container?.querySelector('.zc-controls'),tabs=control?.querySelector('.zc-tabs'),filters=control?.querySelector('.zc-filters');if(!tabs||!filters)return;control.classList.remove('is-wrapped');const t=tabs.getBoundingClientRect(),f=filters.getBoundingClientRect();control.classList.toggle('is-wrapped',f.top>=t.bottom-1)}
-window.addEventListener('resize',()=>{setScale();requestAnimationFrame(syncControlsLayout);charts.forEach(c=>c.resize())});document.addEventListener('click',e=>{if(cal&&container?.isConnected&&!e.target.closest('.zc-date-wrap')){cal=false;anchor=null;render()}if(!e.target.closest('.zc-search-slot'))container?.querySelectorAll('.zc-search-results').forEach(r=>r.hidden=true)});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cal){cal=false;render()}});
+window.addEventListener('resize',()=>{setScale();requestAnimationFrame(syncControlsLayout);charts.forEach(c=>c.resize())});
+document.addEventListener('click',e=>{
+  if(cal&&container?.isConnected&&!e.target.closest('.zc-date-wrap')){
+    cal=false;
+    anchor=null;
+    // Keep the focused fund search field mounted when the date panel is dismissed.
+    const button=container.querySelector('#zc-date');
+    const panel=container.querySelector('#zc-calendar');
+    if(button&&panel){
+      panel.hidden=true;
+      button.classList.remove('open');
+      button.setAttribute('aria-expanded','false');
+      button.querySelector('img').src=`${A}117-5531_imgFrame2036082748.svg`;
+    }
+  }
+  if(!e.target.closest('.zc-search-slot'))container?.querySelectorAll('.zc-search-results').forEach(r=>r.hidden=true);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cal){cal=false;render()}});
 function setScale(){document.documentElement.style.setProperty('--zc-scale',document.documentElement.clientWidth>=1000?Math.min(1,document.documentElement.clientWidth/1440):1)}
 const F='./assets/compare-final/';
 const finalImg=(name,w,h=w)=>`<img src="${F+name}.svg" width="${w}" height="${h}" alt="">`;
