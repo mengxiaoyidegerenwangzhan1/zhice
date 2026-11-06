@@ -1,0 +1,24 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 2036083101" clip-path="url(#clip0_0_23)">
+<circle id="Ellipse 50" cx="16" cy="16" r="16" fill="#E7ECFF"/>
+<g id="Mask group">
+<mask id="mask0_0_23" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32">
+<g id="Ellipse 51">
+<circle cx="16" cy="16" r="16" fill="#E7ECFF"/>
+<circle cx="16" cy="16" r="15.5" stroke="white" stroke-opacity="0.9"/>
+</g>
+</mask>
+<g mask="url(#mask0_0_23)">
+<g id="Group 48">
+<rect id="Rectangle 163" x="11.3571" y="7.82535" width="9.28069" height="9.28069" rx="2.4" fill="#456EF6"/>
+<path id="Rectangle 164" d="M10.0214 21.1361C10.4626 20.4471 11.2244 20.0303 12.0426 20.0303H19.9563C20.7745 20.0303 21.5363 20.4471 21.9775 21.1361L28.9772 32.0677C30 33.6651 28.8529 35.7619 26.956 35.7619H5.04286C3.14601 35.7619 1.99884 33.6651 3.02171 32.0677L10.0214 21.1361Z" fill="#ACBFFF"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_23">
+<rect width="32" height="32" fill="white"/>
+</clipPath>
+</defs>
+</svg>

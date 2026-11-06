@@ -1,0 +1,86 @@
+body.fund-sketch-mode {
+  overflow-x: auto;
+  background: #f2f3f5;
+}
+
+body.fund-sketch-mode .route-progress {
+  display: none;
+}
+
+body.fund-sketch-mode #route-view {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.fund-sketch-page,
+.fund-sketch-stage {
+  position: relative;
+  width: 100%;
+  min-width: 1920px;
+  margin: 0;
+  background: #f2f3f5;
+}
+
+.fund-sketch-artboard {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+}
+
+.fund-sketch-object {
+  position: absolute;
+  left: 0;
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.fund-sketch-loading,
+.fund-sketch-error {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+}
+
+.fund-sketch-error strong {
+  color: #333;
+  font-size: 16px;
+}
+
+.fund-sketch-error span {
+  color: #999;
+  font-size: 12px;
+}
+
+.fund-sketch-hotspots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fund-sketch-hotspots button {
+  position: absolute;
+  z-index: 2;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline-offset: 2px;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.fund-sketch-hotspots button:focus-visible {
+  outline: 2px solid #6078d9;
+}

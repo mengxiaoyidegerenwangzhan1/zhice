@@ -1,0 +1,14 @@
+.zc-charts .zc-chart{height:266px}
+.zc-chart-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px;row-gap:8px;padding:12px 18px 0;min-height:54px}
+.zc-chart-legend button{display:flex;gap:6px;align-items:flex-start;min-width:0;text-align:left;border:0;background:transparent;padding:0;color:#555759;font-size:12px;line-height:17px;cursor:pointer}
+.zc-chart-legend button i{display:block;flex:none;width:10px;height:2px;margin-top:7px}
+.zc-chart-legend button span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zc-chart-legend button.is-hidden{color:#aaa}
+.zc-tip{box-sizing:border-box;padding:12px 16px;color:#333;font-family:"PingFang SC",sans-serif;font-size:12px;line-height:17px}
+.zc-tip-date{font-size:14px;line-height:20px;margin-bottom:8px}
+.zc-tip-rows{display:grid;gap:12px}
+.zc-tip-row{display:grid;grid-template-columns:10px minmax(0,1fr) 45px;align-items:center;column-gap:6px}
+.zc-tip-row i{height:2.2px;border-radius:7px}
+.zc-tip-name{min-width:0;overflow-wrap:anywhere}
+.zc-tip-value{text-align:left;white-space:nowrap;font-weight:500;font-variant-numeric:tabular-nums}
+@media(max-width:540px){.zc-chart-legend{grid-template-columns:1fr;min-height:54px}}

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>基金分析 - 智策研究工作台</title>
+    <link rel="stylesheet" href="./styles.css?v=9">
+    <link rel="stylesheet" href="./site.css?v=22">
+    <link rel="stylesheet" href="./routes/fund-dom.css?v=9">
+    <link rel="stylesheet" href="./routes/fund.css?v=2">
+    <script defer="" src="./assets/echarts.min.js"></script>
+    <script defer="" src="./assets/lucide.min.js"></script>
+    <script defer="" src="./data/snapshot.js?v=6"></script>
+    <script defer="" src="./fund-coded.js?v=14"></script>
+    <script defer src="./compare-view.js?v=15"></script><script defer="" src="./site.js?v=51"></script><script defer src="./sticky-compare.js?v=6"></script>
+  <link rel="stylesheet" href="./routes/compare-update.css?v=13"><link rel="stylesheet" href="./routes/calendar-fix.css?v=1"><link rel="stylesheet" href="./routes/chart-fix.css?v=3"><link rel="stylesheet" href="./routes/sticky-compare.css?v=6"></head>
+  <body class="app-body fund-sketch-mode">
+    <a class="skip-link" href="#route-view">跳到主要内容</a>
+    <header class="app-topbar">
+      <div class="app-topbar-inner">
+        <a class="app-brand" href="#/home" aria-label="智策研究工作台首页">
+          <img src="./assets/zhijun-logo.png?v=2" alt="智君科技">
+        </a>
+        <nav class="app-nav" aria-label="主导航">
+          <a class="nav-link" href="#/home" data-route-nav="home">首页</a>
+          <div class="nav-item">
+            <a class="nav-link is-active" href="#/screener" data-route-nav="fund-research" aria-haspopup="true" aria-current="page">基金研究<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down nav-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></a>
+            <div class="nav-dropdown nav-mega" role="menu" aria-label="基金研究">
+              <div class="nav-col">
+                <strong>公募基金</strong>
+                <a href="#/fund/000001" data-route-leaf="fund" class="is-active">基金分析</a>
+                <a href="#/screener" data-route-leaf="screener">基金筛选</a>
+                <a href="#/compare" data-route-leaf="compare">基金比较</a>
+                <button type="button" data-soon="新发基金">新发基金<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="基金异动">基金异动<i class="soon-badge">规划中</i></button>
+              </div>
+              <div class="nav-col">
+                <strong>ETF</strong>
+                <button type="button" data-soon="ETF 总览">ETF 总览<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="ETF 排行榜">排行榜<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="ETF 目录">目录<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="ETF 筛选">筛选<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="主动基金转 ETF">主动基金转 ETF<i class="soon-badge">规划中</i></button>
+                <a href="#/index" data-route-leaf="index">指数行情</a>
+              </div>
+              <div class="nav-col">
+                <strong>经理与公司</strong>
+                <button type="button" data-soon="经理筛选">经理筛选<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="经理比较">经理比较<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="基金公司列表">基金公司列表<i class="soon-badge">规划中</i></button>
+              </div>
+              <div class="nav-col">
+                <strong>选基工具</strong>
+                <button type="button" data-soon="指标筛选">指标筛选<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="数据浏览器">数据浏览器<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="股基交互">股基交互<i class="soon-badge">规划中</i></button>
+                <button type="button" data-soon="相似基金">相似基金<i class="soon-badge">规划中</i></button>
+              </div>
+            </div>
+          </div>
+          <div class="nav-item">
+            <button class="nav-link" type="button" aria-haspopup="true">基金池<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down nav-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            <div class="nav-dropdown nav-list" role="menu" aria-label="基金池">
+              <button type="button" data-soon="智策基金池"><span>智策基金池<small>平台经过研究形成的候选基金</small></span><i class="soon-badge">规划中</i></button>
+              <button type="button" data-soon="我的基金池"><span>我的基金池<small>保存和管理我的研究结果</small></span><i class="soon-badge">规划中</i></button>
+              <button type="button" data-soon="自选基金"><span>自选基金<small>日常关注、尚未进入正式基金池的基金</small></span><i class="soon-badge">规划中</i></button>
+            </div>
+          </div>
+          <div class="nav-item">
+            <button class="nav-link" type="button" aria-haspopup="true">组合与配置<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down nav-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            <div class="nav-dropdown nav-list" role="menu" aria-label="组合与配置">
+              <button type="button" data-soon="资产配置方案"><span>资产配置方案<small>基金组合策略、资产指数组合与 AI 配置方案</small></span><i class="soon-badge">规划中</i></button>
+              <button type="button" data-soon="我的组合"><span>我的组合<small>FOF 构建、智能组合与组合优化</small></span><i class="soon-badge">规划中</i></button>
+            </div>
+          </div>
+          <div class="nav-item">
+            <button class="nav-link" type="button" aria-haspopup="true">跟踪与复盘<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down nav-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+            <div class="nav-dropdown nav-list" role="menu" aria-label="跟踪与复盘">
+              <button type="button" data-soon="跟踪组合列表"><span>跟踪组合列表<small>组合持仓、收益、风险与历史调整记录</small></span><i class="soon-badge">规划中</i></button>
+              <button type="button" data-soon="持仓详情"><span>持仓详情<small>实盘跟踪、绩效归因与风险管理</small></span><i class="soon-badge">规划中</i></button>
+            </div>
+          </div>
+          <div class="nav-item">
+            <a class="nav-link" href="#/research-tools" data-route-nav="research-tools" aria-haspopup="true">研究工具<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down nav-caret" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></a>
+            <div class="nav-dropdown nav-mega" role="menu" aria-label="研究工具">
+              <div class="nav-col">
+                <strong>基金评价</strong>
+                <a href="#/research-tools" data-route-leaf="research-tools">基金打分</a>
+                <a href="#/research-tools" data-route-leaf="research-tools">打分模板</a>
+              </div>
+              <div class="nav-col">
+                <strong>因子研究</strong>
+                <a href="#/research-tools" data-route-leaf="research-tools">基金因子</a>
+                <a href="#/research-tools" data-route-leaf="research-tools">因子库</a>
+                <a href="#/research-tools" data-route-leaf="research-tools">因子算法</a>
+                <a href="#/research-tools" data-route-leaf="research-tools">因子回测</a>
+              </div>
+              <div class="nav-col">
+                <strong>数据与指数</strong>
+                <a href="#/research-tools" data-route-leaf="research-tools">基金数据管理</a>
+                <a href="#/research-tools" data-route-leaf="research-tools">自定义指数</a>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div class="app-actions">
+          <button class="app-icon-button" type="button" title="全局搜索" aria-label="全局搜索"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" data-lucide="search" class="lucide lucide-search"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></button>
+          <a class="app-icon-button" href="./visual-system.html" title="视觉系统" aria-label="打开视觉系统"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" data-lucide="palette" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path></svg></a>
+          <button class="app-icon-button" type="button" title="个人中心" aria-label="个人中心"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" data-lucide="user-round" class="lucide lucide-user-round"><circle cx="12" cy="8" r="5"></circle><path d="M20 21a8 8 0 0 0-16 0"></path></svg></button>
+        </div>
+      </div>
+    </header>
+    <div class="route-progress" id="route-progress" aria-hidden="true"></div>
+    <main id="route-view" tabindex="-1" aria-live="polite"><div class="fund-sketch-page" data-fund-view="overview">
+      <main class="fund-sketch-stage" aria-label="基金分析 · 产品概览" style="aspect-ratio: 1920 / 3928;"><object class="fund-sketch-object" type="image/svg+xml" data="./assets/fund-sketch/A804FD9E-C5D9-4338-9CB6-4BE6A3E729F1.svg?v=5" aria-label="基金分析 · 产品概览" style="width: 100%; height: 101.426%; left: 0%; top: -1.42566%;"></object><nav class="fund-sketch-hotspots" aria-label="基金分析页面"><button type="button" aria-label="产品概览" aria-current="page" style="left: 16.7708%; top: 4.17515%; width: 3.75%; height: 0.86558%;"></button><button type="button" aria-label="收益" style="left: 21.3542%; top: 4.17515%; width: 2.29167%; height: 0.86558%;"></button><button type="button" aria-label="风险" style="left: 24.4792%; top: 4.17515%; width: 2.29167%; height: 0.86558%;"></button><button type="button" aria-label="持仓分析" style="left: 27.6042%; top: 4.17515%; width: 3.75%; height: 0.86558%;"></button><button type="button" aria-label="收益归因" style="left: 32.1875%; top: 4.17515%; width: 3.75%; height: 0.86558%;"></button><button type="button" aria-label="基金经理" style="left: 36.7708%; top: 4.17515%; width: 3.75%; height: 0.86558%;"></button><button type="button" aria-label="基金公司" style="left: 41.3542%; top: 4.17515%; width: 3.75%; height: 0.86558%;"></button><button type="button" aria-label="基本信息" style="left: 45.9375%; top: 4.17515%; width: 3.75%; height: 0.86558%;"></button></nav></main>
+    </div></main>
+    <div class="app-toast" id="app-toast" role="status" aria-live="polite"></div>
+    <noscript><p class="noscript-note">此交互原型需要启用 JavaScript。</p></noscript>
+  
+
+
+
+
+
+
+
+</body></html>

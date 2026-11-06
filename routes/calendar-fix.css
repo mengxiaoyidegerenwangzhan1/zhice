@@ -1,0 +1,45 @@
+/* Calendar component: 260×32 input, 526×310 two-month panel. */
+.zc-compare .zc-date-wrap{position:relative;flex:0 0 auto}
+.zc-compare .zc-date{width:260px;height:32px;border:1px solid #ebebeb;border-radius:20px;padding:8px 12px;gap:4px;background:#fff;box-shadow:0 0 6px #00000014;color:#333}
+.zc-compare .zc-date:hover,.zc-compare .zc-date.open{border-color:#b9b8d8}
+.zc-compare .zc-date>span{width:100px;flex:0 0 100px;text-align:center;font-size:14px;line-height:20px;white-space:nowrap}
+.zc-compare .zc-date>small{flex:0 0 12px;text-align:center;color:#999;font-size:12px;line-height:17px}
+.zc-compare .zc-date>img{flex:0 0 auto;width:12.6348px;height:12.1194px;margin:0 1.7px}
+.zc-compare #zc-calendar{position:absolute;right:0;top:40px;z-index:125;width:526px;max-width:none;height:310px;border:1px solid #b9b8d8;border-radius:8px;background:#fff;box-shadow:2px 2px 6px #00000014;overflow:visible}
+.zc-compare #zc-calendar:not([hidden]){display:grid;grid-template-columns:1fr 1fr}
+.zc-compare .zc-month{min-width:0;padding:16px;display:flex;flex-direction:column;gap:12px}
+.zc-compare .zc-month+.zc-month{border-left:1px solid #eaeaea}
+.zc-compare .zc-month-head{display:flex;align-items:center;justify-content:space-between;gap:8px;height:34px;margin:0;flex:none}
+.zc-compare .zc-calendar-select{position:relative;flex:none}
+.zc-compare .zc-calendar-trigger{height:34px;min-width:72px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 12px;border:1px solid #eaeaea;border-radius:32px;background:#fff;color:#333;font-size:14px;white-space:nowrap}
+.zc-compare .zc-calendar-select:first-child .zc-calendar-trigger{width:80px}
+.zc-compare .zc-calendar-trigger:hover,.zc-compare .zc-calendar-trigger.open{border-color:#6865a7;color:#6865a7}
+.zc-compare .zc-calendar-chevron{width:7px;height:7px;border-right:1px solid #999;border-bottom:1px solid #999;transform:rotate(45deg);margin-top:-4px;flex:none}
+.zc-compare .zc-calendar-trigger.open .zc-calendar-chevron{transform:rotate(225deg);margin-top:4px;border-color:#6865a7}
+.zc-compare .zc-calendar-options{position:absolute;left:0;top:40px;z-index:3;width:100%;max-height:190px;overflow-y:auto;background:#fff;border:1px solid #eaeaea;border-radius:8px;box-shadow:0 2px 10px #0000001f;scrollbar-width:thin}
+.zc-compare .zc-calendar-options button{display:block;width:100%;height:38px;padding:0;border:0;background:#fff;color:#333;text-align:center;font-size:14px}
+.zc-compare .zc-calendar-options button:hover:not(:disabled){background:#f2f3f5}
+.zc-compare .zc-calendar-options button[aria-selected="true"]{background:#f4f4fc;color:#6865a7}
+.zc-compare .zc-calendar-options button:disabled{color:#cbcbcb;cursor:not-allowed}
+.zc-compare .zc-calendar-nav{display:flex;align-items:center;justify-content:flex-end;gap:0;min-width:48px;margin-left:auto}
+.zc-compare .zc-calendar-nav button{height:20px;width:14px;padding:0;border:0;background:transparent;color:#555759;display:flex;align-items:center;justify-content:center;font-size:14px}
+.zc-compare .zc-calendar-nav button:disabled{opacity:.28;cursor:not-allowed}
+.zc-compare .zc-calendar-nav button:not(:disabled):hover{color:#6865a7}
+.zc-compare .zc-calendar-nav .zc-calendar-unit{width:20px}
+.zc-compare .zc-week,.zc-compare .zc-days{display:grid;grid-template-columns:repeat(7,26px);gap:8px;justify-content:space-between;margin:0;text-align:center}
+.zc-compare .zc-week{height:20px;color:#999;font-size:14px;line-height:20px}
+.zc-compare .zc-week span{width:26px;text-align:center}
+.zc-compare .zc-days{grid-auto-rows:26px;row-gap:8px}
+.zc-compare .zc-days button{position:relative;width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:4px;background:transparent;color:#333;font-size:14px;line-height:20px;isolation:isolate}
+.zc-compare .zc-days button:before{content:'';position:absolute;z-index:-1;top:-1px;bottom:-1px;left:-5px;right:-5px;background:transparent}
+.zc-compare .zc-days button.in-range:before{background:#f4f4fc}
+.zc-compare .zc-days button.range-start:before{left:-1px;border-radius:4px 0 0 4px}
+.zc-compare .zc-days button.range-end:before{right:-1px;border-radius:0 4px 4px 0}
+.zc-compare .zc-days button.endpoint{background:#6865a7;color:white}
+.zc-compare .zc-days button.today:not(.endpoint){color:#6865a7;background:#f4f4fc}
+.zc-compare .zc-days button:hover:not(:disabled):not(.endpoint),.zc-compare .zc-days button:focus-visible:not(.endpoint){border-color:#6865a7;outline:none}
+.zc-compare .zc-days button:disabled{color:#cbcbcb;background:transparent;cursor:not-allowed}
+@media(max-width:600px){.zc-compare #zc-calendar{width:min(526px,calc(100vw - 32px));height:auto;grid-template-columns:1fr!important;max-height:75vh;overflow-y:auto}.zc-compare .zc-month+.zc-month{border-left:0;border-top:1px solid #eaeaea}.zc-compare .zc-month{align-items:center}.zc-compare .zc-month-head{width:230px}}
+.zc-compare .zc-days button.endpoint{background:transparent;color:#fff}
+.zc-compare .zc-days button.endpoint span{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 26px;border-radius:4px;background:#6865a7;color:#fff}
+.zc-compare .zc-calendar-nav button:last-child img{transform:rotate(180deg)}
