@@ -16,11 +16,15 @@
 .zc-compare .zc-type-notice{position:relative;inset:auto;margin:0 0 16px;min-height:35px}
 /* Keep the time label intrinsic; wrap complete control groups when space runs out. */
 .zc-compare.has-results .zc-quick{width:max-content;min-width:max-content;justify-content:flex-start}
-.zc-compare.has-results .zc-controls{flex-wrap:wrap;column-gap:12px;row-gap:16px}
-.zc-compare.has-results .zc-controls.is-wrapped{padding-bottom:16px;border-bottom:0}
-.zc-compare.has-results .zc-controls.is-wrapped .zc-tabs{position:relative;width:100%}
-.zc-compare.has-results .zc-controls.is-wrapped .zc-tabs::after{content:'';position:absolute;left:-20px;right:-20px;bottom:0;height:1px;background:#ddd;pointer-events:none}
-.zc-compare.has-results .zc-controls.is-wrapped .zc-tabs button.active::after{z-index:1}
+.zc-compare.has-results .zc-controls{
+  flex-wrap:wrap;column-gap:12px;row-gap:16px;border-bottom:0;
+  box-shadow:inset 0 -1px #ddd;
+}
+.zc-compare.has-results .zc-controls.is-wrapped{padding-bottom:16px;box-shadow:none}
+.zc-compare.has-results .zc-controls.is-wrapped .zc-tabs{
+  width:calc(100% + 40px);max-width:none;margin-inline:-20px;padding-inline:20px;
+  box-shadow:inset 0 -1px #ddd;
+}
 .zc-action-icon{display:inline-block;flex:none;width:16px;height:16px;background-color:currentColor;mask-position:center;mask-repeat:no-repeat;mask-size:contain}
 .zc-download-icon{mask-image:url('../assets/compare-figma/47-50886_imgFrame1.svg')}
 .zc-refresh-icon{mask-image:url('../assets/compare-figma/47-50886_imgFrame2.svg')}
@@ -35,6 +39,7 @@
 /* Spacing between adjacent pieces within comparison modules. */
 .zc-content>section+section{margin-top:26px;padding-top:26px}
 .zc-section-head{margin-bottom:26px}
+.zc-basic-info > .zc-section-head{margin-bottom:16px}
 .zc-charts h3{margin-bottom:26px}
 /* Hidden fund stays in its slot while its values and line are concealed. */
 .zc-fund.is-hidden::before{display:none}

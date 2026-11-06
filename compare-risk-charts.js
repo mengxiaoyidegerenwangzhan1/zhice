@@ -8,6 +8,7 @@
     d: { growth: .00045, swing: .095, phase: .69 },
   };
   const legendChoices = new WeakMap();
+  const returnZoomId = 'zc-risk-return-range';
   const epoch = Date.UTC(2022, 0, 1) / day;
   const dayIndex = date => Date.parse(`${date}T00:00:00Z`) / day;
   const drawdownStart = dayIndex('2022-12-06');
@@ -127,6 +128,133 @@
     </div>`;
   }
 
+  function rangePreview(values) {
+    if (!values?.length) return '';
+    const low = Math.min(...values);
+    const span = Math.max(...values) - low || 1;
+    const points = values.map((value, index) =>
+      `${100 * index / (values.length - 1)},${20 - 16 * (value - low) / span}`).join(' ');
+    return `<svg class="zc-risk-range-preview" viewBox="0 0 100 24" preserveAspectRatio="none" aria-hidden="true">
+      <polyline points="${points}" fill="none" stroke="#a8bcd2" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    </svg>`;
+  }
+
+  function mountReturnRange(element, chart, { labels, series }) {
+    const slider = document.createElement('div');
+    slider.className = 'zc-risk-range';
+    slider.setAttribute('role', 'group');
+    slider.setAttribute('aria-label', '调整收益图显示范围');
+    slider.innerHTML = `<div class="zc-risk-range-track">
+      ${rangePreview(series[0]?.values)}
+      <div class="zc-risk-range-selection" aria-hidden="true"></div>
+      <button class="zc-risk-range-handle is-start" type="button" role="slider" aria-label="显示范围开始" data-range-edge="start"></button>
+      <button class="zc-risk-range-handle is-end" type="button" role="slider" aria-label="显示范围结束" data-range-edge="end"></button>
+    </div>`;
+    const track = slider.querySelector('.zc-risk-range-track');
+    const selection = slider.querySelector('.zc-risk-range-selection');
+    const startHandle = slider.querySelector('[data-range-edge="start"]');
+    const endHandle = slider.querySelector('[data-range-edge="end"]');
+    const lastIndex = labels.length - 1;
+    const indexAt = percent => Math.round(percent * lastIndex / 100);
+    const percentAt = index => 100 * index / lastIndex;
+    const clamp = (value, limit = 100) => Math.max(0, Math.min(limit, value));
+    let start = 0;
+    let end = 100;
+    let startIndex = 0;
+    let endIndex = lastIndex;
+    let drag = null;
+
+    function updateHandle(handle, index, min, max) {
+      handle.setAttribute('aria-valuemin', String(min));
+      handle.setAttribute('aria-valuemax', String(max));
+      handle.setAttribute('aria-valuenow', String(index));
+      handle.setAttribute('aria-valuetext', labels[index]);
+    }
+
+    function setRange(nextStart, nextEnd) {
+      start = nextStart;
+      end = nextEnd;
+      const nextStartIndex = indexAt(start);
+      const nextEndIndex = indexAt(end);
+      slider.style.setProperty('--zc-range-start', `${start}%`);
+      slider.style.setProperty('--zc-range-end', `${end}%`);
+      slider.classList.toggle('is-zoomed', start > 0 || end < 100);
+      updateHandle(startHandle, nextStartIndex, 0, nextEndIndex);
+      updateHandle(endHandle, nextEndIndex, nextStartIndex, lastIndex);
+      if (nextStartIndex === startIndex && nextEndIndex === endIndex) return;
+      startIndex = nextStartIndex;
+      endIndex = nextEndIndex;
+      chart.dispatchAction({
+        type: 'dataZoom', dataZoomId: returnZoomId, startValue: startIndex, endValue: endIndex,
+      });
+    }
+
+    function pointerPercent(event) {
+      const bounds = track.getBoundingClientRect();
+      return clamp(100 * (event.clientX - bounds.left) / bounds.width);
+    }
+
+    track.addEventListener('pointerdown', event => {
+      if (drag || event.button !== 0) return;
+      const handle = event.target.closest('[data-range-edge]');
+      const move = event.target === selection && end - start < 100;
+      drag = {
+        pointer: event.pointerId, anchor: pointerPercent(event), start, end,
+        mode: handle?.dataset.rangeEdge ?? (move ? 'move' : 'brush'),
+      };
+      track.setPointerCapture(event.pointerId);
+      handle?.focus({ preventScroll: true });
+      event.preventDefault();
+    });
+
+    function moveRange(event) {
+      if (event.pointerId !== drag?.pointer) return;
+      const position = pointerPercent(event);
+      const offset = position - drag.anchor;
+      if (drag.mode === 'start') {
+        setRange(Math.min(clamp(drag.start + offset), end), end);
+      } else if (drag.mode === 'end') {
+        setRange(start, Math.max(clamp(drag.end + offset), start));
+      } else if (drag.mode === 'move') {
+        const width = drag.end - drag.start;
+        const left = clamp(drag.start + offset, 100 - width);
+        setRange(left, left + width);
+      } else if (Math.abs(offset) >= .5) {
+        setRange(Math.min(drag.anchor, position), Math.max(drag.anchor, position));
+      }
+    }
+
+    function finishDrag(event) {
+      if (event.pointerId !== drag?.pointer) return;
+      if (event.type === 'pointerup') moveRange(event);
+      drag = null;
+      setRange(percentAt(startIndex), percentAt(endIndex));
+    }
+
+    track.addEventListener('pointermove', moveRange);
+    track.addEventListener('pointerup', finishDrag);
+    track.addEventListener('pointercancel', finishDrag);
+    track.addEventListener('lostpointercapture', finishDrag);
+
+    for (const handle of [startHandle, endHandle]) {
+      handle.addEventListener('keydown', event => {
+        const isStart = handle === startHandle;
+        const index = isStart ? startIndex : endIndex;
+        const min = isStart ? 0 : startIndex;
+        const max = isStart ? endIndex : lastIndex;
+        const delta = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1, PageDown: -5, PageUp: 5 };
+        if (event.key !== 'Home' && event.key !== 'End' && !Object.hasOwn(delta, event.key)) return;
+        event.preventDefault();
+        const next = event.key === 'Home' ? min : event.key === 'End' ? max : Math.max(min, Math.min(max, index + delta[event.key]));
+        if (isStart) setRange(percentAt(next), end);
+        else setRange(start, percentAt(next));
+      });
+    }
+
+    setRange(0, 100);
+    element.after(slider);
+  }
+
   function chartOption(key, { labels, series }, selected, element) {
     const overview = key === 'returns' || key === 'distribution';
     const line = key === 'rolling';
@@ -148,25 +276,28 @@
           : { type: 'shadow', shadowStyle: { color: 'rgba(80,86,109,.08)' } },
         formatter: params => tooltip(params, element.clientWidth),
       },
-      grid: { left: 40, right, top: 12, bottom: slider ? 37 : 24 },
+      grid: { left: 40, right, top: 12, bottom: slider ? 55 : 24 },
       xAxis: {
         type: 'category', data: labels, boundaryGap: !line,
         axisLine: { onZero: false, lineStyle: { color: '#eaeaea' } },
         axisTick: { show: false },
-        axisLabel: { color: '#555759', fontSize: 12, hideOverlap: true },
+        axisLabel: { color: '#555759', fontSize: 12, margin: 8, hideOverlap: true },
+        ...(key === 'distribution' && {
+          axisPointer: {
+            label: {
+              show: true, margin: 8, padding: [0, 2], backgroundColor: '#fff',
+              color: '#262626', fontSize: 12, fontWeight: 700, borderRadius: 0,
+              shadowBlur: 0, shadowOffsetX: 0, shadowOffsetY: 0,
+            },
+          },
+        }),
       },
       yAxis: {
         type: 'value', min, max, splitNumber: 6,
         axisLabel: { formatter: '{value}%', color: '#555759', fontSize: 12, margin: 9 },
         splitLine: { lineStyle: { color: '#e9eaec', type: 'dashed' } },
       },
-      dataZoom: slider ? [{
-        type: 'slider', height: 13, left: 40, right, bottom: 1,
-        showDetail: false, showDataShadow: true, brushSelect: false,
-        handleSize: '85%', backgroundColor: '#f1f3f6', fillerColor: 'rgba(179,198,219,.28)',
-        borderColor: '#e4e8ed', handleStyle: { color: '#d6e2ef', borderColor: '#a8bcd2' },
-        dataBackground: { lineStyle: { color: '#b8c8da' }, areaStyle: { color: '#e0e8f0' } },
-      }] : [],
+      dataZoom: slider ? [{ id: returnZoomId, type: 'inside', xAxisIndex: 0, disabled: true }] : [],
       series: series.map(item => ({
         name: item.name, type: line ? 'line' : 'bar', data: item.values,
         showSymbol: false, symbolSize: 5, lineStyle: { color: item.color, width: 1.25 },
@@ -188,6 +319,7 @@
       const selected = Object.fromEntries(options.funds.map(fund => [fund.name, fund.visible && !legendChoices.get(fund)?.has(key)]));
       const chart = window.echarts.init(element);
       chart.setOption(chartOption(key, dataset, selected, element));
+      if (key === 'returns' && dataset.labels.length > 1) mountReturnRange(element, chart, dataset);
       legend?.querySelectorAll('[data-risk-fund]').forEach(button => {
         const fund = options.funds.find(item => item.id === button.dataset.riskFund);
         if (!fund) return;

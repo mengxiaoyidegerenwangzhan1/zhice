@@ -77,7 +77,9 @@
   }
 
   function chart(key, title, funds) {
-    return `<div class="zc-chart zc-risk-chart" data-risk-chart="${key}" role="img" aria-label="${title}"></div>${legend(key, title, funds)}`;
+    const plot = `<div class="zc-chart zc-risk-chart" data-risk-chart="${key}" role="img" aria-label="${title}"></div>`;
+    const frame = key === 'returns' ? `<div class="zc-risk-chart-frame">${plot}</div>` : plot;
+    return `${frame}${legend(key, title, funds)}`;
   }
 
   function fundHeading(fund) {

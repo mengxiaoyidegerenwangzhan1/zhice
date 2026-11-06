@@ -175,6 +175,94 @@
   height: 266px;
 }
 
+.zc-risk-chart-frame {
+  position: relative;
+}
+
+.zc-risk-range {
+  position: absolute;
+  inset: auto 28px 6px 40px;
+  height: 18px;
+  touch-action: none;
+  user-select: none;
+}
+
+.zc-risk-range-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #e4e8ed;
+  border-radius: 3px;
+  background: #f1f3f6;
+  cursor: crosshair;
+}
+
+.zc-risk-range-preview,
+.zc-risk-range-selection {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.zc-risk-range-preview {
+  pointer-events: none;
+}
+
+.zc-risk-range-selection {
+  right: calc(100% - var(--zc-range-end, 100%));
+  left: var(--zc-range-start, 0%);
+  width: auto;
+  border-block: 1px solid #becde0;
+  background: rgba(179, 198, 219, .28);
+}
+
+.zc-risk-range.is-zoomed .zc-risk-range-selection {
+  cursor: grab;
+}
+
+.zc-risk-range.is-zoomed .zc-risk-range-selection:active {
+  cursor: grabbing;
+}
+
+.zc-risk-range-handle {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  width: 14px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  border: 1px solid #7f95b2;
+  border-radius: 4px;
+  padding: 0;
+  background: #fff;
+}
+
+.zc-compare .zc-risk-range-handle {
+  cursor: ew-resize;
+}
+
+.zc-risk-range-handle.is-start {
+  left: var(--zc-range-start, 0%);
+}
+
+.zc-risk-range-handle.is-end {
+  left: var(--zc-range-end, 100%);
+}
+
+.zc-risk-range-handle::before {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 8px;
+  margin: auto;
+  border-inline: 1px solid #7f95b2;
+}
+
+.zc-risk-range-handle:hover {
+  border-color: #6865a7;
+}
+
 .zc-risk-view .zc-risk-legend {
   display: flex;
   flex-wrap: wrap;
