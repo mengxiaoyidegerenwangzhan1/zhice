@@ -62,7 +62,7 @@ body.zc-compare-mode .zc-compare.has-results {
   margin: 0;
   border: 0;
   border-radius: 16px 0 0 0;
-  background: url('../assets/compare-figma/fund-pk-expanded.png') center / 139px 126px no-repeat;
+  background: url('../assets/compare-figma/fund-pk-expanded.png?v=2') center / 139px 126px no-repeat;
 }
 
 .zc-compare .zc-fund-slots {
@@ -158,7 +158,7 @@ body.zc-compare-mode .zc-compare.has-results {
 .zc-compare.is-sticky-compact .zc-pk {
   height: 68px;
   border-radius: 0;
-  background-image: url('../assets/compare-figma/fund-pk-compact.png');
+  background-image: url('../assets/compare-figma/fund-pk-compact.png?v=2');
   background-size: 139px 68px;
 }
 
