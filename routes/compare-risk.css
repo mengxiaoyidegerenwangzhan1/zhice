@@ -1,0 +1,334 @@
+.zc-compare.has-results .zc-risk-filters {
+  column-gap: 12px;
+}
+
+.zc-risk-frequency {
+  margin-inline-end: 8px;
+}
+
+.zc-risk-view > section + section {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid #eaeaea;
+}
+
+.zc-risk-view .zc-risk-head {
+  height: auto;
+  min-height: 32px;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.zc-risk-head .zc-risk-heading,
+.zc-risk-actions,
+.zc-risk-actions-main {
+  display: flex;
+  align-items: center;
+}
+
+.zc-risk-head .zc-risk-heading {
+  min-width: 0;
+  gap: 8px;
+}
+
+.zc-risk-heading h2 {
+  color: #333;
+  white-space: nowrap;
+}
+
+.zc-risk-heading small {
+  color: #999;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.zc-risk-actions {
+  flex: none;
+}
+
+.zc-risk-actions-main {
+  gap: 20px;
+}
+
+.zc-risk-view-toggle + .zc-risk-actions-main {
+  gap: 16px;
+}
+
+.zc-risk-view-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(0, 0, 0, .08);
+}
+
+.zc-risk-view-toggle button {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+}
+
+.zc-risk-view-toggle button[aria-pressed="true"],
+.zc-risk-view-toggle button:hover {
+  background: #f2f3f5;
+}
+
+.zc-risk-chart-icon {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.2px;
+  width: 8px;
+  height: 8px;
+  padding: 0 0 .46px .2px;
+}
+
+.zc-risk-table-icon {
+  display: grid;
+  align-content: center;
+  gap: 1.72px;
+  width: 8px;
+  height: 8px;
+}
+
+.zc-risk-table-icon > span {
+  display: flex;
+  align-items: center;
+  gap: .95px;
+}
+
+.zc-risk-table-icon i {
+  width: 6.055px;
+  height: 1px;
+  border-radius: 23px;
+  background: #555759;
+}
+
+.zc-risk-heading .zc-risk-help {
+  position: relative;
+  display: flex;
+  flex: none;
+  margin-inline-start: -4px;
+}
+
+.zc-risk-help button,
+.zc-risk-metric-help {
+  display: grid;
+  flex: none;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.zc-risk-help-popover {
+  position: absolute;
+  z-index: 3;
+  top: -4px;
+  left: calc(100% + 8px);
+  width: 200px;
+  border: 1px solid #b9b8d8;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+  color: #333;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  letter-spacing: .24px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.zc-risk-help:hover .zc-risk-help-popover,
+.zc-risk-help:focus-within .zc-risk-help-popover {
+  visibility: visible;
+}
+
+.zc-risk-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 56px;
+}
+
+.zc-risk-pair article {
+  min-width: 0;
+}
+
+.zc-risk-pair h3 {
+  margin: 0 0 12px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.zc-risk-view .zc-risk-chart {
+  height: 266px;
+}
+
+.zc-risk-view .zc-risk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 29px;
+  padding: 12px 0 0;
+}
+
+.zc-risk-pair .zc-risk-legend {
+  align-content: start;
+  min-height: 54px;
+}
+
+.zc-risk-view .zc-risk-legend button {
+  flex: 0 1 min(280px, calc((100% - 20px) / 2));
+  align-items: center;
+  color: #333;
+}
+
+.zc-risk-view .zc-risk-legend button i {
+  width: 10px;
+  height: 10px;
+  margin: 0;
+  border-radius: 1px;
+  background: var(--series);
+}
+
+.zc-risk-view .zc-risk-legend button.is-hidden {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.zc-risk-view .zc-risk-legend button.is-hidden i {
+  background: #999;
+}
+
+.zc-risk-view .zc-risk-legend button:disabled {
+  cursor: default;
+}
+
+.zc-risk-metric-tables {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.zc-risk-view .zc-risk-table th,
+.zc-risk-view .zc-risk-table td {
+  border-color: rgba(234, 234, 234, .85);
+}
+
+.zc-risk-view .zc-risk-table tbody th {
+  height: auto;
+}
+
+.zc-risk-view .zc-risk-table thead th {
+  height: 65px;
+  font-weight: 500;
+}
+
+.zc-risk-view .zc-risk-table .zc-risk-metric-col {
+  width: 120px;
+}
+
+.zc-risk-fund-heading,
+.zc-risk-metric-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zc-risk-fund-heading > i {
+  flex: none;
+  width: 3px;
+  height: 16px;
+  border-radius: 3px;
+  background: var(--series);
+}
+
+.zc-risk-metric-label {
+  justify-content: space-between;
+}
+
+.zc-risk-metric-label > span {
+  min-width: 0;
+}
+
+.zc-risk-list-wrap {
+  max-height: 320px;
+}
+
+.zc-risk-view .zc-risk-list {
+  min-width: 400px;
+}
+
+.zc-risk-view .zc-risk-list thead th {
+  position: sticky;
+  top: 0;
+}
+
+.zc-risk-no-data {
+  display: grid;
+  min-height: 266px;
+  place-items: center;
+  color: #999;
+  font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .zc-risk-pair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .zc-risk-view .zc-risk-table .zc-risk-metric-col {
+    width: 120px !important;
+  }
+}
+
+@media (max-width: 540px) {
+  .zc-risk-frequency {
+    margin-inline-end: 0;
+  }
+
+  .zc-risk-view > section + section {
+    margin-top: 24px;
+    padding-top: 24px;
+  }
+
+  .zc-risk-head .zc-risk-heading {
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+
+  .zc-risk-heading small {
+    font-size: 12px;
+    line-height: 17px;
+  }
+
+  .zc-risk-head .zc-risk-actions,
+  .zc-risk-head .zc-risk-actions-main {
+    gap: 8px;
+  }
+
+  .zc-risk-head .zc-risk-actions .zc-text {
+    font-size: 12px;
+  }
+
+  .zc-risk-view-toggle {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .zc-risk-help-popover {
+    top: calc(100% + 8px);
+  }
+}

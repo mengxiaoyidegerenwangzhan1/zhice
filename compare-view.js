@@ -2,6 +2,9 @@
 const A='./assets/compare-figma/';const img=(n,w=14,h=w)=>`<img src="${A+n}.svg" width="${w}" height="${h}" alt="">`;
 const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',color:'#8695dd',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'023514',type:'债券型',color:'#e89c71',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'023514',type:'QDII',color:'#7ec3d8',abbr:'yfdnsdk100etfljqdii'},{id:'d',name:'宝盈中证A500指数增强 C',code:'023515',type:'股票型',color:'#e8b871',abbr:'byzza500zszqc'}];
 let funds=[],compared=false,pinned=null,sequence=0,noticeTimer=null,noticeUntil=0,tab=0,mode=0,period='共同时段',start='2025-05-02',end='2026-05-01',cal=false,anchor=null,hover=null,months=[],units=['月','月'],calendarMenu=null,charts=[],container;
+const riskUnits=['月','季','年'];
+let riskUnit='月',riskView='chart';
+const riskOptions=()=>({funds,start,end,unit:riskUnit});
 const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const date=s=>new Date(s+'T12:00:00');const today=fmt(new Date());const min='2022-01-01';
 function download(name,body,type){const u=URL.createObjectURL(new Blob([body],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),500)}
 const refreshButton=t=>`<button class="zc-text" data-refresh="${t}"><span class="zc-action-icon zc-refresh-icon" aria-hidden="true"></span>刷新</button>`;
@@ -24,12 +27,19 @@ function fundCards(){
   return `<div class="zc-fund-row"><div class="zc-pk" role="img" aria-label="基金 PK"></div><div class="zc-fund-slots">${slots}</div></div>`;
 }
 function pill(labels,value,attr){return `<div class="zc-pill">${labels.map((l,i)=>`<button ${attr}="${i}" class="${i===value?'selected':''}">${l}</button>`).join('')}</div>`}
-function controls(){return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((x,i)=>`<button role="tab" aria-selected="${i===tab}" data-tab="${i}" class="${i===tab?'active':''}">${x}</button>`).join('')}</div><div class="zc-filters">${pill(['基金间比较','相对自身基准'],mode,'data-mode')}<div class="zc-quick-wrap"><div class="zc-pill zc-quick">${['共同时段','近1年','近3年'].map(x=>`<button data-period="${x}" class="${period===x?'selected':''}">${x}</button>`).join('')}<button id="zc-more" class="${!['共同时段','近1年','近3年','自定义'].includes(period)?'selected':''}" aria-expanded="false">${['共同时段','近1年','近3年','自定义'].includes(period)?'更多':period}<span class="zc-down">${img('117-5531_imgFrame2036082628',10)}</span></button></div><div class="zc-more-panel" hidden><div><small>区间</small>${['近1月','近3月','近6月'].map(x=>`<button data-period="${x}">${x}</button>`).join('')}</div><div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(x=>`<button data-period="${x}">${x}</button>`).join('')}</div></div></div><div class="zc-date-wrap"><button id="zc-date" class="zc-date ${cal?'open':''}" aria-expanded="${cal}" aria-label="选择日期范围"><span>${start}</span><small>至</small><span>${end}</span>${img(cal?'100-4801_imgFrame2036082748':'117-5531_imgFrame2036082748',12.6348,12.1194)}</button><div id="zc-calendar" ${cal?'':'hidden'}></div></div></div></div>`}
+function riskFrequency(){
+  return `<div class="zc-risk-frequency" role="group" aria-label="收益统计频率">${pill(riskUnits,riskUnits.indexOf(riskUnit),'data-risk-unit')}</div>`;
+}
+function dateIcon(open){
+  if(open)return `${A}100-4801_imgFrame2036082748.svg`;
+  return tab===1?'./assets/compare-risk/calendar.svg':`${A}117-5531_imgFrame2036082748.svg`;
+}
+function controls(){return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((x,i)=>`<button role="tab" aria-selected="${i===tab}" data-tab="${i}" class="${i===tab?'active':''}">${x}</button>`).join('')}</div><div class="zc-filters${tab===1?' zc-risk-filters':''}">${tab===1?riskFrequency():pill(['基金间比较','相对自身基准'],mode,'data-mode')}<div class="zc-quick-wrap"><div class="zc-pill zc-quick">${['共同时段','近1年','近3年'].map(x=>`<button data-period="${x}" class="${period===x?'selected':''}">${x}</button>`).join('')}<button id="zc-more" class="${!['共同时段','近1年','近3年','自定义'].includes(period)?'selected':''}" aria-expanded="false">${['共同时段','近1年','近3年','自定义'].includes(period)?'更多':period}<span class="zc-down">${img('117-5531_imgFrame2036082628',10)}</span></button></div><div class="zc-more-panel" hidden><div><small>区间</small>${['近1月','近3月','近6月'].map(x=>`<button data-period="${x}">${x}</button>`).join('')}</div><div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(x=>`<button data-period="${x}">${x}</button>`).join('')}</div></div></div><div class="zc-date-wrap"><button id="zc-date" class="zc-date ${cal?'open':''}" aria-expanded="${cal}" aria-label="选择日期范围"><span>${start}</span><small>至</small><span>${end}</span><img src="${dateIcon(cal)}" width="12.6348" height="12.1194" alt=""></button><div id="zc-calendar" ${cal?'':'hidden'}></div></div></div></div>`}
 function table(rows,returns=false){return `<div class="zc-table-wrap"><table class="zc-table ${returns?'zc-returns':''}"><colgroup><col style="width:120px">${'<col>'.repeat(4)}</colgroup><tbody>${rows.map((r,ri)=>`<tr><th scope="row">${r[0]}</th>${Array.from({length:4},(_,i)=>`<td class="${returns&&funds[i]?.visible&&funds[i]?.id==='a'&&![4,5,6,7].includes(ri)?'best':''}">${funds[i]?.visible?(typeof r[1]==='function'?r[1](i):r[seed.findIndex(f=>f.id===funds[i].id)+1]??r[1]):''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
 function returnsTable(){return table(['今年以来','近1月','近3月','近6月','近1年','近2年','近3年','近5年','成立以来'].map((x,i)=>[x,j=>[4,5,6,7].includes(i)?'--':`<b class="${i===3&&funds[j].id==='a'?'zc-up':'zc-down-value'}">${i===3&&funds[j].id==='a'?'':'-'}10.47%</b><small>排名 515 / 941</small>`]),true)}
 function stars(i){return Array.from({length:5},(_,j)=>img(j<(i===0?2:1)?'47-51123_imgProperty1':'47-51123_imgProperty2',14.8)).join('')}
 function basic(){return table([['基金代码',i=>funds[i].code],['基金简称',i=>`<a href="#/fund/${funds[i].code}">${funds[i].name}</a>`],['基金类型',i=>funds[i].type==='股票型'?'股票型 | 增强指数股票型':funds[i].type],['基金星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金经理',i=>`<a href="#/fund/${funds[i].code}">${funds[i].id==='c'?'蔡丹':'蔡丹 | 阳之璇'}</a>`],['经理星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金公司','宝盈基金管理有限公司','宝盈基金管理有限公司','易方达基金管理有限公司'],['成立日期','2025-12-09'],['最新单位净值','0.9019'],['最新规模','3864.22万','5528.64万','3864.22万'],['申购状态','可申购','终止','可申购'],['赎回状态','可赎回','终止','可赎回'],['管理费率','0.8%','--','0.8%'],['托管费率','0.15%','--','0.15%'],['业绩比较基准','中证A500指数收益率×95%+银行活期存款利率(税后)×5%']])}
-function content(){if(!funds.length)return `<div class="zc-empty"><strong>添加基金，开始比较</strong><p>通过上方搜索框选择最多 4 只基金</p></div>`;if(tab===0)return `<section>${heading('业绩走势',true,true)}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('区间收益')}${returnsTable()}</section><section>${heading('基本信息')}${basic()}</section>`;if(tab===1)return `<section>${heading('收益与风险比较',true,true)}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('风险指标')}${table([['年化收益率','8.52%','3.16%','12.64%'],['年化波动率','18.62%','2.18%','23.71%'],['最大回撤','-22.14%','-2.38%','-23.16%'],['夏普比率','0.46','1.12','0.53'],['卡玛比率','0.38','1.33','0.55']])}</section>`;return `<section>${heading(tab===2?'资产配置比较':'收益归因比较',true,true)}<div id="zc-bar-chart" class="zc-chart zc-bar"></div></section><section>${heading(tab===2?'资产配置明细':'收益来源明细')}${table(tab===2?[['股票','82.5%','0.0%','95.2%'],['债券','10.2%','94.6%','0.0%'],['现金','6.3%','4.4%','3.8%'],['其他','1.0%','1.0%','1.0%']]:[['市场收益','6.32%','2.41%','8.62%'],['行业配置','1.42%','0.32%','2.16%'],['个股选择','0.56%','0.21%','1.32%'],['其他','0.22%','0.22%','0.54%']])}</section>`}
+function content(){if(!funds.length)return `<div class="zc-empty"><strong>添加基金，开始比较</strong><p>通过上方搜索框选择最多 4 只基金</p></div>`;if(tab===0)return `<section>${heading('业绩走势',true,true)}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('区间收益')}${returnsTable()}</section><section>${heading('基本信息')}${basic()}</section>`;if(tab===1)return riskContent();return `<section>${heading(tab===2?'资产配置比较':'收益归因比较',true,true)}<div id="zc-bar-chart" class="zc-chart zc-bar"></div></section><section>${heading(tab===2?'资产配置明细':'收益来源明细')}${table(tab===2?[['股票','82.5%','0.0%','95.2%'],['债券','10.2%','94.6%','0.0%'],['现金','6.3%','4.4%','3.8%'],['其他','1.0%','1.0%','1.0%']]:[['市场收益','6.32%','2.41%','8.62%'],['行业配置','1.42%','0.32%','2.16%'],['个股选择','0.56%','0.21%','1.32%'],['其他','0.22%','0.22%','0.54%']])}</section>`}
 function render(){
   setupHeader();
   setScale();
@@ -44,7 +54,7 @@ function render(){
     ? `<div class="zc-sticky-region"><div class="zc-sticky-panel">${selector}${controls()}</div></div>
        <div class="zc-results-card"><div class="zc-content">${content()}</div></div>`
     : `<nav class="zc-breadcrumb">公募基金 <span>›</span> 基金分析 <span>›</span> <b>基金比较</b></nav>${selector}${emptyState()}`;
-  container.innerHTML=`<div class="zc-compare ${compared?'has-results':'is-empty'}">${layout}</div>`;
+  container.innerHTML=`<div class="zc-compare ${compared?'has-results':'is-empty'}${compared&&tab===1?' is-risk-tab':''}">${layout}</div>`;
   bind();
   if(compared)draw();
   if(cal&&compared)calendar();
@@ -63,6 +73,10 @@ function chartTooltip(params,kind,width){
 function draw(){
   if(!compared||!window.echarts)return;
   charts.forEach(c=>c.dispose());charts=[];
+  if(tab===1){
+    charts=CompareRiskCharts.mount(container,riskOptions());
+    return;
+  }
   const first=date(start),last=date(end),day=86400000,days=Math.max(0,Math.round((last-first)/day)),count=Math.max(1,Math.min(320,days+1));
   const times=Array.from({length:count},(_,i)=>new Date(+first+(count===1?0:Math.round(days*i/(count-1))*day)));
   const dateLabels=times.map(fmt);
@@ -114,8 +128,156 @@ function refreshModule(button){
     button.classList.remove('is-refreshing');button.removeAttribute('aria-busy');
   },500);
 }
+function riskContent(){
+  const options=riskOptions();
+  const series=CompareRiskCharts.data(options);
+  return CompareRiskView.render({...options,view:riskView,series});
+}
+function renderWithFocus(selector,value){
+  render();
+  container.querySelector(`[${selector}="${value}"]`)?.focus({preventScroll:true});
+}
+function refreshRiskSection(button){
+  if(button.classList.contains('is-refreshing'))return;
+  const section=button.closest('[data-risk-section]');
+  button.classList.add('is-refreshing');
+  button.setAttribute('aria-busy','true');
+  setTimeout(()=>{
+    if(!button.isConnected)return;
+    const template=document.createElement('template');
+    template.innerHTML=riskContent();
+    const replacement=template.content.querySelector(`[data-risk-section="${section.dataset.riskSection}"]`);
+    const restoreFocus=document.activeElement===button;
+    charts=charts.filter(chart=>{
+      if(!section.contains(chart.getDom()))return true;
+      chart.dispose();
+      return false;
+    });
+    section.replaceWith(replacement);
+    charts.push(...CompareRiskCharts.mount(replacement,riskOptions()));
+    bindRiskActions(replacement);
+    if(restoreFocus)replacement.querySelector('[data-risk-refresh]').focus({preventScroll:true});
+  },500);
+}
+function saveChartImage(name,sectionCharts){
+  const images=sectionCharts.map(chart=>chart.renderToCanvas({pixelRatio:2,backgroundColor:'#fff'}));
+  let canvas=images[0];
+  if(images.length>1){
+    const gap=48;
+    canvas=document.createElement('canvas');
+    canvas.width=images.reduce((width,image)=>width+image.width,0)+gap*(images.length-1);
+    canvas.height=Math.max(...images.map(image=>image.height));
+    const context=canvas.getContext('2d');
+    context.fillStyle='#fff';
+    context.fillRect(0,0,canvas.width,canvas.height);
+    let left=0;
+    for(const image of images){
+      context.drawImage(image,left,0);
+      left+=image.width+gap;
+    }
+  }
+  canvas.toBlob(blob=>{
+    if(blob)download(`${name}.png`,blob,'image/png');
+  },'image/png');
+}
+function downloadRiskSection(button){
+  const section=button.closest('[data-risk-section]');
+  const name=section.querySelector('h2').textContent.trim();
+  const sectionCharts=charts.filter(chart=>section.contains(chart.getDom()));
+  if(sectionCharts.length){
+    saveChartImage(name,sectionCharts);
+    return;
+  }
+  const tables=Array.from(section.querySelectorAll('table'));
+  const csv=tables.map(table=>Array.from(table.rows,row=>
+    Array.from(row.cells,cell=>`"${cell.textContent.trim().replaceAll('"','""')}"`).join(',')
+  ).join('\r\n')).join('\r\n\r\n');
+  if(csv)download(`${name}.csv`,'\ufeff'+csv,'text/csv;charset=utf-8');
+}
+function bindRiskActions(scope){
+  scope.querySelectorAll('[data-risk-view]').forEach(button=>{
+    button.onclick=()=>{
+      if(riskView===button.dataset.riskView)return;
+      riskView=button.dataset.riskView;
+      renderWithFocus('data-risk-view',riskView);
+    };
+  });
+  scope.querySelectorAll('[data-risk-refresh]').forEach(button=>{
+    button.onclick=()=>refreshRiskSection(button);
+  });
+  scope.querySelectorAll('[data-risk-download]').forEach(button=>{
+    button.onclick=()=>downloadRiskSection(button);
+  });
+}
 function setPeriod(v){period=v;end='2026-05-01';if(v==='共同时段')start='2025-05-02';else if(v.includes('年度')){start=v.slice(0,4)+'-01-01';end=v.slice(0,4)+'-12-31'}else if(v==='今年以来')start='2026-01-01';else {const d=date(end);d.setMonth(d.getMonth()-({'近1年':12,'近3年':36,'近1月':1,'近3月':3,'近6月':6}[v]||12));start=fmt(d)}cal=false;render()}
-function bind(){container.querySelectorAll('[data-tab]').forEach(b=>{if(+b.dataset.tab>0)b.setAttribute('aria-disabled','true');b.onclick=()=>{if(+b.dataset.tab===0){tab=0;render()}}});container.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=+b.dataset.mode;render()});container.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>setPeriod(b.dataset.period));container.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{funds=funds.filter(f=>f.id!==b.dataset.remove);if(pinned===b.dataset.remove){pinned=null;funds.sort((a,b)=>a.order-b.order)}if(funds.length<2)compared=false;render()});container.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{const f=funds.find(f=>f.id===b.dataset.eye);f.visible=!f.visible;if(f.visible)f.chartVisible={return:true,drawdown:true};render()});container.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{pinned=pinned===b.dataset.pin?null:b.dataset.pin;funds.sort((a,b)=>a.order-b.order);if(pinned){const i=funds.findIndex(f=>f.id===pinned);funds.unshift(...funds.splice(i,1))}render()});container.querySelector('#zc-clear').onclick=()=>{funds=[];compared=false;pinned=null;noticeUntil=0;cal=false;render()};container.querySelector('#zc-start').onclick=()=>{compared=true;cal=false;render()};if(container.querySelector('#zc-export'))container.querySelector('#zc-export').onclick=()=>download('基金对比.csv','\ufeff基金名称,基金代码,基金类型,起始日期,结束日期\n'+funds.map(f=>[f.name,f.code,f.type,start,end].join(',')).join('\n'),'text/csv;charset=utf-8');container.querySelectorAll('[data-refresh]').forEach(b=>b.onclick=()=>refreshModule(b));container.querySelectorAll('[data-download]').forEach(b=>b.onclick=()=>{if(charts[0]){const a=document.createElement('a');a.href=charts[0].getDataURL({pixelRatio:2,backgroundColor:'#fff'});a.download='基金收益走势.png';a.click()}});if(!compared){bindSearch();return}const more=container.querySelector('.zc-quick-wrap'),mp=more.querySelector('.zc-more-panel');more.querySelector('#zc-more').onmouseenter=()=>{mp.hidden=false;more.querySelector('#zc-more').setAttribute('aria-expanded','true')};more.onmouseleave=()=>{mp.hidden=true;more.querySelector('#zc-more').setAttribute('aria-expanded','false')};more.querySelector('#zc-more').onclick=()=>{mp.hidden=false;more.querySelector('#zc-more').setAttribute('aria-expanded','true')};container.querySelector('#zc-date').onclick=()=>{cal=!cal;anchor=null;hover=null;calendarMenu=null;months=[];render()};bindSearch();}
+function bind(){
+  container.querySelectorAll('[data-tab]').forEach(button=>{
+    const next=Number(button.dataset.tab);
+    if(next>1){
+      button.setAttribute('aria-disabled','true');
+      return;
+    }
+    button.onclick=()=>{
+      if(tab===next)return;
+      tab=next;
+      cal=false;
+      renderWithFocus('data-tab',next);
+    };
+  });
+  container.querySelectorAll('[data-risk-unit]').forEach(button=>{
+    const next=riskUnits[Number(button.dataset.riskUnit)];
+    button.setAttribute('aria-pressed',String(riskUnit===next));
+    button.onclick=()=>{
+      if(riskUnit===next)return;
+      riskUnit=next;
+      cal=false;
+      renderWithFocus('data-risk-unit',button.dataset.riskUnit);
+    };
+  });
+  container.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=+b.dataset.mode;render()});
+  container.querySelectorAll('[data-period]').forEach(b=>b.onclick=()=>setPeriod(b.dataset.period));
+  container.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{
+    funds=funds.filter(f=>f.id!==b.dataset.remove);
+    if(pinned===b.dataset.remove){pinned=null;funds.sort((a,b)=>a.order-b.order)}
+    if(funds.length<2){compared=false;tab=0}
+    render();
+  });
+  container.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{
+    const f=funds.find(f=>f.id===b.dataset.eye);
+    f.visible=!f.visible;
+    if(f.visible)f.chartVisible={return:true,drawdown:true};
+    render();
+  });
+  container.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{
+    pinned=pinned===b.dataset.pin?null:b.dataset.pin;
+    funds.sort((a,b)=>a.order-b.order);
+    if(pinned){const i=funds.findIndex(f=>f.id===pinned);funds.unshift(...funds.splice(i,1))}
+    render();
+  });
+  container.querySelector('#zc-clear').onclick=()=>{
+    funds=[];compared=false;tab=0;pinned=null;noticeUntil=0;cal=false;render();
+  };
+  container.querySelector('#zc-start').onclick=()=>{compared=true;cal=false;render()};
+  const exportButton=container.querySelector('#zc-export');
+  if(exportButton)exportButton.onclick=()=>download('基金对比.csv','\ufeff基金名称,基金代码,基金类型,起始日期,结束日期\n'+funds.map(f=>[f.name,f.code,f.type,start,end].join(',')).join('\n'),'text/csv;charset=utf-8');
+  container.querySelectorAll('[data-refresh]').forEach(b=>b.onclick=()=>refreshModule(b));
+  container.querySelectorAll('[data-download]').forEach(b=>b.onclick=()=>{
+    if(charts[0])saveChartImage('基金收益走势',[charts[0]]);
+  });
+  bindSearch();
+  if(!compared)return;
+  if(tab===1)bindRiskActions(container);
+  const more=container.querySelector('.zc-quick-wrap');
+  const panel=more.querySelector('.zc-more-panel');
+  const trigger=more.querySelector('#zc-more');
+  const showMore=()=>{panel.hidden=false;trigger.setAttribute('aria-expanded','true')};
+  trigger.onmouseenter=showMore;
+  trigger.onclick=showMore;
+  more.onmouseleave=()=>{panel.hidden=true;trigger.setAttribute('aria-expanded','false')};
+  container.querySelector('#zc-date').onclick=()=>{
+    cal=!cal;anchor=null;hover=null;calendarMenu=null;months=[];render();
+  };
+}
 
 function calendar(){
   const el=container.querySelector('#zc-calendar');
@@ -184,7 +346,7 @@ document.addEventListener('click',e=>{
       panel.hidden=true;
       button.classList.remove('open');
       button.setAttribute('aria-expanded','false');
-      button.querySelector('img').src=`${A}117-5531_imgFrame2036082748.svg`;
+      button.querySelector('img').src=dateIcon(false);
     }
   }
   if(!e.target.closest('.zc-search-slot'))container?.querySelectorAll('.zc-search-results').forEach(r=>r.hidden=true);
