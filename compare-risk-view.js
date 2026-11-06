@@ -31,17 +31,17 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[char]);
 
-  function icon(name) {
-    return `<img src="${assets}${name}.svg" alt="">`;
+  function icon(name, query = '') {
+    return `<img src="${assets}${name}.svg${query}" alt="">`;
   }
 
   function viewToggle(view) {
     return `<div class="zc-risk-view-toggle" role="group" aria-label="收益与发布视图">
       <button type="button" data-risk-view="chart" aria-pressed="${view === 'chart'}" aria-label="图表视图" title="图表视图">
-        <span class="zc-risk-chart-icon" aria-hidden="true">${[1, 2, 3, 4].map(i => icon(`view-chart-${i}`)).join('')}</span>
+        <span class="zc-risk-chart-icon" aria-hidden="true">${[1, 2, 3, 4].map(i => icon(`view-chart-${i}`, '?v=2')).join('')}</span>
       </button>
       <button type="button" data-risk-view="table" aria-pressed="${view === 'table'}" aria-label="列表视图" title="列表视图">
-        <span class="zc-risk-table-icon" aria-hidden="true">${[1, 2, 2].map(i => `<span>${icon(`view-table-dot-${i}`)}<i></i></span>`).join('')}</span>
+        <span class="zc-risk-table-icon" aria-hidden="true">${[1, 2, 2].map(i => `<span>${icon(`view-table-dot-${i}`, '?v=2')}<i></i></span>`).join('')}</span>
       </button>
     </div>`;
   }
