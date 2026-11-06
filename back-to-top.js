@@ -11,7 +11,7 @@
   document.body.append(control);
 
   const updateVisibility = () => {
-    control.toggleAttribute('hidden', window.scrollY <= window.innerHeight);
+    control.toggleAttribute('hidden', window.scrollY < window.innerHeight / 2);
   };
   window.addEventListener('scroll', updateVisibility, { passive: true });
   window.addEventListener('resize', updateVisibility);
