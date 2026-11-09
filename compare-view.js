@@ -54,7 +54,7 @@ function render(){
   const layout=compared
     ? `<div class="zc-sticky-region"><div class="zc-sticky-panel">${selector}${controls()}</div></div>
        <div class="zc-results-card"><div class="zc-content">${content()}</div></div>`
-    : `<nav class="zc-breadcrumb">公募基金 <span>›</span> 基金分析 <span>›</span> <b>基金比较</b></nav>${selector}${emptyState()}`;
+    : `${selector}${emptyState()}`;
   container.innerHTML=`<div class="zc-compare ${compared?'has-results':'is-empty'}${compared&&tab===1?' is-risk-tab':''}">${layout}</div>`;
   bind();
   if(compared)draw();

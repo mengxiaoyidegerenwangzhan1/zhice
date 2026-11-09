@@ -138,8 +138,6 @@ select:focus-visible,
   padding: 22px 24px 64px;
 }
 
-.breadcrumb { color: var(--quiet); font-size: 12px; margin-bottom: 18px; }
-.breadcrumb span + span::before { content: "/"; margin: 0 8px; color: var(--line); }
 
 .page-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 20px; }
 .page-heading h1 { margin: 0; font-size: 20px; line-height: 1.35; font-weight: 600; }
