@@ -63,13 +63,68 @@
     return Date.UTC(year, month, Math.min(date.getUTCDate(), daysInMonth)) / day;
   }
 
-  function histogram(values, thresholds) {
+  function histogramCounts(values, thresholds) {
     const counts = Array(thresholds.length + 1).fill(0);
     for (const value of values) {
       const index = thresholds.findIndex(limit => value <= limit);
       counts[index === -1 ? thresholds.length : index]++;
     }
-    return counts.map(count => round(100 * count / values.length));
+    return counts;
+  }
+
+  function histogram(values, thresholds) {
+    return histogramCounts(values, thresholds).map(count => round(100 * count / values.length));
+  }
+
+  function calendarReturns(funds, buckets, months) {
+    const labels = months === 1 ? Array.from({ length: 12 }, (_, i) => `${i + 1}月`)
+      : months === 3 ? ['一季度', '二季度', '三季度', '四季度'] : ['年度'];
+    const years = new Map();
+    for (const bucket of buckets) {
+      const year = new Date(bucket.first * day).getUTCFullYear();
+      if (!years.has(year)) years.set(year, []);
+      years.get(year).push(bucket);
+    }
+    return {
+      labels,
+      years: Array.from(years, ([year, periods]) => ({
+        year,
+        series: funds.map(fund => {
+          const values = Array(labels.length).fill(null);
+          for (const period of periods) {
+            const month = new Date(period.first * day).getUTCMonth();
+            values[Math.floor(month / months)] = gain(period.first - 1, period.last, fund);
+          }
+          return {
+            id: fund.id, name: fund.name, color: fund.color, values,
+            total: gain(periods[0].first - 1, periods.at(-1).last, fund),
+          };
+        }),
+      })).reverse(),
+    };
+  }
+
+  function distributionCounts(funds, valuesById) {
+    const thresholds = [-10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10];
+    return {
+      labels: ['≤ -10%', '-10% ~ -8%', '-8% ~ -6%', '-6% ~ -4%', '-4% ~ -2%', '-2% ~ 0%',
+        '0% ~ 2%', '2% ~ 4%', '4% ~ 6%', '6% ~ 8%', '8% ~ 10%', '> 10%'],
+      positiveIndexes: [6, 7, 8, 9, 10, 11],
+      negativeIndexes: [0, 1, 2, 3, 4, 5],
+      series: funds.map(fund => {
+        const values = valuesById.get(fund.id);
+        const total = values.length;
+        const counts = histogramCounts(values, thresholds);
+        const positive = values.filter(value => value > 0).length;
+        const zero = values.filter(value => value === 0).length;
+        const summary = count => ({ count, ratio: round(100 * count / total) });
+        return {
+          id: fund.id, name: fund.name, color: fund.color, total, counts,
+          ratios: counts.map(count => round(100 * count / total)),
+          positive: summary(positive), negative: summary(total - positive), zero: summary(zero),
+        };
+      }),
+    };
   }
 
   function data({ funds, start, end, unit }) {
@@ -97,7 +152,10 @@
         series: active.map(fund => ({ id: fund.id, name: fund.name, color: fund.color, values: values(fund) })),
       };
     }
-    const periodReturns = fund => buckets.map(bucket => gain(bucket.first - 1, bucket.last, fund));
+    const returnsById = new Map(funds.map(fund => [fund.id,
+      buckets.map(bucket => gain(bucket.first - 1, bucket.last, fund)),
+    ]));
+    const periodReturns = fund => returnsById.get(fund.id);
     return {
       returns: dataset(buckets.map(bucket => dateLabel(bucket.last)), periodReturns),
       distribution: dataset([-2, 0, 2, 4, 6, 8, 10].map(value => `${round(value * distributionScale)}%`),
@@ -109,6 +167,8 @@
         gain(monthsBefore(index, 3), index, fund))),
       drawdown: dataset(intervalLabels, fund => intervals.map(index =>
         last < drawdownStart ? null : maximumDrawdown(Math.max(index, drawdownStart), last, fund))),
+      calendar: calendarReturns(funds, buckets, months),
+      distributionCounts: distributionCounts(funds, returnsById),
     };
   }
 

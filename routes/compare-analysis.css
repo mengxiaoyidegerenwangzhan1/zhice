@@ -1,0 +1,53 @@
+@font-face {
+  font-family: Roboto;
+  src: url('../assets/fonts/Roboto-400.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Roboto;
+  src: url('../assets/fonts/Roboto-500.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: Roboto;
+  src: url('../assets/fonts/Roboto-700.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700 900;
+  font-display: swap;
+}
+.zc-analysis-time {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.zc-analysis-time .zc-analysis-quick {
+  width: 269px;
+  justify-content: space-between;
+  box-shadow: 0 0 6px #00000014;
+}
+.zc-analysis-time .zc-analysis-quick > button {
+  padding-inline: 11px;
+}
+.zc-analysis-time .zc-date:disabled {
+  background: #f7f8fa;
+  border-color: #f7f8fa;
+  color: #c6c6c6;
+  box-shadow: none;
+  cursor: default;
+}
+.zc-analysis-time .zc-date:disabled img { opacity: .45; }
+.zc-analysis-time .zc-date:disabled small { color: #c6c6c6; }
+.zc-analysis-time .zc-more-panel { z-index: 130; }
+.zc-compare .zc-table td {
+  font-family: Roboto, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 700px) {
+  .zc-analysis-time { flex-wrap: wrap; }
+  .zc-analysis-time .zc-date-wrap { margin-left: 0; }
+}

@@ -1,5 +1,6 @@
 (() => {
   const assets = './assets/compare-risk/';
+  const disclosureState = new Map();
   const forecastHelp = '反映了在分析时段内任意日期买入并持有所选周期时长，获得的累计收益的概率分布。';
   const rollingHelp = '展示所选基金在分析时段内的滚动收益变化。';
   const returnMetrics = [
@@ -91,33 +92,119 @@
     return `${value.toFixed(2)}%`;
   }
 
-  function distributionTable(title, rowHeading, data, funds) {
-    const shownFunds = funds.filter(fund => fund.visible);
-    if (!shownFunds.length || !data?.labels.length) return '<div class="zc-risk-no-data">暂无可显示的数据</div>';
-    const columns = shownFunds.map(fund => data.series.find(series => series.name === fund.name));
-    const rows = data.labels.map((label, i) => `<tr><th scope="row">${escape(label)}</th>${columns.map(series => {
-      const value = series?.values[i];
-      return `<td>${Number.isFinite(value) ? percent(value) : '—'}</td>`;
-    }).join('')}</tr>`).join('');
-    return `<div class="zc-table-wrap zc-risk-list-wrap"><table class="zc-table zc-risk-table zc-risk-list" aria-label="${title}">
-      <thead><tr><th scope="col">${rowHeading}</th>${shownFunds.map(fund => `<th scope="col">${fundHeading(fund)}</th>`).join('')}</tr></thead>
-      <tbody>${rows}</tbody>
+  function tableColumns() {
+    return '<colgroup><col class="zc-risk-tree-label-col"><col><col><col><col></colgroup>';
+  }
+
+  function disclosure(key, label, expanded) {
+    return `<button type="button" class="zc-risk-disclosure" data-risk-disclosure="${key}" aria-expanded="${expanded}" aria-controls="zc-risk-children-${key}">
+      <span class="zc-risk-disclosure-arrow" aria-hidden="true">${icon('tree-arrow')}${icon('tree-arrow-muted')}</span>
+      <span>${label}</span>
+    </button>`;
+  }
+
+  function returnCell(fund, value) {
+    if (!fund?.visible) return '<td></td>';
+    const negative = Number.isFinite(value) && value < 0;
+    return `<td class="zc-risk-number${negative ? ' is-negative' : ''}">${Number.isFinite(value) ? percent(value) : '—'}</td>`;
+  }
+
+  function calendarTable(title, data, funds, unit) {
+    if (!data?.years.length) return '<div class="zc-risk-no-data">暂无可显示的数据</div>';
+    const slots = Array.from({ length: 4 }, (_, i) => funds[i]);
+    const unitKey = { 月: 'month', 季: 'quarter', 年: 'year' }[unit];
+    const rows = data.years.map((year, yearIndex) => {
+      const key = `calendar-${unitKey}-${year.year}`;
+      const expanded = disclosureState.get(key) ?? (yearIndex === 0);
+      const values = new Map(year.series.map(series => [series.id, series]));
+      const children = data.labels.map((label, index) => `<tr>
+        <th scope="row" class="zc-risk-period-label">${escape(label)}</th>
+        ${slots.map(fund => returnCell(fund, values.get(fund?.id)?.values[index])).join('')}
+      </tr>`).join('');
+      return `<tbody class="zc-risk-tree-summary"><tr>
+        <th scope="row">${disclosure(key, `<span class="zc-risk-number">${year.year}</span>`, expanded)}</th>
+        ${slots.map(fund => returnCell(fund, values.get(fund?.id)?.total)).join('')}
+      </tr></tbody>
+      <tbody id="zc-risk-children-${key}" data-risk-children="${key}"${expanded ? '' : ' hidden'}>${children}</tbody>`;
+    }).join('');
+    return `<div class="zc-table-wrap zc-risk-tree-wrap"><table class="zc-table zc-risk-tree-table" aria-label="${title}">
+      ${tableColumns()}
+      <thead class="zc-risk-visually-hidden"><tr><th scope="col">年份及周期</th>${slots.map(fund => `<th scope="col">${fund?.visible ? escape(fund.name) : ''}</th>`).join('')}</tr></thead>
+      ${rows}
+    </table></div>`;
+  }
+
+  function quantityCell(fund, values, summary) {
+    if (!fund?.visible) return '<td></td>';
+    if (!values) return '<td class="zc-risk-number">—</td>';
+    return `<td class="zc-risk-number"><span class="zc-risk-quantity" aria-label="${values.count}次，占比${percent(values.ratio)}">
+      <span>${values.count}</span><span class="zc-risk-quantity-divider" aria-hidden="true">${icon(summary ? 'table-divider-medium' : 'table-divider-regular')}<span class="zc-risk-visually-hidden">｜</span></span><span>${percent(values.ratio)}</span>
+    </span></td>`;
+  }
+
+  function distributionTable(title, data, funds) {
+    if (!data?.series.length) return '<div class="zc-risk-no-data">暂无可显示的数据</div>';
+    const slots = Array.from({ length: 4 }, (_, i) => funds[i]);
+    const values = new Map(data.series.map(series => [series.id, series]));
+    const groups = [
+      { key: 'positive', label: '(&gt;0)', indexes: data.positiveIndexes, expanded: true },
+      { key: 'negative', label: '(≤0)', indexes: data.negativeIndexes, expanded: false },
+    ];
+    const rows = groups.map(group => {
+      const key = `distribution-${group.key}`;
+      const expanded = disclosureState.get(key) ?? group.expanded;
+      const indexes = group.indexes.filter(index => {
+        const overflow = index === 0 || index === data.labels.length - 1;
+        return !overflow || data.series.some(series => series.counts[index] > 0);
+      });
+      const children = indexes.map(index => `<tr>
+        <th scope="row" class="zc-risk-period-label">${escape(data.labels[index])}</th>
+        ${slots.map(fund => {
+          const series = values.get(fund?.id);
+          return quantityCell(fund, series ? { count: series.counts[index], ratio: series.ratios[index] } : null, false);
+        }).join('')}
+      </tr>`).join('');
+      return `<tbody class="zc-risk-tree-summary"><tr>
+        <th scope="row">${disclosure(key, group.label, expanded)}</th>
+        ${slots.map(fund => quantityCell(fund, values.get(fund?.id)?.[group.key], true)).join('')}
+      </tr></tbody>
+      <tbody id="zc-risk-children-${key}" data-risk-children="${key}"${expanded ? '' : ' hidden'}>${children}</tbody>`;
+    }).join('');
+    return `<div class="zc-table-wrap zc-risk-tree-wrap"><table class="zc-table zc-risk-tree-table" aria-label="${title}">
+      ${tableColumns()}
+      <thead><tr><th scope="col">收益区间</th>${slots.map(fund => `<th scope="col"${fund?.visible ? ` aria-label="${escape(fund.name)}，数量及占比"` : ''}>${fund?.visible ? '数量｜占比' : ''}</th>`).join('')}</tr></thead>
+      ${rows}
     </table></div>`;
   }
 
   function overview({ funds, series, unit, view }) {
     const title = `${unit}度收益`;
-    const entries = [
-      ['returns', title, '日期'],
-      ['distribution', `${title}分布`, '收益区间'],
-    ];
+    const body = view === 'table'
+      ? `<div class="zc-risk-table-stack">
+          <article><h3>${title}</h3>${calendarTable(title, series.calendar, funds, unit)}</article>
+          <article><h3>${title}分布</h3>${distributionTable(`${title}分布`, series.distributionCounts, funds)}</article>
+        </div>`
+      : `<div class="zc-risk-pair">
+          <article><h3>${title}</h3>${chart('returns', title, funds)}</article>
+          <article><h3>${title}分布</h3>${chart('distribution', `${title}分布`, funds)}</article>
+        </div>`;
     return `<section data-risk-section="overview">
       ${heading('overview', '收益与发布', { view })}
-      <div class="zc-risk-pair">${entries.map(([key, name, rowHeading]) => `<article>
-        <h3>${name}</h3>
-        ${view === 'table' ? distributionTable(name, rowHeading, series[key], funds) : chart(key, name, funds)}
-      </article>`).join('')}</div>
+      ${body}
     </section>`;
+  }
+
+  function bind(root) {
+    root.querySelectorAll('[data-risk-disclosure]').forEach(button => {
+      button.onclick = () => {
+        const key = button.dataset.riskDisclosure;
+        const expanded = button.getAttribute('aria-expanded') !== 'true';
+        const children = button.closest('table').querySelector(`[data-risk-children="${key}"]`);
+        disclosureState.set(key, expanded);
+        button.setAttribute('aria-expanded', String(expanded));
+        children.hidden = !expanded;
+      };
+    });
   }
 
   function chartSection(key, title, funds, details) {
@@ -137,7 +224,7 @@
         const current = row === 0 ? currentValues.get(fund.name) : undefined;
         const sample = fund.id === 'a' ? first : other;
         const value = Number.isFinite(current) ? percent(current) : (current === null ? '—' : sample);
-        return `<td>${value}</td>`;
+        return `<td class="${parseFloat(value) < 0 ? 'is-negative' : ''}">${value}</td>`;
       }).join('')}
     </tr>`).join('');
     return `<div class="zc-table-wrap"><table class="zc-table zc-risk-table" aria-label="${title}">
@@ -165,5 +252,5 @@
     </div>`;
   }
 
-  window.CompareRiskView = { render };
+  window.CompareRiskView = { render, bind };
 })();
