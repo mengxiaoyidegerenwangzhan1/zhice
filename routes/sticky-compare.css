@@ -71,7 +71,10 @@ body.zc-compare-mode .zc-compare.has-results {
 }
 
 .zc-compare .zc-fund {
-  height: 102px;
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  min-height: 102px;
   padding: 0 20px;
   background: transparent;
   border-radius: 0;
@@ -90,18 +93,22 @@ body.zc-compare-mode .zc-compare.has-results {
 }
 
 .zc-compare .zc-fund > strong {
-  display: -webkit-box;
+  display: block;
   margin-inline-start: 16px;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
-  height: 48px;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  height: auto;
+  min-height: 48px;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
 }
 
 .zc-compare .zc-fund-code {
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 8px;
 }
 
 .zc-compare .zc-fund-code span {
@@ -167,9 +174,11 @@ body.zc-compare-mode .zc-compare.has-results {
 }
 
 .zc-compare.is-sticky-compact .zc-fund {
-  display: flex;
+  flex-direction: row;
   align-items: center;
-  height: 36px;
+  height: auto;
+  min-height: 36px;
+  padding-block: 8px;
 }
 
 .zc-compare.is-sticky-compact .zc-fund::before {
@@ -183,10 +192,11 @@ body.zc-compare-mode .zc-compare.has-results {
   flex: 1;
   min-width: 0;
   height: auto;
+  min-height: 0;
   margin-inline-end: 26px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: clip;
 }
 
 .zc-compare.is-sticky-compact .zc-card-tools {
