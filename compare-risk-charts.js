@@ -127,10 +127,12 @@
     };
   }
 
-  function data({ funds, start, end, unit }) {
+  function data({ funds, start, end, unit, holdingMonths }) {
     const first = dayIndex(start);
     const last = dayIndex(end);
     const months = unitMonths[unit] ?? unitMonths.月;
+    const holdingPeriod = Number(holdingMonths);
+    const forecastMonths = Number.isInteger(holdingPeriod) && holdingPeriod > 0 ? holdingPeriod : months;
     const buckets = periods(first, last, months);
     const active = funds.filter(fund => fund.visible);
     const intervals = [Date.UTC(new Date(last * day).getUTCFullYear(), 0, 1) / day,
@@ -162,7 +164,7 @@
         fund => histogram(periodReturns(fund), distributionThresholds)),
       interval: dataset(intervalLabels, fund => intervals.map(index => gain(index, last, fund))),
       forecast: dataset(forecastLabels, fund => histogram(forecastDates.map(index =>
-        gain(monthsBefore(index, months), index, fund)), forecastThresholds)),
+        gain(monthsBefore(index, forecastMonths), index, fund)), forecastThresholds)),
       rolling: dataset(rollingDates.map(dateLabel), fund => rollingDates.map(index =>
         gain(monthsBefore(index, 3), index, fund))),
       drawdown: dataset(intervalLabels, fund => intervals.map(index =>
@@ -371,17 +373,23 @@
     if (!window.echarts) return [];
     const elements = root.querySelectorAll('[data-risk-chart]');
     if (!elements.length) return [];
-    const datasets = data(options);
+    const sections = new Map();
     return Array.from(elements, element => {
       const key = element.dataset.riskChart;
-      const dataset = datasets[key];
+      const sectionKey = element.closest('[data-risk-section]')?.dataset.riskSection;
+      if (!sections.has(sectionKey)) {
+        const sectionOptions = sectionKey && options.sectionOptions ? options.sectionOptions(sectionKey) : options;
+        sections.set(sectionKey, { options: sectionOptions, datasets: data(sectionOptions) });
+      }
+      const section = sections.get(sectionKey);
+      const dataset = section.datasets[key];
       const legend = root.querySelector(`[data-risk-legend="${key}"]`);
-      const selected = Object.fromEntries(options.funds.map(fund => [fund.name, fund.visible && !legendChoices.get(fund)?.has(key)]));
+      const selected = Object.fromEntries(section.options.funds.map(fund => [fund.name, fund.visible && !legendChoices.get(fund)?.has(key)]));
       const chart = window.echarts.init(element);
       chart.setOption(chartOption(key, dataset, selected, element));
       if (key === 'returns' && dataset.labels.length > 1) mountReturnRange(element, chart, dataset);
       legend?.querySelectorAll('[data-risk-fund]').forEach(button => {
-        const fund = options.funds.find(item => item.id === button.dataset.riskFund);
+        const fund = section.options.funds.find(item => item.id === button.dataset.riskFund);
         if (!fund) return;
         const syncButton = () => {
           const visible = selected[fund.name];

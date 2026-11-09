@@ -34,14 +34,14 @@
   padding-inline: 11px;
 }
 .zc-analysis-time .zc-date:disabled {
-  background: #f7f8fa;
-  border-color: #f7f8fa;
-  color: #c6c6c6;
+  background: #f2f3f5;
+  border-color: #f2f3f5;
+  color: #ccc;
   box-shadow: none;
   cursor: default;
 }
-.zc-analysis-time .zc-date:disabled img { opacity: .45; }
-.zc-analysis-time .zc-date:disabled small { color: #c6c6c6; }
+.zc-analysis-time .zc-date:disabled img { opacity: 1; }
+.zc-analysis-time .zc-date:disabled small { color: #ccc; }
 .zc-analysis-time .zc-more-panel { z-index: 130; }
 .zc-compare .zc-table td {
   font-family: Roboto, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
@@ -51,3 +51,21 @@
   .zc-analysis-time { flex-wrap: wrap; }
   .zc-analysis-time .zc-date-wrap { margin-left: 0; }
 }
+
+.zc-overview-head { height: auto; min-height: 32px; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.zc-overview-actions { align-items: center; flex-wrap: wrap; }
+.zc-overview-buttons { display: flex; align-items: center; gap: 16px; }
+.zc-overview-buttons .is-refreshing img { animation: zc-refresh-spin .7s linear infinite; }
+.zc-analysis-select { position: relative; width: 154px; flex: none; }
+.zc-analysis-select summary { display: flex; align-items: center; gap: 8px; height: 32px; border-radius: 20px; padding: 0 12px; background: #fff; box-shadow: 0 0 6px #00000014; color: #333; cursor: pointer; list-style: none; }
+.zc-analysis-select summary::-webkit-details-marker { display: none; }
+.zc-analysis-select summary > span { flex: none; color: #999; }
+.zc-analysis-select summary > strong { flex: 1; min-width: 0; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zc-analysis-select summary img { flex: none; transform: rotate(90deg); }
+.zc-analysis-select[open] summary { outline: 1px solid #b9b8d8; }
+.zc-analysis-select[open] summary img { transform: rotate(-90deg); }
+.zc-analysis-select summary:focus-visible { outline: 2px solid #6865a7; outline-offset: 2px; }
+.zc-analysis-menu { position: absolute; z-index: 35; left: 0; top: 40px; min-width: 100%; max-height: 240px; overflow: auto; padding: 6px 0; border: 1px solid #eaeaea; border-radius: 8px; background: #fff; box-shadow: 0 4px 12px #00000014; }
+.zc-analysis-menu button { display: block; width: 100%; border: 0; padding: 8px 12px; background: #fff; color: #333; text-align: left; white-space: nowrap; }
+.zc-analysis-menu button:hover { background: #f7f8fa; }
+.zc-analysis-menu button[aria-selected="true"] { background: #f4f4fc; color: #6865a7; }

@@ -1,6 +1,6 @@
 (() => {
   const assets = './assets/compare-attribution/';
-  const defaultRange = { start: '2026-11-05', end: '2026-11-06', period: '近1年', disabledUnlessCustom: true };
+  const defaultRange = { start: '2026-11-05', end: '2026-11-06', period: '近1年', disabled: true };
   const industries = [
     { name: '电子', weight: 13.45, returns: [1.2, 1.2], ranks: [1, 1] },
     { name: '公用事业', weight: 1.08, returns: [1.2, 1.2], ranks: [2, 3] },

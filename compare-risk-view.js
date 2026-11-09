@@ -37,12 +37,13 @@
   }
 
   function viewToggle(view) {
+    const tableState = view === 'table' ? 'active' : 'inactive';
     return `<div class="zc-risk-view-toggle" role="group" aria-label="收益与发布视图">
       <button type="button" data-risk-view="chart" aria-pressed="${view === 'chart'}" aria-label="图表视图" title="图表视图">
-        <span class="zc-risk-chart-icon" aria-hidden="true">${[1, 2, 3, 4].map(i => icon(`view-chart-${i}`, '?v=2')).join('')}</span>
+        <span class="zc-risk-chart-icon" aria-hidden="true">${icon(`view-chart-${view === 'chart' ? 'active' : 'inactive'}`)}</span>
       </button>
       <button type="button" data-risk-view="table" aria-pressed="${view === 'table'}" aria-label="列表视图" title="列表视图">
-        <span class="zc-risk-table-icon" aria-hidden="true">${[1, 2, 2].map(i => `<span>${icon(`view-table-dot-${i}`, '?v=2')}<i></i></span>`).join('')}</span>
+        <span class="zc-risk-table-icon" aria-hidden="true">${[1, 2, 2].map(i => `<span>${icon(`view-table-dot-${tableState}-${i}`)}<i></i></span>`).join('')}</span>
       </button>
     </div>`;
   }
@@ -54,12 +55,13 @@
     </span>`;
   }
 
-  function heading(key, title, { view, description, note } = {}) {
+  function heading(key, title, { view, description, note, controls = '', rangeNote = false } = {}) {
     return `<div class="zc-section-head zc-risk-head">
-      <div class="zc-risk-heading">
+      <div class="zc-risk-heading${rangeNote ? ' has-range-note' : ''}">
         <h2>${title}</h2>${description ? help(key, title, description) : ''}${note ? `<small>${note}</small>` : ''}
       </div>
       <div class="zc-risk-actions">
+        ${controls}
         ${view ? viewToggle(view) : ''}
         <div class="zc-risk-actions-main">
           <button class="zc-text" type="button" data-risk-download="${key}" aria-label="下载${title}"><span class="zc-action-icon zc-download-icon" aria-hidden="true"></span>下载</button>
@@ -67,6 +69,29 @@
         </div>
       </div>
     </div>`;
+  }
+
+  function rangeFor(options, key, defaults = {}) {
+    const initial = { start: options.start, end: options.end, unit: options.unit || '月', period: '共同时段', ...defaults };
+    return options.ui?.range(`risk-${key}`, initial) || initial;
+  }
+
+  function rangeNote(range) {
+    return `${escape(range.start)} ～ ${escape(range.end)}`;
+  }
+
+  function timeControls(options, key, range, setting = '', showDate = true) {
+    if (!options.ui) return '';
+    return `<div class="zc-risk-toolbar">${setting}${options.ui.timeControls(`risk-${key}`, { ...range, showDate })}</div>`;
+  }
+
+  function setting(options, key, field, label, choices, initial) {
+    if (!options.ui?.setting) return '';
+    return `<div class="zc-risk-setting zc-risk-setting-${field}">${options.ui.setting(`risk-${key}`, field, label, choices, initial)}</div>`;
+  }
+
+  function frequencyButtons(unit) {
+    return `<div class="zc-pill zc-risk-units" role="group" aria-label="收益统计频率">${['月', '季', '年'].map(value => `<button type="button" data-analysis-scope="risk-overview" data-analysis-field="unit" data-analysis-value="${value}" aria-pressed="${unit === value}" class="${unit === value ? 'selected' : ''}">${value}</button>`).join('')}</div>`;
   }
 
   function legend(key, title, funds) {
@@ -177,8 +202,16 @@
     </table></div>`;
   }
 
-  function overview({ funds, series, unit, view }) {
+  function overview(options) {
+    const { funds, view } = options;
+    const range = rangeFor(options, 'overview');
+    const series = options.seriesBySection?.['risk-overview'] || options.series;
+    const unit = range.unit;
     const title = `${unit}度收益`;
+    const frequency = view === 'table'
+      ? setting(options, 'overview', 'unit', '频率', [{ value: '月', label: '月度' }, { value: '季', label: '季度' }, { value: '年', label: '年度' }], unit)
+      : frequencyButtons(unit);
+    const controls = timeControls(options, 'overview', range, frequency);
     const body = view === 'table'
       ? `<div class="zc-risk-table-stack">
           <article><h3>${title}</h3>${calendarTable(title, series.calendar, funds, unit)}</article>
@@ -189,7 +222,7 @@
           <article><h3>${title}分布</h3>${chart('distribution', `${title}分布`, funds)}</article>
         </div>`;
     return `<section data-risk-section="overview">
-      ${heading('overview', '收益与发布', { view })}
+      ${heading('overview', '收益与发布', { view, controls, note: view === 'table' ? rangeNote(range) : '', rangeNote: true })}
       ${body}
     </section>`;
   }
@@ -236,17 +269,33 @@
 
   function render(options) {
     const { funds, series } = options;
+    const intervalRange = rangeFor(options, 'interval');
+    const forecastRange = rangeFor(options, 'forecast', { period: '近3年', holdingMonths: 3 });
+    const rollingRange = rangeFor(options, 'rolling', { period: '近1年' });
+    const drawdownRange = rangeFor(options, 'drawdown');
+    const metricsRange = rangeFor(options, 'metrics', { benchmark: '上证综指', frequency: '原始频率' });
+    const holding = setting(options, 'forecast', 'holdingMonths', '持有周期', [
+      { value: 1, label: '一个月' }, { value: 3, label: '三个月' }, { value: 6, label: '六个月' }, { value: 12, label: '一年' },
+    ], forecastRange.holdingMonths);
+    const benchmark = setting(options, 'metrics', 'benchmark', '基准', ['上证综指', '沪深300', '中证500', '中证800'], metricsRange.benchmark);
+    const metricsFrequency = setting(options, 'metrics', 'frequency', '频率', ['原始频率', '日度', '周度', '月度'], metricsRange.frequency);
+    const metricsSeries = options.seriesBySection?.['risk-metrics'] || series;
     return `<div class="zc-risk-view">
       ${overview(options)}
-      ${chartSection('interval', '区间收益', funds)}
-      ${chartSection('forecast', '收益预测', funds, { description: forecastHelp })}
-      ${chartSection('rolling', '收益波动走势', funds, { description: rollingHelp })}
-      ${chartSection('drawdown', '区间最大回撤', funds, { note: '区间最小起始日期为 2022-12-06' })}
+      ${chartSection('interval', '区间收益', funds, { note: `截止日期：${escape(intervalRange.end)}` })}
+      ${chartSection('forecast', '收益预测', funds, {
+        description: forecastHelp,
+        note: options.view === 'table' ? rangeNote(forecastRange) : '',
+        rangeNote: true,
+        controls: timeControls(options, 'forecast', forecastRange, holding, options.view === 'table'),
+      })}
+      ${chartSection('rolling', '收益波动走势', funds, { description: rollingHelp, controls: timeControls(options, 'rolling', rollingRange) })}
+      ${chartSection('drawdown', '区间最大回撤', funds, { note: `区间最小起始日期为：2022-12-06　 截止日期：${escape(drawdownRange.end)}` })}
       <section class="zc-risk-metrics" data-risk-section="metrics">
-        ${heading('metrics', '收益风险指标')}
+        ${heading('metrics', '收益风险指标', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
         <div class="zc-risk-metric-tables">
-          ${metricTable('收益指标', returnMetrics, funds, series.interval)}
-          ${metricTable('风险指标', riskMetrics, funds, series.drawdown)}
+          ${metricTable('收益指标', returnMetrics, funds, metricsSeries.interval)}
+          ${metricTable('风险指标', riskMetrics, funds, metricsSeries.drawdown)}
         </div>
       </section>
     </div>`;

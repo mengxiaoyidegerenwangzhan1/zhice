@@ -17,6 +17,7 @@
   min-height: 32px;
   margin-bottom: 16px;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .zc-risk-head .zc-risk-heading,
@@ -31,23 +32,31 @@
   gap: 8px;
 }
 
+.zc-risk-head .zc-risk-heading.has-range-note {
+  column-gap: 12px;
+}
+
 .zc-risk-heading h2 {
   color: #333;
   white-space: nowrap;
 }
 
 .zc-risk-heading small {
-  color: #999;
+  color: #555759;
   font-size: 14px;
   line-height: 20px;
 }
 
 .zc-risk-actions {
-  flex: none;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 100%;
 }
 
 .zc-risk-actions-main {
-  gap: 20px;
+  flex: none;
+  gap: 16px;
 }
 
 .zc-risk-view-toggle + .zc-risk-actions-main {
@@ -58,9 +67,9 @@
   display: flex;
   flex: none;
   align-items: center;
-  gap: 6px;
-  width: 66px;
-  height: 32px;
+  gap: 2px;
+  width: 54px;
+  height: 28px;
   padding: 2px;
   border-radius: 99px;
   background: #fff;
@@ -71,8 +80,8 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border: 0;
   border-radius: 50%;
   padding: 0;
@@ -88,34 +97,71 @@
 }
 
 .zc-risk-chart-icon {
-  display: flex;
-  align-items: flex-end;
-  gap: 2.29px;
-  width: 16.8px;
-  height: 16.8px;
-  padding: 0 0 2.46px 2.17px;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
 }
 
 .zc-risk-table-icon {
-  display: grid;
-  align-content: start;
-  gap: 3.82px;
-  width: 16.8px;
-  height: 16.8px;
-  padding: 2.48px 0 0 .96px;
+  position: relative;
+  width: 12px;
+  height: 12px;
 }
 
 .zc-risk-table-icon > span {
+  position: absolute;
+  left: .5px;
+  top: 1.57px;
   display: flex;
   align-items: center;
-  gap: 1.87px;
+  gap: 1.29px;
+}
+
+.zc-risk-table-icon > span:nth-child(2) {
+  top: 5.4px;
+}
+
+.zc-risk-table-icon > span:nth-child(3) {
+  top: 9.23px;
 }
 
 .zc-risk-table-icon i {
-  width: 11.612px;
+  width: 8.513px;
   height: 1.2px;
   border-radius: 23px;
   background: #555759;
+}
+
+.zc-risk-view-toggle [aria-pressed="true"] .zc-risk-table-icon i {
+  background: #333;
+}
+
+.zc-risk-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.zc-risk-setting,
+.zc-risk-toolbar .zc-analysis-time,
+.zc-risk-units {
+  flex: none;
+}
+
+.zc-risk-setting > * {
+  min-width: 154px;
+}
+
+.zc-risk-setting-benchmark {
+  margin-inline-end: 8px;
+}
+
+.zc-risk-setting-benchmark > * {
+  min-width: 188px;
 }
 
 .zc-risk-heading .zc-risk-help {
@@ -299,7 +345,7 @@
 
 .zc-risk-view .zc-risk-legend button.is-hidden {
   color: #999;
-  text-decoration: line-through;
+  text-decoration: none;
 }
 
 .zc-risk-view .zc-risk-legend button.is-hidden i {

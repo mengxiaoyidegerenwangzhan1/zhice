@@ -42,10 +42,10 @@
 .zc-basic-info > .zc-section-head{margin-bottom:16px}
 .zc-charts h3{margin-bottom:26px}
 /* Hidden fund stays in its slot while its values and line are concealed. */
-.zc-fund.is-hidden::before{display:none}
+.zc-fund.is-hidden::before{display:block;background:#999}
 .zc-fund.is-hidden>strong,.zc-fund.is-hidden .zc-fund-code{color:#aaa}
-.zc-fund.is-hidden .zc-fund-code span{color:#aaa;background:#fff}
-.zc-fund.is-hidden>strong{color:#999;text-decoration:line-through}
+.zc-fund.is-hidden .zc-fund-code span{color:#999;background:#f7f8fa}
+.zc-fund.is-hidden>strong{color:#999;text-decoration:none}
 .zc-fund.is-hidden .zc-fund-code,.zc-fund.is-hidden .zc-fund-code span{color:#999}
 /* Search result hover spans the full panel width, matching the design. */
 .zc-compare .zc-search-results{padding:12px 0}
@@ -56,3 +56,8 @@
 .zc-compare .zc-type-notice{position:absolute;top:32px;left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:calc(100% - 32px);margin:0;min-height:35px;z-index:250}
 .zc-compare .zc-type-notice button{margin-left:12px;flex:none}
 @media(max-width:800px){.zc-compare .zc-type-notice{top:28px;border-radius:18px}.zc-compare .zc-type-notice>span:nth-child(2){white-space:normal}}
+
+.zc-search-icon { display: flex; flex: none; width: 20px; height: 20px; }
+.zc-search-icon .is-focus { display: none; }
+.zc-search:focus-within .zc-search-icon img:first-child { display: none; }
+.zc-search:focus-within .zc-search-icon .is-focus { display: block; }

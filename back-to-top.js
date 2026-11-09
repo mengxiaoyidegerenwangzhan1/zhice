@@ -4,22 +4,45 @@
   control.hidden = true;
   control.innerHTML = `
     <button type="button" aria-label="回到顶部">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-        <path d="M4.5 3h15M4.5 14l7.5-7.5 7.5 7.5M12 6.5V21" />
-      </svg>
+      <span class="site-back-to-top-icon" aria-hidden="true">
+        <img class="is-default" src="./assets/back-to-top/arrow-default.svg" alt="">
+        <img class="is-hover" src="./assets/back-to-top/arrow-hover.svg" alt="">
+      </span>
     </button>`;
   document.body.append(control);
 
+  let activeScroller = null;
+  const isVisible = element => element.isConnected && element.getClientRects().length > 0 && window.getComputedStyle(element).visibility === 'visible';
+
   const updateVisibility = () => {
-    control.toggleAttribute('hidden', window.scrollY < window.innerHeight / 2);
+    if (activeScroller && !isVisible(activeScroller)) {
+      activeScroller = null;
+    }
+    const scrollTop = activeScroller ? activeScroller.scrollTop : window.scrollY;
+    const viewportHeight = activeScroller ? activeScroller.clientHeight : window.innerHeight;
+    control.toggleAttribute('hidden', scrollTop < viewportHeight / 2);
   };
-  window.addEventListener('scroll', updateVisibility, { passive: true });
+  window.addEventListener('scroll', () => {
+    activeScroller = null;
+    updateVisibility();
+  }, { passive: true });
+  document.addEventListener('scroll', event => {
+    const target = event.target;
+    if (target.matches?.('[data-back-to-top-scroll]') && isVisible(target)) {
+      activeScroller = target;
+    }
+    updateVisibility();
+  }, { capture: true, passive: true });
+  document.addEventListener('click', () => requestAnimationFrame(updateVisibility));
   window.addEventListener('resize', updateVisibility);
   window.addEventListener('pageshow', updateVisibility);
+  window.addEventListener('hashchange', updateVisibility);
   updateVisibility();
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   control.querySelector('button').addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
+    updateVisibility();
+    const target = activeScroller || window;
+    target.scrollTo({ top: 0, behavior: reducedMotion.matches ? 'instant' : 'smooth' });
   });
 })();
