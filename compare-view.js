@@ -1,7 +1,13 @@
 (()=>{
 const A='./assets/compare-figma/';const img=(n,w=14,h=w)=>`<img src="${A+n}.svg" width="${w}" height="${h}" alt="">`;
-const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',color:'#9693cc',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'023514',type:'债券型',color:'#93b9cc',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'023514',type:'QDII',color:'#ccbd93',abbr:'yfdnsdk100etfljqdii'},{id:'d',name:'鹏华养老目标日期2040五年持有期混合',code:'012784',type:'FOF',color:'#bc93cc',abbr:'phylmbrq2040wncyqhh'}];
+const fundColors=['#9693cc','#93b9cc','#ccbd93','#bc93cc'];
+const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'023514',type:'债券型',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'023514',type:'QDII',abbr:'yfdnsdk100etfljqdii'},{id:'d',name:'鹏华养老目标日期2040五年持有期混合',code:'012784',type:'FOF',abbr:'phylmbrq2040wncyqhh'}];
 let funds=[],compared=false,pinned=null,sequence=0,noticeTimer=null,noticeUntil=0,tab=0,period='共同时段',start='2025-11-07',end='2026-11-06',charts=[],container;
+function syncFundColors(){
+  [...funds].sort((a,b)=>a.order-b.order).forEach((fund,index)=>{
+    fund.color=fundColors[index];
+  });
+}
 let riskView='chart';
 const analysisRanges=new Map();
 function riskOptions(section='overview'){
@@ -362,25 +368,31 @@ function bind(){
   });
   container.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{
     funds=funds.filter(f=>f.id!==b.dataset.remove);
+    syncFundColors();
     if(pinned===b.dataset.remove){pinned=null;funds.sort((a,b)=>a.order-b.order)}
     if(funds.length<2){compared=false;tab=0}
     render();
+    const next=container.querySelector('[data-search]')||container.querySelector('[data-remove]');
+    next?.focus({preventScroll:true});
+    closeSearchResults();
   });
   container.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{
     const f=funds.find(f=>f.id===b.dataset.eye);
     f.visible=!f.visible;
-    render();
+    renderWithFocus('data-eye',f.id);
   });
   container.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{
     pinned=pinned===b.dataset.pin?null:b.dataset.pin;
     funds.sort((a,b)=>a.order-b.order);
     if(pinned){const i=funds.findIndex(f=>f.id===pinned);funds.unshift(...funds.splice(i,1))}
-    render();
+    renderWithFocus('data-pin',b.dataset.pin);
   });
   container.querySelector('#zc-clear').onclick=()=>{
     funds=[];compared=false;tab=0;pinned=null;noticeUntil=0;render();
+    container.querySelector('[data-search]')?.focus({preventScroll:true});
+    closeSearchResults();
   };
-  container.querySelector('#zc-start').onclick=()=>{compared=true;render()};
+  container.querySelector('#zc-start').onclick=()=>{compared=true;renderWithFocus('data-tab',tab)};
   const exportButton=container.querySelector('#zc-export');
   if(exportButton)exportButton.onclick=()=>download('基金对比.csv','\ufeff基金名称,基金代码,基金类型,起始日期,结束日期\n'+funds.map(f=>[f.name,f.code,f.type,start,end].join(',')).join('\n'),'text/csv;charset=utf-8');
   container.querySelectorAll('[data-refresh]').forEach(b=>b.onclick=()=>refreshModule(b));
@@ -397,7 +409,7 @@ function syncControlsLayout(){const control=container?.querySelector('.zc-contro
 window.addEventListener('resize',()=>{setScale();requestAnimationFrame(syncControlsLayout);charts.forEach(c=>c.resize())});
 document.addEventListener('click',e=>{
   container?.querySelectorAll('.zc-analysis-select[open]').forEach(menu=>{if(!menu.contains(e.target))menu.open=false;});
-  if(!e.target.closest('.zc-search-slot'))container?.querySelectorAll('.zc-search-results').forEach(r=>r.hidden=true);
+  if(!e.target.closest('.zc-search-slot'))closeSearchResults();
 });
 
 function setScale(){document.documentElement.style.setProperty('--zc-scale',document.documentElement.clientWidth>=1000?Math.min(1,document.documentElement.clientWidth/1440):1)}
@@ -405,7 +417,112 @@ const F='./assets/compare-final/';
 const finalImg=(name,w,h=w)=>`<img src="${F+name}.svg" width="${w}" height="${h}" alt="">`;
 function emptyState(){return `<div class="zc-design-empty"><div class="zc-illustration"><div class="zc-illustration-art">${['img','img1','img2','img3','img4','img5','img6'].map((name,i)=>`<span class="zc-art-layer layer-${i}">${finalImg('51-57569_'+name,...[[194.643,113.882],[196.574,17.418],[84.2461,73.9375],[82.1133,67.0059],[25.8981,47.9883],[26.0381,26.0381],[16.1738,14.9297]][i])}${i===5?'<span class="zc-badge-plus"><i></i><i></i></span>':''}</span>`).join('')}</div></div><p>请选择 <strong>2–4只</strong> 基金进行比较</p></div>`}
 function showTypeNotice(restart=false){if(new Set(funds.map(f=>f.type)).size<2){noticeUntil=0;clearTimeout(noticeTimer);return}if(restart)noticeUntil=Date.now()+3000;const remaining=noticeUntil-Date.now();if(remaining<=0)return;clearTimeout(noticeTimer);document.querySelector('.zc-type-notice')?.remove();const n=document.createElement('div');n.className='zc-type-notice';n.setAttribute('role','status');n.innerHTML=`<span class="zc-warning">!</span><span>您选择了不同类型的基金，建议同类型基金对比更具有参考意义。</span><button aria-label="关闭提示">${img('47-50726_imgFrame2036082637')}</button>`;container.querySelector('.zc-selector').before(n);n.querySelector('button').onclick=()=>{noticeUntil=0;clearTimeout(noticeTimer);n.remove()};noticeTimer=setTimeout(()=>{noticeUntil=0;n.remove()},remaining)}
-function bindSearch(){container.querySelectorAll('[data-search]').forEach(search=>{const result=container.querySelector(`[data-results="${search.dataset.search}"]`);function highlight(value,q){const fragment=document.createDocumentFragment();let pos=0,lower=value.toLowerCase(),at=q?lower.indexOf(q):-1;while(at!==-1){fragment.append(document.createTextNode(value.slice(pos,at)));const strong=document.createElement('strong');strong.textContent=value.slice(at,at+q.length);fragment.append(strong);pos=at+q.length;at=lower.indexOf(q,pos)}fragment.append(document.createTextNode(value.slice(pos)));return fragment}function results(){container.querySelectorAll('.zc-search-results').forEach(r=>r.hidden=true);const q=search.value.trim().toLowerCase();const matches=seed.filter(f=>!funds.some(x=>x.id===f.id)&&(!q||`${f.name}${f.code}${f.type}${f.abbr}`.toLowerCase().includes(q)));result.hidden=false;result.replaceChildren();search.setAttribute('aria-expanded','true');if(!matches.length){const empty=document.createElement('div');empty.className='zc-search-no-results';empty.textContent='暂无匹配基金';result.append(empty);return}matches.forEach(f=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','option');for(const [field,cl]of [['code','code'],['name','name'],['type','type']]){const span=document.createElement('span');span.className=cl;span.append(highlight(f[field],q));b.append(span)}b.onclick=e=>{e.stopPropagation();funds.push({...f,visible:true,order:sequence++});render();showTypeNotice(true)};result.append(b)})}search.setAttribute('aria-haspopup','listbox');result.setAttribute('role','listbox');search.oninput=results;search.onfocus=results;search.onkeydown=e=>{if(e.key==='Escape'){result.hidden=true;search.setAttribute('aria-expanded','false')}if(e.key==='Enter')result.querySelector('button')?.click();if(e.key==='ArrowDown'){e.preventDefault();result.querySelector('button')?.focus()}}})}
+function closeSearchResults(){
+  container?.querySelectorAll('.zc-search-results').forEach(result=>{result.hidden=true});
+  container?.querySelectorAll('[data-search]').forEach(search=>{search.setAttribute('aria-expanded','false')});
+}
+function bindSearch(){
+  container.querySelectorAll('[data-search]').forEach(search=>{
+    const result=container.querySelector(`[data-results="${search.dataset.search}"]`);
+    const slot=search.closest('.zc-search-slot');
+    result.id=`zc-fund-results-${search.dataset.search}`;
+    result.setAttribute('role','listbox');
+    result.setAttribute('aria-label','基金搜索结果');
+    search.setAttribute('role','combobox');
+    search.setAttribute('aria-autocomplete','list');
+    search.setAttribute('aria-haspopup','listbox');
+    search.setAttribute('aria-controls',result.id);
+    search.setAttribute('aria-expanded','false');
+    function highlight(value,q){
+      const fragment=document.createDocumentFragment();
+      let pos=0,lower=value.toLowerCase(),at=q?lower.indexOf(q):-1;
+      while(at!==-1){
+        fragment.append(document.createTextNode(value.slice(pos,at)));
+        const strong=document.createElement('strong');
+        strong.textContent=value.slice(at,at+q.length);
+        fragment.append(strong);
+        pos=at+q.length;
+        at=lower.indexOf(q,pos);
+      }
+      fragment.append(document.createTextNode(value.slice(pos)));
+      return fragment;
+    }
+    function results(){
+      closeSearchResults();
+      const q=search.value.trim().toLowerCase();
+      const matches=seed.filter(f=>!funds.some(x=>x.id===f.id)&&(!q||`${f.name}${f.code}${f.type}${f.abbr}`.toLowerCase().includes(q)));
+      result.hidden=false;
+      result.replaceChildren();
+      search.setAttribute('aria-expanded','true');
+      if(!matches.length){
+        const empty=document.createElement('div');
+        empty.className='zc-search-no-results';
+        empty.textContent='暂无匹配基金';
+        result.append(empty);
+        return;
+      }
+      matches.forEach(f=>{
+        const button=document.createElement('button');
+        button.type='button';
+        button.setAttribute('role','option');
+        button.setAttribute('aria-selected','false');
+        for(const [field,className] of [['code','code'],['name','name'],['type','type']]){
+          const span=document.createElement('span');
+          span.className=className;
+          span.append(highlight(f[field],q));
+          button.append(span);
+        }
+        button.onclick=event=>{
+          event.stopPropagation();
+          funds.push({...f,visible:true,order:sequence++});
+          syncFundColors();
+          render();
+          const next=container.querySelector('[data-search]')||container.querySelector('#zc-start');
+          next?.focus({preventScroll:true});
+          closeSearchResults();
+          showTypeNotice(true);
+        };
+        result.append(button);
+      });
+    }
+    search.oninput=results;
+    search.onfocus=results;
+    search.onkeydown=event=>{
+      if(event.isComposing)return;
+      if(event.key==='Escape'){
+        event.preventDefault();
+        closeSearchResults();
+      }else if(event.key==='Enter'&&!result.hidden){
+        event.preventDefault();
+        result.querySelector('button')?.click();
+      }else if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+        event.preventDefault();
+        if(result.hidden)results();
+        const options=result.querySelectorAll('button');
+        const target=event.key==='ArrowDown'?options[0]:options[options.length-1];
+        target?.focus({preventScroll:true});
+      }
+    };
+    result.onkeydown=event=>{
+      const options=[...result.querySelectorAll('button')];
+      const index=options.indexOf(event.target);
+      if(index<0)return;
+      if(event.key==='Escape'){
+        event.preventDefault();
+        search.focus({preventScroll:true});
+        closeSearchResults();
+      }else if(event.key==='ArrowDown'||event.key==='ArrowUp'){
+        event.preventDefault();
+        const next=index+(event.key==='ArrowDown'?1:-1);
+        if(next<0)search.focus({preventScroll:true});
+        else options[Math.min(next,options.length-1)]?.focus({preventScroll:true});
+      }
+    };
+    slot.onfocusout=event=>{
+      if(!slot.contains(event.relatedTarget))closeSearchResults();
+    };
+  });
+}
 function setupHeader(){let h=document.getElementById('zc-header');if(h)return;const original=document.querySelector('header.app-topbar');h=original.cloneNode(true);h.id='zc-header';h.classList.add('zc-header');h.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));const brand=h.querySelector('.app-brand');brand.innerHTML=`<span class="zc-brand-crop"><img src="${F}51-57380_imgImage5.png" alt="智君科技"></span>`;h.querySelectorAll('.app-nav .nav-caret').forEach(el=>{el.outerHTML=`<span class="zc-nav-arrow">${finalImg('51-57380_imgFrame2036082628',12)}</span>`});h.querySelector('.app-actions').innerHTML=`<button type="button" class="zc-global-search" aria-label="全局搜索">${finalImg('51-57380_imgFrame',20)}<span>搜索基金、组合或报告</span></button><div class="zc-header-icons"><a href="./visual-system.html" aria-label="视觉系统">${finalImg('51-57380_imgFrame1',20)}</a><button aria-label="设置">${finalImg('51-57380_imgFrame2',20)}</button><button aria-label="帮助">${finalImg('51-57380_imgFrame3',20)}</button></div><span class="zc-header-divider"></span><button class="zc-user" aria-label="个人中心">${finalImg('51-57380_imgFrame2036083101',32)}<span>孟豆豆</span>${finalImg('51-57380_imgDown',16)}</button>`;h.querySelectorAll('.app-nav .nav-link').forEach(e=>e.classList.toggle('is-active',e.dataset.routeNav==='fund-research'));h.querySelectorAll('[data-route-leaf]').forEach(e=>e.classList.toggle('is-active',e.dataset.routeLeaf==='compare'));h.querySelector('.zc-global-search').onclick=()=>container.querySelector('[data-search]')?.focus();original.after(h)}
 window.CompareView={render(el){container=el;render()}};
 })();

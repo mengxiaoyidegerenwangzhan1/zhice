@@ -85,25 +85,38 @@
     return key === 'stock' ? [weight, result] : [weight * benchmark, weight * benchmark, result];
   }
 
+  function sortState(key, funds) {
+    const sort = state.sort[key];
+    if (!sort) return null;
+    const fund = sort.fundId ? funds.find(item => item?.id === sort.fundId) : funds[sort.fund];
+    if (!fund) {
+      state.sort[key] = null;
+      return null;
+    }
+    if (!sort.fundId) state.sort[key] = { fundId: fund.id, metric: sort.metric, direction: sort.direction };
+    return state.sort[key];
+  }
+
   function sortedRows(key, funds, scale) {
     const names = industryNames(key);
     const rows = industries.map((row, i) => ({ ...row, label: names[i], index: i }));
-    const sort = state.sort[key];
+    const sort = sortState(key, funds);
     if (!sort) return rows;
+    const fund = funds.find(item => item?.id === sort.fundId);
     return rows.sort((a, b) => {
-      const left = rowValues(a, funds[sort.fund], key, scale)[sort.metric];
-      const right = rowValues(b, funds[sort.fund], key, scale)[sort.metric];
+      const left = rowValues(a, fund, key, scale)[sort.metric];
+      const right = rowValues(b, fund, key, scale)[sort.metric];
       return (sort.direction === 'asc' ? left - right : right - left) || a.index - b.index;
     });
   }
 
   function metricHeaders(key, funds) {
     const labels = key === 'stock' ? ['行业权重均值', '行业累计收益'] : ['配置效应', '选股效应', '超额收益'];
+    const sort = sortState(key, funds);
     return slots(funds).map((fund, fundIndex) => labels.map((label, metric) => {
-      const sort = state.sort[key];
-      const active = sort?.fund === fundIndex && sort?.metric === metric;
+      const active = sort?.fundId === fund?.id && sort?.metric === metric;
       const order = active ? `${sort.direction === 'asc' ? '升序' : '降序'}排列` : '未排序';
-      return `<th scope="col" aria-sort="${active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}"><button type="button" class="zc-attr-sort ${active ? `is-${sort.direction}` : ''}" data-attr-sort="${key}" data-attr-fund="${fundIndex}" data-attr-metric="${metric}" aria-label="${escape(fund?.name || `基金${fundIndex + 1}`)} ${label} ${order}" ${fund?.visible && fund.id !== 'c' ? '' : 'disabled'}><span>${label}</span>${icon(active ? 'sort-desc' : 'sort')}</button></th>`;
+      return `<th scope="col" aria-sort="${active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}"><button type="button" class="zc-attr-sort ${active ? `is-${sort.direction}` : ''}" data-attr-sort="${key}" data-attr-fund="${escape(fund?.id || '')}" data-attr-metric="${metric}" aria-label="${escape(fund?.name || `基金${fundIndex + 1}`)} ${label} ${order}" ${fund?.visible && fund.id !== 'c' ? '' : 'disabled'}><span>${label}</span>${icon(active ? 'sort-desc' : 'sort')}</button></th>`;
     }).join('')).join('');
   }
 
@@ -201,13 +214,13 @@
       const sortButton = event.target.closest('[data-attr-sort]');
       if (sortButton && !sortButton.disabled) {
         const key = sortButton.dataset.attrSort;
-        const fund = Number(sortButton.dataset.attrFund);
+        const fundId = sortButton.dataset.attrFund;
         const metric = Number(sortButton.dataset.attrMetric);
-        const previous = state.sort[key];
-        const same = previous?.fund === fund && previous?.metric === metric;
-        state.sort[key] = same && previous.direction === 'asc' ? null : { fund, metric, direction: same ? 'asc' : 'desc' };
+        const previous = sortState(key, options.funds);
+        const same = previous?.fundId === fundId && previous?.metric === metric;
+        state.sort[key] = same && previous.direction === 'asc' ? null : { fundId, metric, direction: same ? 'asc' : 'desc' };
         replaceSection(key, root, options);
-        root.querySelector(`[data-attr-sort="${key}"][data-attr-fund="${fund}"][data-attr-metric="${metric}"]`)?.focus({ preventScroll: true });
+        root.querySelector(`[data-attr-sort="${key}"][data-attr-fund="${fundId}"][data-attr-metric="${metric}"]`)?.focus({ preventScroll: true });
       }
       const expand = event.target.closest('[data-attr-expand]');
       if (expand) {
