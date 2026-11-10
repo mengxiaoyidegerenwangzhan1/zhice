@@ -169,15 +169,16 @@ function analysisOptions() {
 function analysisTimeControls(scope, initial = {}) {
   const range = analysisRange(scope,initial);
   const common = ['共同时段','近1年','近3年'];
-  const moreLabel = common.includes(range.period) ? '更多' : range.period;
+  const moreSelected = !common.includes(range.period);
+  const moreLabel = moreSelected ? range.period : '更多';
   return `<div class="zc-analysis-time" data-analysis-time="${scope}">
     <div class="zc-quick-wrap">
       <div class="zc-pill zc-analysis-quick">${common.map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}
-        <button type="button" data-analysis-more aria-expanded="false">${moreLabel}<span class="zc-down"><img src="./assets/compare-controls/more.svg" width="10" height="10" alt=""></span></button>
+        <button type="button" data-analysis-more class="${moreSelected?'selected':''}" aria-pressed="${moreSelected}" aria-expanded="false">${moreLabel}<span class="zc-down"><img src="./assets/compare-controls/more.svg" width="10" height="10" alt=""></span></button>
       </div>
       <div class="zc-more-panel" hidden>
-        <div><small>区间</small>${['近1月','近3月','近6月'].map(label=>`<button type="button" data-analysis-period="${label}">${label}</button>`).join('')}</div>
-        <div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(label=>`<button type="button" data-analysis-period="${label}">${label}</button>`).join('')}</div>
+        <div><small>区间</small>${['近1月','近3月','近6月'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
+        <div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
       </div>
     </div>
     ${initial.showDate===false?'':`<div class="zc-date-wrap"><button type="button" class="zc-date" data-analysis-date="${scope}" aria-label="当前日期范围 ${range.start} 至 ${range.end}" disabled>
@@ -201,6 +202,16 @@ function selectAnalysisPeriod(scope, value) {
   range.period = value;
   Object.assign(range,datesForPeriod(range,value));
   render();
+  const toolbar = container.querySelector(`[data-analysis-time="${scope}"]`);
+  const selected = toolbar.querySelector('.zc-analysis-quick .selected');
+  selected?.focus({preventScroll:true});
+}
+
+function closeAnalysisMenu(toolbar) {
+  toolbar.querySelector('.zc-more-panel').hidden=true;
+  const more=toolbar.querySelector('[data-analysis-more]');
+  more.setAttribute('aria-expanded','false');
+  delete more.dataset.openByClick;
 }
 
 function performanceHeading() {
@@ -236,10 +247,26 @@ function bindAnalysisUi(scope) {
     });
     const more = toolbar.querySelector('[data-analysis-more]');
     const panel = toolbar.querySelector('.zc-more-panel');
+    const wrap = more.closest('.zc-quick-wrap');
     const show = ()=>{panel.hidden=false;more.setAttribute('aria-expanded','true');};
-    more.onclick=show;
+    more.onclick=()=>{
+      if(more.dataset.openByClick)closeAnalysisMenu(toolbar);
+      else {more.dataset.openByClick='true';show();}
+    };
     more.onmouseenter=show;
-    more.closest('.zc-quick-wrap').onmouseleave=()=>{panel.hidden=true;more.setAttribute('aria-expanded','false');};
+    wrap.onmouseleave=()=>{
+      if(!more.dataset.openByClick&&!wrap.contains(document.activeElement))closeAnalysisMenu(toolbar);
+    };
+    wrap.onfocusout=event=>{
+      if(!wrap.contains(event.relatedTarget))closeAnalysisMenu(toolbar);
+    };
+    wrap.onkeydown=event=>{
+      if(event.key==='Escape'){
+        event.preventDefault();
+        closeAnalysisMenu(toolbar);
+        more.focus({preventScroll:true});
+      }
+    };
   });
   scope.querySelectorAll('[data-analysis-field]').forEach(control=>{
     const update = ()=>{
@@ -379,6 +406,10 @@ function bind(){
   container.querySelectorAll('[data-eye]').forEach(b=>b.onclick=()=>{
     const f=funds.find(f=>f.id===b.dataset.eye);
     f.visible=!f.visible;
+    if(f.visible){
+      f.chartVisible={return:true,drawdown:true};
+      CompareRiskCharts.resetFundVisibility(f);
+    }
     renderWithFocus('data-eye',f.id);
   });
   container.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{
@@ -409,6 +440,9 @@ function syncControlsLayout(){const control=container?.querySelector('.zc-contro
 window.addEventListener('resize',()=>{setScale();requestAnimationFrame(syncControlsLayout);charts.forEach(c=>c.resize())});
 document.addEventListener('click',e=>{
   container?.querySelectorAll('.zc-analysis-select[open]').forEach(menu=>{if(!menu.contains(e.target))menu.open=false;});
+  container?.querySelectorAll('[data-analysis-time]').forEach(toolbar=>{
+    if(!toolbar.querySelector('.zc-quick-wrap').contains(e.target))closeAnalysisMenu(toolbar);
+  });
   if(!e.target.closest('.zc-search-slot'))closeSearchResults();
 });
 

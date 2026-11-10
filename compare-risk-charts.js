@@ -413,5 +413,9 @@
     });
   }
 
-  window.CompareRiskCharts = { data, mount };
+  function resetFundVisibility(fund) {
+    legendChoices.delete(fund);
+  }
+
+  window.CompareRiskCharts = { data, mount, resetFundVisibility };
 })();
