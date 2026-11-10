@@ -45,7 +45,7 @@
     const empty = value == null;
     const formatted = empty ? '—' : `${Number(value.toFixed(2))}%`;
     const className = ['zc-attr-number', empty ? 'is-empty' : '', value < 0 ? 'is-negative' : '', positive && value > 0 ? 'is-positive' : ''].filter(Boolean).join(' ');
-    return `<td class="${summary ? 'is-summary' : ''}">${rank ? `<span class="zc-attr-rank rank-${rank}" aria-label="排名第${rank}">${rank}</span>` : ''}<span class="${className}">${formatted}</span></td>`;
+    return `<td class="${summary ? 'is-summary' : ''}">${rank ? `<img class="zc-attr-rank rank-${rank}" src="${assets}rank-${rank}.png" width="20" alt="排名第${rank}">` : ''}<span class="${className}">${formatted}</span></td>`;
   }
 
   function fundCells(fund, values, settings = {}) {
