@@ -88,53 +88,14 @@
   background: transparent;
 }
 
-.zc-risk-view-toggle button[aria-pressed="true"] {
-  background: #f2f3f5;
-}
-
 .zc-risk-view-toggle button[aria-pressed="false"]:hover {
   background: #f7f8fa;
 }
 
-.zc-risk-chart-icon {
-  display: grid;
-  place-items: center;
-  width: 12px;
-  height: 12px;
-}
-
-.zc-risk-table-icon {
-  position: relative;
-  width: 12px;
-  height: 12px;
-}
-
-.zc-risk-table-icon > span {
-  position: absolute;
-  left: .5px;
-  top: 1.57px;
-  display: flex;
-  align-items: center;
-  gap: 1.29px;
-}
-
-.zc-risk-table-icon > span:nth-child(2) {
-  top: 5.4px;
-}
-
-.zc-risk-table-icon > span:nth-child(3) {
-  top: 9.23px;
-}
-
-.zc-risk-table-icon i {
-  width: 8.513px;
-  height: 1.2px;
-  border-radius: 23px;
-  background: #555759;
-}
-
-.zc-risk-view-toggle [aria-pressed="true"] .zc-risk-table-icon i {
-  background: #333;
+.zc-risk-view-toggle button > img {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 .zc-risk-toolbar {

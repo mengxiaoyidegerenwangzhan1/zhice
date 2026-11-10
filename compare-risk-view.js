@@ -37,13 +37,12 @@
   }
 
   function viewToggle(view) {
-    const tableState = view === 'table' ? 'active' : 'inactive';
-    return `<div class="zc-risk-view-toggle" role="group" aria-label="收益与发布视图">
+    return `<div class="zc-risk-view-toggle" role="group" aria-label="收益与风险视图">
       <button type="button" data-risk-view="chart" aria-pressed="${view === 'chart'}" aria-label="图表视图" title="图表视图">
-        <span class="zc-risk-chart-icon" aria-hidden="true">${icon(`view-chart-${view === 'chart' ? 'active' : 'inactive'}`)}</span>
+        <img src="${assets}view-chart-${view === 'chart' ? 'selected' : 'unselected'}.png" width="24" height="24" alt="">
       </button>
       <button type="button" data-risk-view="table" aria-pressed="${view === 'table'}" aria-label="列表视图" title="列表视图">
-        <span class="zc-risk-table-icon" aria-hidden="true">${[1, 2, 2].map(i => `<span>${icon(`view-table-dot-${tableState}-${i}`)}<i></i></span>`).join('')}</span>
+        <img src="${assets}view-list-${view === 'table' ? 'selected' : 'unselected'}.png" width="24" height="24" alt="">
       </button>
     </div>`;
   }
