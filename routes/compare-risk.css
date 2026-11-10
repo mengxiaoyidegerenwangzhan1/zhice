@@ -462,6 +462,7 @@
   flex: none;
   width: 14px;
   height: 14px;
+  transform: rotate(0deg);
 }
 
 .zc-risk-disclosure[aria-expanded="true"] .zc-risk-disclosure-arrow {

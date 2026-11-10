@@ -157,7 +157,7 @@
     function renderRows(rows) {
       return rows.map(row => {
         const expanded = state.expanded.has(row.id);
-        const label = row.children ? `<button type="button" class="zc-attr-expand" data-attr-expand="${row.id}" aria-expanded="${expanded}" aria-label="${expanded ? '收起' : '展开'}${row.label}">${icon(expanded ? 'tree-open' : 'tree-closed')}<span>${row.label}</span></button>` : `<span class="zc-attr-factor-label">${row.label}</span>`;
+        const label = row.children ? `<button type="button" class="zc-attr-expand" data-attr-expand="${row.id}" aria-expanded="${expanded}" aria-label="${expanded ? '收起' : '展开'}${row.label}">${icon('tree-open')}<span>${row.label}</span></button>` : `<span class="zc-attr-factor-label">${row.label}</span>`;
         return `<tr class="zc-attr-level-${row.level}" data-attr-row="${row.id}"><th scope="row">${label}</th>${funds.map(fund => fundCells(fund, [row.value * scale])).join('')}</tr>${row.children && expanded ? renderRows(row.children) : ''}`;
       }).join('');
     }

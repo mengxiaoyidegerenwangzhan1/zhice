@@ -20,7 +20,7 @@
     ['最大回撤区间月份数', '12.00', '12.00', '最大回撤从高点到低点所跨的月数。'],
     ['最大回撤修复日期', '2025-07-21', '2025-08-06', '最大回撤后首次回到回撤前高点的日期。'],
     ['最大回撤修复月份数', '17.00', '18.00', '最大回撤触底后修复所用的月数。'],
-    ['年化标准差(%)', '23.12', '10.28', '将收益率波动换算为年化标准差。'],
+    ['年化标准差', '23.12%', '10.28%', '将收益率波动换算为年化标准差。'],
     ['贝塔', '1.06', '0.52', '基金收益相对比较基准变化的敏感度。'],
     ['下行风险', '15.19%', '6.62%', '衡量低于目标收益的波动幅度。'],
     ['跟踪误差', '13.91%', '9.70%', '衡量基金收益与比较基准收益之差的波动。'],
@@ -122,7 +122,7 @@
 
   function disclosure(key, label, expanded) {
     return `<button type="button" class="zc-risk-disclosure" data-risk-disclosure="${key}" aria-expanded="${expanded}" aria-controls="zc-risk-children-${key}">
-      <span class="zc-risk-disclosure-arrow" aria-hidden="true"><img src="./assets/compare-attribution/tree-closed.svg" width="14" height="14" alt=""></span>
+      <span class="zc-risk-disclosure-arrow" aria-hidden="true"><img src="./assets/compare-attribution/tree-open.svg" width="14" height="14" alt=""></span>
       <span>${label}</span>
     </button>`;
   }
