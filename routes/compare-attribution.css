@@ -57,6 +57,7 @@
 .zc-attr-factor-table .zc-attr-level-3 > th { padding-left: 52px; }
 .zc-attr-expand { display: flex; align-items: center; gap: 6px; width: 100%; border: 0; padding: 0; background: transparent; color: inherit; font-weight: inherit; text-align: left; line-height: 20px; }
 .zc-attr-expand img { display: block; flex: none; width: 14px; height: 14px; }
+.zc-attr-expand[aria-expanded="true"] img { transform: rotate(90deg); }
 .zc-attr-expand:hover { color: #6865a7; }
 .zc-attr-factor-table .zc-attr-level-2 .zc-attr-expand { margin-left: 0; width: 100%; }
 .zc-attr-factor-label { display: block; }
