@@ -122,7 +122,7 @@
 
   function disclosure(key, label, expanded) {
     return `<button type="button" class="zc-risk-disclosure" data-risk-disclosure="${key}" aria-expanded="${expanded}" aria-controls="zc-risk-children-${key}">
-      <span class="zc-risk-disclosure-arrow" aria-hidden="true">${icon('tree-arrow')}${icon('tree-arrow-muted')}</span>
+      <span class="zc-risk-disclosure-arrow" aria-hidden="true"><img src="./assets/compare-attribution/tree-closed.svg" width="14" height="14" alt=""></span>
       <span>${label}</span>
     </button>`;
   }

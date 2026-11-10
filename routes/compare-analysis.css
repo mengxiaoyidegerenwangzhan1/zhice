@@ -77,3 +77,28 @@
 .zc-analysis-menu button { display: block; width: 100%; border: 0; padding: 8px 12px; background: #fff; color: #333; text-align: left; white-space: nowrap; }
 .zc-analysis-menu button:hover { background: #f7f8fa; }
 .zc-analysis-menu button[aria-selected="true"] { background: #f4f4fc; color: #6865a7; }
+
+
+.zc-compare .zc-overview-table tr > th,
+.zc-compare .zc-overview-table tr > td {
+  height: 45px;
+  padding: 10px 12px;
+  border-color: rgba(234, 234, 234, .85);
+  color: #333;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.zc-compare .zc-overview-table th { background: #f7f8fa; text-align: left; }
+.zc-compare .zc-overview-table col:first-child { width: 120px !important; }
+.zc-compare .zc-overview-table td { background: #fff; font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
+.zc-compare .zc-overview-table .zc-number-cell { font-family: Roboto, Arial, sans-serif; text-align: right; }
+.zc-compare .zc-overview-table.zc-returns td { text-align: left; }
+.zc-compare .zc-overview-table.zc-returns td.best { background: #fceef0; }
+.zc-compare .zc-overview-table.zc-returns td > b {
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.zc-compare .zc-overview-table.zc-returns small { font-family: Roboto, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }

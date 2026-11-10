@@ -323,19 +323,48 @@
   min-width: 0;
 }
 
+.zc-risk-view .zc-risk-table,
+.zc-risk-view .zc-risk-tree-table {
+  color: #333;
+  font-size: 14px;
+  line-height: 20px;
+}
+
 .zc-risk-view .zc-risk-table th,
-.zc-risk-view .zc-risk-table td {
+.zc-risk-view .zc-risk-table td,
+.zc-risk-view .zc-risk-tree-table th,
+.zc-risk-view .zc-risk-tree-table td {
+  height: 45px;
   border-color: rgba(234, 234, 234, .85);
   padding: 10px 12px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  vertical-align: middle;
 }
 
 .zc-risk-view .zc-risk-table tbody th {
-  height: auto;
+  height: 45px;
+  background: #f7f8fa;
+  text-align: left;
 }
 
-.zc-risk-view .zc-risk-table thead th {
-  height: 65px;
-  font-weight: 500;
+.zc-risk-view .zc-risk-table thead th,
+.zc-risk-view .zc-risk-tree-table thead th {
+  height: 45px;
+  background: #f6f6f6;
+  color: #555759;
+  font-weight: 400;
+  text-align: left;
+}
+
+.zc-risk-view .zc-risk-table td,
+.zc-risk-view .zc-risk-tree-table td {
+  background: #fff;
+  font-family: Roboto, 'PingFang SC', sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .zc-risk-view .zc-risk-table .zc-risk-metric-col {
@@ -346,7 +375,7 @@
 .zc-risk-metric-label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .zc-risk-fund-heading > i {
@@ -390,29 +419,10 @@
   width: 120px;
 }
 
-.zc-risk-view .zc-risk-tree-table tr th,
-.zc-risk-view .zc-risk-tree-table tr td {
-  height: 45px;
-  border-color: rgba(234, 234, 234, .85);
-  padding: 10px 12px;
-  line-height: 20px;
-}
-
-.zc-risk-view .zc-risk-tree-table thead th {
-  background: #f6f6f6;
-  color: #555759;
-  font-weight: 500;
-  text-align: right;
-}
-
-.zc-risk-view .zc-risk-tree-table thead th:first-child {
-  color: #333;
-  text-align: left;
-}
-
 .zc-risk-view .zc-risk-tree-table tbody th {
+  height: 45px;
   background: #f7f8fa;
-  color: #555759;
+  color: #333;
   text-align: left;
 }
 
@@ -424,21 +434,13 @@
 .zc-risk-view .zc-risk-tree-table .zc-risk-tree-summary th,
 .zc-risk-view .zc-risk-tree-table .zc-risk-tree-summary td {
   background: #f7f8fa;
+  color: #333;
   font-weight: 500;
-}
-
-.zc-risk-view .zc-risk-tree-table td {
-  background: #fff;
-  text-align: right;
 }
 
 .zc-risk-tree-table .zc-risk-number {
   font-family: 'Roboto', 'PingFang SC', sans-serif;
   font-variant-numeric: tabular-nums;
-}
-
-.zc-risk-tree-table td.is-negative {
-  color: #36b397;
 }
 
 .zc-risk-disclosure {
@@ -458,17 +460,12 @@
 .zc-risk-disclosure-arrow {
   display: inline-flex;
   flex: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
 }
 
 .zc-risk-disclosure[aria-expanded="true"] .zc-risk-disclosure-arrow {
   transform: rotate(90deg);
-}
-
-.zc-risk-disclosure[aria-expanded="true"] .zc-risk-disclosure-arrow img:last-child,
-.zc-risk-disclosure[aria-expanded="false"] .zc-risk-disclosure-arrow img:first-child {
-  display: none;
 }
 
 .zc-risk-quantity {
@@ -560,5 +557,7 @@
   }
 }
 
-.zc-risk-view .zc-risk-table td { text-align: right; }
-.zc-risk-view .zc-risk-table td.is-negative { color: #36b397; }
+.zc-risk-view .zc-risk-table td.is-negative,
+.zc-risk-view .zc-risk-tree-table td.is-negative {
+  color: #36b397;
+}
