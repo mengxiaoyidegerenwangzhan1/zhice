@@ -16,16 +16,14 @@
     const panel = region.firstElementChild;
     page.classList.remove('is-sticky-compact');
     const expandedHeight = panel.offsetHeight;
-    page.classList.add('is-sticky-compact');
-    const compactHeight = panel.offsetHeight;
     page.classList.toggle('is-sticky-compact', compact);
 
     const scale = region.getBoundingClientRect().width / region.offsetWidth || 1;
-    const headerHeight = document.getElementById('zc-header').getBoundingClientRect().height / scale;
+    const header = document.getElementById('zc-header');
+    const headerHeight = header ? header.getBoundingClientRect().height / scale : 56;
     region.style.setProperty('--zc-sticky-header', `${headerHeight}px`);
     region.style.setProperty('--zc-sticky-reserve', `${expandedHeight}px`);
-    // Let the results reach the compact bar before shrinking the sticky panel.
-    collapseAfter = (expandedHeight - compactHeight) * scale;
+    collapseAfter = 156 * scale;
   }
 
   function update() {

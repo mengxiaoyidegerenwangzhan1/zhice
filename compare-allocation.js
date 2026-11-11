@@ -15,7 +15,7 @@
   const assetRows = [
     ['股票', '#889ffa', 88.72, null], ['基金', '#ceb2ee', null, 89.93],
     ['银行存款', '#f0a89d', 9.36, 4.14], ['固定收益', '#b0b5f7', 0.43, 5.81],
-    ['可转换债券', '#74c0da', 0.11, null], ['其他资产', '#f4bd84', 1.49, 0.12],
+    ['可转换债券', '#74c0da', 0.11, null], ['其他资产', '#f4bd84', 1.38, 0.12],
   ];
   const industryRows = [
     ['电子', 16.90, '#ccbde6'], ['机械设备', 13.92, '#7ebaa2'], ['电力设备', 11.11, '#a6c8d3'],
@@ -29,11 +29,20 @@
     ['钢铁', 0.49, '#aed0ab'], ['美容护理', 0.42, '#f2dca2'], ['食品饮料', 0.39, '#f28098'],
     ['房地产', 0.25, '#f2a2a1'], ['煤炭', 0.14, '#adc59a'],
   ];
-  const holdings = [
-    ['快克智能', 0.44], ['海南高速', 0.43], ['华自科技', 0.42], ['移为通信', 0.42],
-    ['新锐股份', 0.42], ['山东赫达', 0.41], ['鲁北化工', 0.41], ['纽威数控', 0.41],
-    ['山高环能', 0.40], ['中材节能', 0.40],
+  const comparisonIndustryValues = [18.35, 12.48, 9.76, 9.42, null, 4.66, 5.32, 3.92, 4.65, 3.14, 2.24, 1.67, 1.58, 1.10, 1.49, 1.32, 0.86, 0.93, 0.71, 0.66, 0.78, 0.45, 0.64, 0.48, 0.56, 0.35, 0.48, 0.22, 0.38];
+  const stockHoldings = [
+    [['快克智能', 6.24], ['海南高速', 5.68], ['华自科技', 4.93], ['移为通信', 4.27], ['新锐股份', 3.86], ['山东赫达', 3.42], ['鲁北化工', 3.15], ['纽威数控', 2.76], ['山高环能', 2.39], ['中材节能', 2.11]],
+    [['宁德时代', 7.12], ['山东赫达', 6.45], ['中际旭创', 5.87], ['快克智能', 5.26], ['立讯精密', 4.78], ['阳光电源', 4.13], ['移为通信', 3.69], ['汇川技术', 3.24], ['纽威数控', 2.86], ['恒立液压', 2.31]],
   ];
+  const bondHoldings = [
+    [['25国债05', 8.36], ['25国开03', 7.24], ['25农发06', 6.18], ['25进出04', 5.72], ['24国债13', 4.65]],
+    [['25国开03', 9.12], ['25国债11', 7.46], ['24国债13', 6.83], ['25国债05', 5.29], ['25农发09', 4.17]],
+  ];
+  const matchingColors = ['#7268ab', '#4f83a6', '#9b8148', '#9a6ba4'];
+  const securityColors = {
+    '快克智能': '#7268ab', '移为通信': '#4f83a6', '山东赫达': '#9b8148', '纽威数控': '#9a6ba4',
+    '25国债05': '#7268ab', '25国开03': '#4f83a6', '24国债13': '#9b8148',
+  };
   const classificationGroups = {
     '行业分布 - 中信行业分类': [
       ['电子', [0]], ['机械', [1]], ['电力设备及新能源', [2]], ['计算机', [3]],
@@ -64,6 +73,9 @@
   const hasData = fund => fund && fund.id !== 'c';
   const scopeFor = key => `allocation-${key}`;
   const numeric = value => `<span class="zc-allocation-number${value < 0 ? ' is-negative' : ''}">${value.toFixed(2)}%</span>`;
+  const missing = '<span class="zc-allocation-dash">--</span>';
+  const referenceFund = options => options.funds.find(fund => fund.id === options.referenceId);
+  const referenceClass = (fund, options) => fund && fund.id === options.referenceId ? ' class="is-reference"' : '';
 
   function changeForReport(key) {
     const original = definitions.find(item => item.key === key).report;
@@ -72,14 +84,18 @@
 
   function dataRows(key) {
     if (key === 'asset') return assetRows.map(([name, color, first, second]) => ({ name, color, values: [first, second] }));
-    if (key === 'bond') return [{ name: '可转换债券', color: '#74c0da', values: [0.02, 0.02] }];
+    if (key === 'bond') return [{ name: '可转换债券', color: '#74c0da', values: [0.02, 0.15] }];
+    const rows = industryRows.map(([name, value, color], index) => ({ name, color, values: [index === 3 ? null : value, comparisonIndustryValues[index]] }));
     const grouping = classificationGroups[state.stock.distribution];
-    if (!grouping) return industryRows.map(([name, value, color]) => ({ name, color, values: [value, value] }));
+    if (!grouping) return rows;
     return grouping.map(([name, indices]) => ({
       name,
       color: industryRows[indices[0]][2],
-      values: [0, 1].map(() => indices.reduce((sum, index) => sum + industryRows[index][1], 0)),
-    })).sort((first, second) => second.values[0] - first.values[0]);
+      values: [0, 1].map(column => {
+        const values = indices.map(index => rows[index].values[column]).filter(Number.isFinite);
+        return values.length ? values.reduce((sum, value) => sum + value, 0) : null;
+      }),
+    })).sort((first, second) => (second.values[0] ?? 0) - (first.values[0] ?? 0));
   }
 
   function amount(row, fund, key) {
@@ -116,43 +132,86 @@
     return '<colgroup><col style="width:120px"><col><col><col><col></colgroup>';
   }
 
-  function chartRow(key, funds) {
+  function chartRow(key, options) {
+    const { funds } = options;
     const labels = { asset: '大类资产类型<br>/<br>占总资产比', stock: state.stock.distribution === '板块分布' ? '板块分布<br>/<br>占净资产比' : '行业分布<br>/<br>占净资产比', bond: '债券类型 /<br>占净资产比' };
     return `<table class="zc-allocation-table zc-allocation-chart-table" aria-label="${definitions.find(item => item.key === key).title}图表">${columns()}<tbody><tr>
-      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td>${fund?.visible ? hasData(fund) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</td>`).join('')}
+      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}>${fund?.visible ? hasData(fund) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</td>`).join('')}
     </tr></tbody></table>`;
   }
 
-  function valueCells(row, funds, key) {
-    return slots(funds).map(fund => {
+  function valueCells(row, options, key) {
+    const reference = referenceFund(options);
+    const baseline = amount(row, reference, key);
+    return slots(options.funds).map(fund => {
       const value = amount(row, fund, key);
-      return `<td>${fund?.visible ? Number.isFinite(value) ? numeric(value) : '<span class="zc-allocation-dash">—</span>' : ''}</td>`;
+      let content = '';
+      if (fund?.visible) {
+        content = Number.isFinite(value) ? numeric(value) : missing;
+        if (reference && fund.id !== reference.id && Number.isFinite(value)) {
+          const difference = Number.isFinite(baseline) ? value - baseline : null;
+          const delta = difference === null ? '--' : `${difference >= 0 ? '+' : ''}${difference.toFixed(2)}pp`;
+          content = `<span class="zc-allocation-value-pair">${content}<span class="zc-allocation-difference${difference < 0 ? ' is-negative' : ''}">${delta}</span></span>`;
+        }
+      }
+      return `<td${referenceClass(fund, options)}>${content}</td>`;
     }).join('');
   }
 
-  function distributionTable(key, funds) {
+  function distributionTable(key, options) {
     const rows = dataRows(key);
-    return `<div class="zc-allocation-table-frame">${chartRow(key, funds)}
+    return `<div class="zc-allocation-table-frame">${chartRow(key, options)}
       <div class="zc-allocation-data-scroll${rows.length > 10 ? ' is-long' : ''}"${rows.length > 10 ? ' tabindex="0" role="region" aria-label="股票资产分布明细，可滚动"' : ''}>
-        <table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}明细">${columns()}<tbody>${rows.map((row, index) => `<tr data-allocation-row="${index}" data-allocation-label="${escape(row.name)}"><th scope="row"><span class="zc-allocation-row-label"><i style="--category:${row.color}" aria-hidden="true"></i><span>${escape(row.name)}</span></span></th>${valueCells(row, funds, key)}</tr>`).join('')}</tbody></table>
+        <table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}明细">${columns()}<tbody>${rows.map((row, index) => `<tr data-allocation-row="${index}" data-allocation-label="${escape(row.name)}"><th scope="row"><span class="zc-allocation-row-label"><i style="--category:${row.color}" aria-hidden="true"></i><span>${escape(row.name)}</span></span></th>${valueCells(row, options, key)}</tr>`).join('')}</tbody></table>
       </div>
     </div>`;
   }
 
-  function holdingTable(key, funds) {
-    const rows = key === 'holdings' ? holdings : [['常青转债', 0.02]];
-    const sum = rows.reduce((total, row) => total + row[1], 0);
-    const summaries = [[key === 'holdings' ? '前十大合计' : '前五大合计', sum]];
-    if (key === 'holdings') summaries.push(['集中度', 4.48]);
+  function holdingRows(key, fund) {
+    if (!hasData(fund)) return [];
+    return (key === 'holdings' ? stockHoldings : bondHoldings)[fund.id === 'b' ? 1 : 0];
+  }
+
+  function holdingMatches(key, options) {
+    const reference = referenceFund(options);
+    if (!reference) return new Map();
+    const names = new Set(options.funds.filter(fund => fund.id !== reference.id).flatMap(fund => holdingRows(key, fund).map(row => row[0])));
+    return new Map(holdingRows(key, reference).filter(row => names.has(row[0])).map(([name], index) => [name, securityColors[name] || matchingColors[index % matchingColors.length]]));
+  }
+
+  function holdingTable(key, options) {
+    const { funds } = options;
+    const hasReference = Boolean(referenceFund(options));
+    const matches = holdingMatches(key, options);
+    const rowCount = key === 'holdings' ? 10 : 5;
+    const summaries = key === 'holdings' ? ['前十大合计', '集中度'] : ['前五大合计'];
     return `<div class="zc-allocation-table-frame"><table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}">${columns()}<tbody>
-      ${rows.map(([name, value], index) => `<tr><th scope="row"><span class="zc-allocation-number">${index + 1}</span></th>${slots(funds).map(fund => `<td>${fund?.visible ? hasData(fund) ? `<span class="zc-allocation-holding"><span>${name}</span>${numeric(value * (1 - changeForReport(key)))}</span>` : '<span class="zc-allocation-dash">—</span>' : ''}</td>`).join('')}</tr>`).join('')}
-      ${summaries.map(([name, value]) => `<tr class="zc-allocation-summary"><th scope="row">${name}</th>${valueCells({ values: [value, value] }, funds, key)}</tr>`).join('')}
+      ${Array.from({ length: rowCount }, (_, index) => `<tr><th scope="row"><span class="zc-allocation-number">${index + 1}</span></th>${slots(funds).map(fund => {
+        const row = holdingRows(key, fund)[index];
+        let content = '';
+        if (fund?.visible) {
+          content = missing;
+          if (row) {
+            const [name, value] = row;
+            const color = matches.get(name);
+            const stripe = hasReference ? `<i class="zc-allocation-holding-stripe"${color ? ` style="--holding-color:${color}"` : ''} aria-hidden="true"></i>` : '';
+            content = `<span class="zc-allocation-holding">${stripe}<span class="zc-allocation-holding-name"${color ? ` style="color:${color}"` : ''}>${escape(name)}</span>${numeric(value * (1 - changeForReport(key)))}</span>`;
+          }
+        }
+        return `<td${referenceClass(fund, options)}>${content}</td>`;
+      }).join('')}</tr>`).join('')}
+      ${summaries.map(name => `<tr class="zc-allocation-summary"><th scope="row">${name}</th>${slots(funds).map(fund => {
+        const rows = holdingRows(key, fund);
+        const value = rows.reduce((sum, row) => sum + row[1], 0) * (1 - changeForReport(key));
+        const content = fund?.visible ? rows.length && name !== '集中度' ? numeric(value) : missing : '';
+        return `<td${referenceClass(fund, options)}>${content}</td>`;
+      }).join('')}</tr>`).join('')}
     </tbody></table></div>`;
   }
 
   function section(definition, options) {
     const { key } = definition;
-    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition)}${key.includes('holdings') ? holdingTable(key, options.funds) : distributionTable(key, options.funds)}</section>`;
+    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
   }
 
   function render(options) {

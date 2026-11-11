@@ -9,6 +9,7 @@ body.zc-compare-mode .zc-compare.has-results {
   height: var(--zc-sticky-reserve, auto);
   z-index: 145;
   pointer-events: none;
+  overflow-anchor: none;
 }
 
 .zc-sticky-panel {
@@ -45,12 +46,12 @@ body.zc-compare-mode .zc-compare.has-results {
 
 /* The selector's four slots line up with the four result columns. */
 .zc-compare .zc-selector {
-  padding: 0 0 16px;
+  padding: 0;
 }
 
 .zc-compare .zc-fund-row {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 0;
   padding-right: 20px;
 }
@@ -58,37 +59,39 @@ body.zc-compare-mode .zc-compare.has-results {
 .zc-compare .zc-pk {
   flex: none;
   width: 139px;
-  height: 126px;
+  height: auto;
+  min-height: 134px;
   margin: 0;
   border: 0;
   border-radius: 16px 0 0 0;
-  background: url('../assets/compare-figma/fund-pk-expanded.png?v=2') center / 139px 126px no-repeat;
+  background: url('../assets/compare-sticky/fund-pk-expanded.svg') center / 139px 134px no-repeat;
 }
 
 .zc-compare .zc-fund-slots {
   gap: 0;
-  margin-top: 16px;
+  margin-top: 0;
 }
 
 .zc-compare .zc-fund {
   display: flex;
   flex-direction: column;
   height: auto;
-  min-height: 102px;
-  padding: 0 20px;
+  min-height: 134px;
+  padding: 16px 20px;
   background: transparent;
   border-radius: 0;
   box-shadow: inset 1px 0 #eaeaea;
 }
 
 .zc-compare .zc-fund::before {
-  top: 25px;
+  top: 41px;
   left: 20px;
   height: 18px;
   border-radius: 3px;
 }
 
 .zc-compare .zc-card-tools {
+  flex: none;
   margin-bottom: 8px;
 }
 
@@ -117,7 +120,8 @@ body.zc-compare-mode .zc-compare.has-results {
 }
 
 .zc-compare .zc-actions {
-  margin-top: 16px;
+  margin-top: 0;
+  padding: 16px 0;
 }
 
 .zc-compare .zc-search-slot {
@@ -148,25 +152,23 @@ body.zc-compare-mode .zc-compare.has-results {
 
 /* Preserve the expanded space in the document while the visible panel is compact. */
 .zc-compare.is-sticky-compact .zc-sticky-panel {
-  padding-top: 0;
+  padding-top: 20px;
 }
 
 .zc-compare.is-sticky-compact .zc-selector {
   padding-bottom: 0;
   margin-bottom: 0;
-  border-radius: 0;
+  border-radius: 16px 16px 0 0;
 }
 
 .zc-compare.is-sticky-compact .zc-fund-row {
-  align-items: center;
-  min-height: 68px;
+  min-height: 104px;
 }
 
 .zc-compare.is-sticky-compact .zc-pk {
-  height: 68px;
-  border-radius: 0;
-  background-image: url('../assets/compare-figma/fund-pk-compact.png?v=2');
-  background-size: 139px 68px;
+  min-height: 104px;
+  background-image: url('../assets/compare-sticky/fund-pk-compact.svg');
+  background-size: 139px 104px;
 }
 
 .zc-compare.is-sticky-compact .zc-fund-slots {
@@ -174,40 +176,9 @@ body.zc-compare-mode .zc-compare.has-results {
 }
 
 .zc-compare.is-sticky-compact .zc-fund {
-  flex-direction: row;
-  align-items: center;
-  height: auto;
-  min-height: 36px;
-  padding-block: 8px;
+  min-height: 104px;
 }
 
-.zc-compare.is-sticky-compact .zc-fund::before {
-  top: 50%;
-  height: 20px;
-  transform: translateY(-50%);
-}
-
-.zc-compare.is-sticky-compact .zc-fund > strong {
-  display: block;
-  flex: 1;
-  min-width: 0;
-  height: auto;
-  min-height: 0;
-  margin-inline-end: 26px;
-  overflow: visible;
-  white-space: normal;
-  text-overflow: clip;
-}
-
-.zc-compare.is-sticky-compact .zc-card-tools {
-  position: absolute;
-  top: 50%;
-  right: 20px;
-  margin: 0;
-  transform: translateY(-50%);
-}
-
-.zc-compare.is-sticky-compact .zc-card-tools > div,
 .zc-compare.is-sticky-compact .zc-fund-code,
 .zc-compare.is-sticky-compact .zc-actions {
   display: none;
@@ -241,9 +212,6 @@ body.zc-compare-mode .zc-compare.has-results {
     right: 20px;
   }
 
-  .zc-compare.is-sticky-compact .zc-fund-row {
-    padding-block: 8px;
-  }
 }
 
 @media (max-width: 540px) {
@@ -258,6 +226,7 @@ body.zc-compare-mode .zc-compare.has-results {
   .zc-compare.is-sticky-compact .zc-pk {
     width: 100%;
     height: 48px;
+    min-height: 48px;
     border-top-right-radius: 16px;
   }
 
@@ -288,10 +257,6 @@ body.zc-compare-mode .zc-compare.has-results {
 
   .zc-compare .zc-fund-code span {
     padding-inline: 5px;
-  }
-
-  .zc-compare.is-sticky-compact .zc-card-tools {
-    right: 12px;
   }
 
   .zc-compare .zc-fund-slots > .zc-search-slot:nth-child(odd) .zc-search-results {

@@ -304,7 +304,7 @@
   background: var(--series);
 }
 
-.zc-risk-view .zc-risk-legend button.is-hidden {
+.zc-compare .zc-risk-view .zc-risk-legend button.is-hidden {
   color: #999;
   text-decoration: none;
 }
@@ -321,6 +321,18 @@
   display: grid;
   gap: 24px;
   min-width: 0;
+}
+
+.zc-risk-metric-block {
+  min-width: 0;
+}
+
+.zc-risk-metric-block > h3 {
+  margin: 0 0 16px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
 }
 
 .zc-risk-view .zc-risk-table,
@@ -347,6 +359,7 @@
 .zc-risk-view .zc-risk-table tbody th {
   height: 45px;
   background: #f7f8fa;
+  color: #555759;
   text-align: left;
 }
 
@@ -435,6 +448,40 @@
 .zc-risk-view .zc-risk-tree-table .zc-risk-tree-summary td {
   background: #f7f8fa;
   color: #333;
+  font-weight: 500;
+}
+
+.zc-risk-view .zc-risk-table td.is-reference,
+.zc-risk-view .zc-risk-tree-table td.is-reference {
+  background: #f8f7fc;
+}
+
+.zc-risk-view .zc-risk-tree-table .zc-risk-tree-summary td.is-reference {
+  background: #f0eff7;
+}
+
+.zc-risk-value-pair {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.zc-risk-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: #333;
+  white-space: nowrap;
+}
+
+.zc-risk-difference {
+  flex: 0 0 56px;
+  color: #6865a7;
+  font-style: italic;
+  white-space: nowrap;
+}
+
+.zc-risk-view .zc-risk-legend button.is-reference {
   font-weight: 500;
 }
 

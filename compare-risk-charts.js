@@ -3,15 +3,26 @@
   const unitMonths = { 月: 1, 季: 3, 年: 12 };
   const fundProfiles = {
     a: { growth: .00039, swing: .09, phase: .2 },
-    b: { growth: .00033, swing: .072, phase: .5 },
-    c: { growth: .00033, swing: .073, phase: .55 },
-    d: { growth: .00045, swing: .095, phase: .69 },
+    b: { growth: .00008, swing: .006, phase: .5 },
+    c: { growth: .00052, swing: .11, phase: 1.1 },
+    d: { growth: .00030, swing: .065, phase: .69 },
+  };
+  const monthlySamples = {
+    a: [3.23, -1.18, 2.06, -.74, 4.10, 1.32, -2.45, 3.08, .86, -1.52, 2.34, 1.06],
+    b: [.24, .18, .32, .11, .28, .35, -.08, .26, .21, .17, .30, .23],
+    c: [2.68, -2.04, 3.12, -1.35, 3.82, .76, -1.64, 2.47, 1.58, -2.10, 2.96, 1.42],
+    d: [1.42, -.85, 1.76, -.46, 2.34, 1.08, -1.32, 1.95, .72, -.68, 1.64, .94],
+  };
+  const yearlySamples = {
+    2026: { a: 12.60, b: 2.60, c: 12.03, d: 8.79 },
+    2025: { a: 8.63, b: 2.91, c: 10.42, d: 6.75 },
+    2024: { a: -3.28, b: 3.16, c: 5.47, d: -1.82 },
   };
   const legendChoices = new WeakMap();
   const returnZoomId = 'zc-risk-return-range';
   const epoch = Date.UTC(2022, 0, 1) / day;
   const dayIndex = date => Date.parse(`${date}T00:00:00Z`) / day;
-  const drawdownStart = dayIndex('2022-12-06');
+  const drawdownStart = dayIndex('2022-11-06');
   const dateLabel = index => new Date(index * day).toISOString().slice(0, 10);
   const round = value => Math.round(value * 100) / 100;
 
@@ -30,6 +41,22 @@
 
   function gain(first, last, fund) {
     return round((nav(last, fund) / nav(first, fund) - 1) * 100);
+  }
+
+  function periodGain(period, fund, months) {
+    const date = new Date(period.first * day);
+    const samples = monthlySamples[fund.id];
+    if (date.getUTCFullYear() !== 2026 || !samples) return gain(period.first - 1, period.last, fund);
+    const month = Math.floor(date.getUTCMonth() / months) * months;
+    return round((samples.slice(month, month + months).reduce((total, value) => total * (1 + value / 100), 1) - 1) * 100);
+  }
+
+  function annualizedVolatility(first, last, fund) {
+    const returns = [];
+    for (let index = first + 1; index <= last; index++) returns.push(nav(index, fund) / nav(index - 1, fund) - 1);
+    const average = returns.reduce((total, value) => total + value, 0) / returns.length;
+    const variance = returns.reduce((total, value) => total + (value - average) ** 2, 0) / Math.max(1, returns.length - 1);
+    return round(Math.sqrt(variance * 252) * 100);
   }
 
   function maximumDrawdown(first, last, fund) {
@@ -93,11 +120,15 @@
           const values = Array(labels.length).fill(null);
           for (const period of periods) {
             const month = new Date(period.first * day).getUTCMonth();
-            values[Math.floor(month / months)] = gain(period.first - 1, period.last, fund);
+            values[Math.floor(month / months)] = periodGain(period, fund, months);
           }
+          const firstMonth = new Date(periods[0].first * day).getUTCMonth();
+          const lastMonth = new Date(periods.at(-1).last * day).getUTCMonth();
+          const fullYear = firstMonth === 0 && lastMonth >= 10;
+          if (fullYear && year === 2026 && months === 1 && monthlySamples[fund.id]) values.splice(0, 12, ...monthlySamples[fund.id]);
           return {
             id: fund.id, name: fund.name, color: fund.color, values,
-            total: gain(periods[0].first - 1, periods.at(-1).last, fund),
+            total: (fullYear ? yearlySamples[year]?.[fund.id] : undefined) ?? gain(periods[0].first - 1, periods.at(-1).last, fund),
           };
         }),
       })).reverse(),
@@ -149,13 +180,15 @@
     for (let index = last - 7; index >= first; index -= 7) forecastDates.push(index);
 
     function dataset(labels, values) {
+      const allSeries = funds.map(fund => ({ id: fund.id, name: fund.name, color: fund.color, values: values(fund) }));
       return {
         labels,
-        series: active.map(fund => ({ id: fund.id, name: fund.name, color: fund.color, values: values(fund) })),
+        series: allSeries.filter(series => active.some(fund => fund.id === series.id)),
+        allSeries,
       };
     }
     const returnsById = new Map(funds.map(fund => [fund.id,
-      buckets.map(bucket => gain(bucket.first - 1, bucket.last, fund)),
+      buckets.map(bucket => periodGain(bucket, fund, months)),
     ]));
     const periodReturns = fund => returnsById.get(fund.id);
     return {
@@ -166,9 +199,9 @@
       forecast: dataset(forecastLabels, fund => histogram(forecastDates.map(index =>
         gain(monthsBefore(index, forecastMonths), index, fund)), forecastThresholds)),
       rolling: dataset(rollingDates.map(dateLabel), fund => rollingDates.map(index =>
-        gain(monthsBefore(index, 3), index, fund))),
+        annualizedVolatility(monthsBefore(index, 3), index, fund))),
       drawdown: dataset(intervalLabels, fund => intervals.map(index =>
-        last < drawdownStart ? null : maximumDrawdown(Math.max(index, drawdownStart), last, fund))),
+        last < drawdownStart ? null : -maximumDrawdown(Math.max(index, drawdownStart), last, fund))),
       calendar: calendarReturns(funds, buckets, months),
       distributionCounts: distributionCounts(funds, returnsById),
     };
@@ -178,15 +211,24 @@
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   })[char]);
 
-  function tooltip(params, width) {
+  function tooltip(params, width, dataset, referenceId) {
     const rows = (Array.isArray(params) ? params : [params]).filter(item => typeof item?.value === 'number');
     if (!rows.length) return '';
-    return `<div class="zc-tip" style="width:${Math.min(284, Math.max(148, width - 18))}px">
+    const reference = dataset.allSeries?.find(series => series.id === referenceId);
+    const referenceValue = reference?.values[rows[0].dataIndex];
+    const showDifference = reference && Number.isFinite(referenceValue);
+    return `<div class="zc-tip${showDifference ? ' has-reference' : ''}" style="width:${Math.min(showDifference ? 356 : 284, Math.max(148, width - 18))}px">
       <div class="zc-tip-date">${escape(rows[0].axisValueLabel)}</div>
-      <div class="zc-tip-rows">${rows.map(item => `<div class="zc-tip-row">
-        <i style="background:${item.color}"></i><span class="zc-tip-name">${escape(item.seriesName)}</span>
-        <span class="zc-tip-value">${item.value.toFixed(2)}%</span>
-      </div>`).join('')}</div>
+      <div class="zc-tip-rows">${rows.map(item => {
+        const series = dataset.series.find(series => series.name === item.seriesName);
+        const isReference = reference?.name === item.seriesName;
+        const delta = round(item.value - referenceValue);
+        const difference = showDifference ? `<span class="zc-tip-difference">${isReference ? '' : `${delta > 0 ? '+' : ''}${delta.toFixed(2)}pp`}</span>` : '';
+        return `<div class="zc-tip-row${isReference ? ' is-reference' : ''}">
+          <i style="background:${series?.color || '#999'}"></i><span class="zc-tip-name">${escape(item.seriesName)}</span>
+          <span class="zc-tip-value">${item.value.toFixed(2)}%</span>${difference}
+        </div>`;
+      }).join('')}</div>
     </div>`;
   }
 
@@ -317,7 +359,8 @@
     element.after(slider);
   }
 
-  function chartOption(key, { labels, series }, selected, element) {
+  function chartOption(key, dataset, selected, element, referenceId) {
+    const { labels, series } = dataset;
     const overview = key === 'returns' || key === 'distribution';
     const line = key === 'rolling';
     const probability = key === 'distribution' || key === 'forecast';
@@ -326,17 +369,17 @@
     const allValues = series.flatMap(item => item.values);
     const minimum = Math.min(0, ...allValues);
     const maximum = Math.max(0, ...allValues);
-    const min = probability || key === 'drawdown' ? 0 : Math.min(key === 'returns' ? -15 : 0, Math.floor(minimum / 5) * 5);
-    const max = key === 'distribution' ? 100 : Math.max(key === 'returns' ? 15 : 30, Math.ceil(maximum / 5) * 5);
+    const min = probability ? 0 : key === 'drawdown' ? Math.min(-40, Math.floor(minimum / 10) * 10) : Math.min(key === 'returns' ? -15 : 0, Math.floor(minimum / 5) * 5);
+    const max = key === 'drawdown' ? 0 : key === 'distribution' ? 100 : Math.max(key === 'returns' ? 15 : 30, Math.ceil(maximum / 5) * 5);
     return {
       animation: false,
       legend: { show: false, selected, data: series.map(item => item.name) },
       tooltip: {
-        trigger: 'axis', confine: true, backgroundColor: 'rgba(255,255,255,.98)', borderColor: '#ddd',
+        trigger: 'axis', confine: true, backgroundColor: 'rgba(255,255,255,.96)', borderColor: '#d9d9d9',
         padding: 0, extraCssText: 'border-radius:8px;box-shadow:0 4px 12px #00000014;white-space:normal;',
         axisPointer: line ? { type: 'line', lineStyle: { color: '#b9b8d8' } }
-          : { type: 'shadow', shadowStyle: { color: 'rgba(80,86,109,.08)' } },
-        formatter: params => tooltip(params, element.clientWidth),
+          : { type: 'shadow', shadowStyle: { color: 'rgba(0,5,30,.04)' } },
+        formatter: params => tooltip(params, element.clientWidth, dataset, referenceId),
       },
       grid: { left: 40, right, top: 12, bottom: slider ? 55 : 24 },
       xAxis: {
@@ -344,7 +387,6 @@
         axisLine: { onZero: false, lineStyle: { color: '#eaeaea' } },
         axisTick: { show: false },
         axisLabel: { color: '#555759', fontSize: 12, margin: 8, hideOverlap: true },
-        ...(key === 'distribution' && {
           axisPointer: {
             label: {
               show: true, margin: 8, padding: [0, 2], backgroundColor: '#fff',
@@ -352,7 +394,6 @@
               shadowBlur: 0, shadowOffsetX: 0, shadowOffsetY: 0,
             },
           },
-        }),
       },
       yAxis: {
         type: 'value', min, max, splitNumber: 6,
@@ -361,10 +402,18 @@
       },
       dataZoom: slider ? [{ id: returnZoomId, type: 'inside', xAxisIndex: 0, disabled: true }] : [],
       series: series.map(item => ({
-        name: item.name, type: line ? 'line' : 'bar', data: item.values,
-        showSymbol: false, symbolSize: 5, lineStyle: { color: item.color, width: 1.25 },
+        name: item.name, type: key === 'forecast' ? 'pictorialBar' : line ? 'line' : 'bar', data: item.values,
+        showSymbol: false, symbolSize: key === 'forecast' ? ['100%', '100%'] : 5,
+        ...(key === 'forecast' && {
+          symbol: `image://./assets/compare-risk/forecast-${item.id}.png`,
+          symbolPosition: 'start', symbolKeepAspect: false,
+        }),
+        lineStyle: { color: item.color, width: 1.25 },
         barMaxWidth: overview ? 16 : 30, barGap: '10%', barCategoryGap: '35%',
-        itemStyle: { color: item.color, borderRadius: line ? 0 : [2, 2, 0, 0] },
+        itemStyle: {
+          color: item.color,
+          borderRadius: line || key === 'drawdown' ? 0 : [2, 2, 0, 0],
+        },
       })),
     };
   }
@@ -386,7 +435,7 @@
       const legend = root.querySelector(`[data-risk-legend="${key}"]`);
       const selected = Object.fromEntries(section.options.funds.map(fund => [fund.name, fund.visible && !legendChoices.get(fund)?.has(key)]));
       const chart = window.echarts.init(element);
-      chart.setOption(chartOption(key, dataset, selected, element));
+      chart.setOption(chartOption(key, dataset, selected, element, section.options.referenceId));
       if (key === 'returns' && dataset.labels.length > 1) mountReturnRange(element, chart, dataset);
       legend?.querySelectorAll('[data-risk-fund]').forEach(button => {
         const fund = section.options.funds.find(item => item.id === button.dataset.riskFund);

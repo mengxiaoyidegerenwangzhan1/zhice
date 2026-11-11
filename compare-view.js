@@ -8,11 +8,11 @@ function syncFundColors(){
     fund.color=fundColors[index];
   });
 }
-let riskView='chart';
+let riskView='chart',showDifferences=true;
 const analysisRanges=new Map();
 function riskOptions(section='overview'){
-  const defaults={forecast:{period:'近3年',holdingMonths:3},rolling:{period:'近1年'},metrics:{benchmark:'上证综指',frequency:'原始频率'}};
-  return {funds,...analysisRange(`risk-${section}`,defaults[section]),unit:analysisRange(`risk-${section}`).unit||'月'};
+  const defaults={overview:{start:'2024-01-01',end:'2026-11-06'},forecast:{period:'近3年',holdingMonths:3},rolling:{period:'近1年'},metrics:{benchmark:'上证综指',frequency:'原始频率'}};
+  return {funds,referenceId:pinned,...analysisRange(`risk-${section}`,defaults[section]),unit:analysisRange(`risk-${section}`).unit||'月'};
 }
 const riskChartOptions=()=>({...riskOptions(),sectionOptions:riskOptions});
 const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;const date=s=>new Date(s+'T12:00:00');
@@ -26,10 +26,12 @@ function fundCards(){
       <label class="zc-search"><input data-search="${i}" autocomplete="off" placeholder="输入基金代码、名称或简拼" aria-label="搜索添加基金"><span class="zc-search-icon">${img('47-50726_imgFrame',20)}<img class="is-focus" src="./assets/compare-controls/search-focus.svg" width="20" height="20" alt=""></span></label>
       <div class="zc-search-results" data-results="${i}" hidden></div>
     </article>`;
-    return `<article class="zc-fund ${f.visible?'':'is-hidden'}" style="--series:${f.color}">
+    const reference=pinned===f.id;
+    return `<article class="zc-fund ${f.visible?'':'is-hidden'} ${reference?'is-reference':''}" style="--series:${f.color}">
+      ${reference?`<button class="zc-reference-badge" data-pin="${f.id}" aria-label="取消参照 ${f.name}" aria-pressed="true"><img src="./assets/compare-controls/reference-pin.svg" width="14" height="14" alt=""><span>参照</span></button>`:''}
       <div class="zc-card-tools"><div>
-        <button aria-label="${pinned===f.id?'取消置前':'置前'} ${f.name}" aria-pressed="${pinned===f.id}" data-pin="${f.id}">${img(pinned===f.id?'47-50726_imgProperty2':'47-50726_imgProperty3')}</button>
-        <button aria-label="${f.visible?'隐藏':'显示'} ${f.name}" aria-pressed="${f.visible}" data-eye="${f.id}">${img(f.visible?'47-50726_imgProperty1':'eye-hidden-latest')}</button>
+        ${reference?'':`<button aria-label="钉住参照 ${f.name}" aria-pressed="false" data-pin="${f.id}">${img('47-50726_imgProperty3')}</button>
+        <button aria-label="${f.visible?'隐藏':'显示'} ${f.name}" aria-pressed="${f.visible}" data-eye="${f.id}">${img(f.visible?'47-50726_imgProperty1':'eye-hidden-latest')}</button>`}
       </div><button aria-label="移除 ${f.name}" data-remove="${f.id}">${img('47-50726_imgFrame2036082637')}</button></div>
       <strong title="${f.name}">${f.name}</strong><div class="zc-fund-code">${f.code}<span>${f.type}</span></div>
     </article>`;
@@ -38,10 +40,39 @@ function fundCards(){
 }
 function pill(labels,value,attr){return `<div class="zc-pill">${labels.map((l,i)=>`<button ${attr}="${i}" class="${i===value?'selected':''}">${l}</button>`).join('')}</div>`}
 function controls(){
-  return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((label,index)=>`<button role="tab" aria-selected="${index===tab}" data-tab="${index}" class="${index===tab?'active':''}">${label}</button>`).join('')}</div></div>`;
+  return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((label,index)=>`<button role="tab" aria-selected="${index===tab}" data-tab="${index}" class="${index===tab?'active':''}">${label}</button>`).join('')}</div>${tab===3?`<button type="button" class="zc-reference-toggle ${showDifferences?'is-on':''}" role="switch" aria-checked="${showDifferences}" aria-label="参照差值" data-reference-toggle><img src="./assets/compare-controls/reference-toggle.svg" width="22" height="22" alt=""><span>参照差值</span></button>`:''}</div>`;
 }
-function table(rows,returns=false){return `<div class="zc-table-wrap"><table class="zc-table zc-overview-table ${returns?'zc-returns':''}"><colgroup><col style="width:120px">${'<col>'.repeat(4)}</colgroup><tbody>${rows.map((r,ri)=>`<tr><th scope="row">${r[0]}</th>${Array.from({length:4},(_,i)=>`<td class="${!returns&&['基金代码','成立日期','最新单位净值','最新规模','管理费率','托管费率'].includes(r[0])?'zc-number-cell ':''}${returns&&funds[i]?.visible&&funds[i]?.id==='a'&&![4,5,6,7].includes(ri)?'best':''}">${funds[i]?.visible?(typeof r[1]==='function'?r[1](i):r[seed.findIndex(f=>f.id===funds[i].id)+1]??r[1]):''}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
-function returnsTable(){return table(['今年以来','近1月','近3月','近6月','近1年','近2年','近3年','近5年','成立以来'].map((x,i)=>[x,j=>[4,5,6,7].includes(i)?'--':`<b class="${i===3&&funds[j].id==='a'?'zc-up':'zc-down-value'}">${i===3&&funds[j].id==='a'?'':'-'}10.47%</b><small>排名 515 / 941</small>`]),true)}
+function table(rows,returns=false){
+  const numericRows=['基金代码','成立日期','最新单位净值','最新规模','管理费率','托管费率'];
+  return `<div class="zc-table-wrap"><table class="zc-table zc-overview-table ${returns?'zc-returns':''}"><colgroup><col style="width:120px">${'<col>'.repeat(4)}</colgroup><tbody>${rows.map(row=>`<tr><th scope="row">${row[0]}</th>${Array.from({length:4},(_,index)=>{
+    const fund=funds[index];
+    const classes=[!returns&&numericRows.includes(row[0])?'zc-number-cell':'',fund?.id===pinned?'is-reference':''].filter(Boolean).join(' ');
+    const value=fund?.visible?(typeof row[1]==='function'?row[1](index):row[seed.findIndex(item=>item.id===fund.id)+1]??row[1]):'';
+    return `<td class="${classes}">${value}</td>`;
+  }).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+const intervalData={
+  a:[[-6.82,526,941],[2.38,186,1082],[-3.76,438,1036],[5.42,267,997],null,null,null,null,[-4.95,412,941]],
+  b:[[2.46,128,623],[.21,286,658],[.74,203,646],[1.56,156,635],null,null,null,null,[2.81,119,623]],
+  c:[[-9.35,112,168],[3.16,42,183],[-6.48,128,177],[8.73,57,172],null,null,null,null,[-7.62,105,168]],
+  d:[[1.25,192,583],[.69,211,607],[-1.85,309,601],[3.66,175,590],null,null,null,null,[1.84,201,583]],
+};
+function difference(value,reference,unit='pp'){
+  if(!Number.isFinite(value)||!Number.isFinite(reference))return '--';
+  const delta=+(value-reference).toFixed(2);
+  return `${delta>0?'+':''}${delta.toFixed(2)}${unit}`;
+}
+function returnsTable(){
+  return table(['今年以来','近1月','近3月','近6月','近1年','近2年','近3年','近5年','成立以来'].map((label,rowIndex)=>[label,index=>{
+    const fund=funds[index];
+    const entry=intervalData[fund.id]?.[rowIndex];
+    if(!entry)return '<span class="zc-empty-value">--</span>';
+    const [value,rank,total]=entry;
+    const reference=intervalData[pinned]?.[rowIndex]?.[0];
+    const delta=pinned&&fund.id!==pinned?`<em class="zc-reference-difference">${difference(value,reference,' pp')}</em>`:'';
+    return `<div class="zc-return-value"><b class="${value<0?'zc-down-value':'zc-up'}">${value.toFixed(2)}%</b>${delta}</div><small>排名 <span>${rank}</span> / <span class="zc-rank-total">${total}</span></small>`;
+  }]),true);
+}
 function stars(i){return Array.from({length:5},(_,j)=>img(j<(i===0?2:1)?'47-51123_imgProperty1':'47-51123_imgProperty2',14.8)).join('')}
 function basic(){return table([['基金代码',i=>funds[i].code],['基金简称',i=>`<a href="#/fund/${funds[i].code}">${funds[i].name}</a>`],['基金类型',i=>funds[i].type==='股票型'?'股票型 | 增强指数股票型':funds[i].type],['基金星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金经理',i=>`<a href="#/fund/${funds[i].code}">${funds[i].id==='c'?'蔡丹':'蔡丹 | 阳之璇'}</a>`],['经理星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金公司','宝盈基金管理有限公司','宝盈基金管理有限公司','易方达基金管理有限公司'],['成立日期','2025-12-09'],['最新单位净值','0.9019'],['最新规模','3864.22万','5528.64万','3864.22万'],['申购状态','可申购','终止','可申购'],['赎回状态','可赎回','终止','可赎回'],['管理费率','0.8%','--','0.8%'],['托管费率','0.15%','--','0.15%'],['业绩比较基准','中证A500指数收益率×95%+银行活期存款利率(税后)×5%']])}
 function content(){if(!funds.length)return `<div class="zc-empty"><strong>添加基金，开始比较</strong><p>通过上方搜索框选择最多 4 只基金</p></div>`;if(tab===0)return `<section>${performanceHeading()}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('区间收益')}${returnsTable()}</section><section class="zc-basic-info">${heading('基本信息')}${basic()}</section>`;if(tab===1)return riskContent();return (tab===2?CompareAllocationView:CompareAttributionView).render(analysisOptions());}
@@ -66,12 +97,18 @@ function render(){
   requestAnimationFrame(syncControlsLayout);
 }
 function isChartVisible(f,kind){return f.visible&&f.chartVisible?.[kind]!==false}
-function chartLegend(kind){return `<div class="zc-chart-legend" aria-label="${kind==='return'?'收益走势':'动态回撤'}曲线显隐">${funds.map(f=>{const active=isChartVisible(f,kind);return `<button type="button" data-chart-legend="${f.id}" data-chart-kind="${kind}" aria-pressed="${active}" aria-label="${active?'隐藏':'显示'} ${f.name} 曲线" class="${active?'':'is-hidden'}" ${f.visible?'':'disabled title="请先显示基金卡片"'}><i style="background:${active?f.color:'#999'}"></i><span>${f.name}</span></button>`}).join('')}</div>`}
+function chartLegend(kind){return `<div class="zc-chart-legend" aria-label="${kind==='return'?'收益走势':'动态回撤'}曲线显隐">${funds.map(f=>{const active=isChartVisible(f,kind);return `<button type="button" data-chart-legend="${f.id}" data-chart-kind="${kind}" aria-pressed="${active}" aria-label="${active?'隐藏':'显示'} ${f.name} 曲线" class="${active?'':'is-hidden'} ${f.id===pinned?'is-reference':''}" ${f.visible?'':'disabled title="请先显示基金卡片"'}><i style="background:${active?f.color:'#999'}"></i><span>${f.name}</span></button>`}).join('')}</div>`}
 const escapeTooltip=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function chartTooltip(params,kind,width){
-  const rows=(Array.isArray(params)?params:[params]).filter(p=>p&&p.value!=null&&Number.isFinite(Number(p.value))&&funds.some(f=>f.name===p.seriesName&&isChartVisible(f,kind)));
+function chartTooltip(params,kind,width,referenceValue){
+  const allRows=(Array.isArray(params)?params:[params]).filter(p=>p&&p.value!=null&&Number.isFinite(Number(p.value)));
+  const rows=allRows.filter(p=>funds.some(f=>f.name===p.seriesName&&isChartVisible(f,kind)));
   if(!rows.length)return '';
-  return `<div class="zc-tip" style="width:${Math.min(283,Math.max(150,width-18))}px"><div class="zc-tip-date">${escapeTooltip(rows[0].axisValue)}</div><div class="zc-tip-rows">${rows.map(p=>{const f=funds.find(x=>x.name===p.seriesName),value=Number(p.value).toFixed(2);return `<div class="zc-tip-row"><i style="background:${f.color}"></i><span class="zc-tip-name">${escapeTooltip(f.name)}</span><span class="zc-tip-value" style="color:${f.color}">${value}</span></div>`}).join('')}</div></div>`;
+  const reference=allRows.find(p=>funds.find(f=>f.name===p.seriesName)?.id===pinned);
+  return `<div class="zc-tip ${pinned?'has-reference':''}" style="width:${Math.min(pinned?350:292,Math.max(150,width-18))}px"><div class="zc-tip-date">${escapeTooltip(rows[0].axisValue)}</div><div class="zc-tip-rows">${rows.map(p=>{
+    const fund=funds.find(f=>f.name===p.seriesName),value=Number(p.value);
+    const delta=pinned&&fund.id!==pinned?difference(value,referenceValue??Number(reference?.value)) : '';
+    return `<div class="zc-tip-row ${fund.id===pinned?'is-reference':''}"><i style="background:${fund.color}"></i><span class="zc-tip-name">${escapeTooltip(fund.name)}</span><span class="zc-tip-value">${value>0?'+':''}${value.toFixed(2)}%</span>${pinned?`<em class="zc-tip-difference">${delta}</em>`:''}</div>`;
+  }).join('')}</div></div>`;
 }
 
 function draw(){
@@ -112,9 +149,9 @@ function draw(){
     const yMax=isDrawdown?0:(days>=180?Math.max(20,Math.ceil(actualMax/5)*5):Math.ceil((actualMax+.3)*2)/2);
     c.setOption({
       animation:false,color:funds.map(f=>f.color),
-      tooltip:{trigger:'axis',confine:true,backgroundColor:'rgba(255,255,255,0.96)',borderColor:'#d9d9d9',borderWidth:1,padding:0,extraCssText:'border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.08);white-space:normal;',axisPointer:{type:'line',lineStyle:{color:'#b9b8d8',type:'solid',width:1}},formatter:params=>chartTooltip(params,kind,el.clientWidth)},
+      tooltip:{trigger:'axis',confine:true,backgroundColor:'rgba(255,255,255,0.96)',borderColor:'#d9d9d9',borderWidth:1,padding:0,extraCssText:'border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.08);white-space:normal;',axisPointer:{type:'line',lineStyle:{color:'#b9b8d8',type:'solid',width:1}},formatter:params=>chartTooltip(params,kind,el.clientWidth,dataById.get(pinned)?.[isDrawdown?'drawdown':'performance']?.[params[0]?.dataIndex])},
       grid:{left:42,right:42,top:9,bottom:31},legend:{show:false},
-      xAxis:{type:'category',boundaryGap:false,data:dateLabels,axisLine:{lineStyle:{color:'#eaeaea'}},axisTick:{show:false},axisLabel:{color:'#777',fontSize:12,hideOverlap:true,showMinLabel:true,showMaxLabel:true}},
+      xAxis:{type:'category',boundaryGap:false,data:dateLabels,axisLine:{lineStyle:{color:'#eaeaea'}},axisTick:{show:false},axisLabel:{color:'#777',fontSize:12,hideOverlap:true,showMinLabel:true,showMaxLabel:true},axisPointer:{label:{show:true,margin:8,padding:[0,2],backgroundColor:'#fff',color:'#262626',fontSize:12,fontWeight:700,shadowBlur:0}}},
       yAxis:{type:'value',min:yMin,max:yMax,splitNumber:days>=180?(isDrawdown?5:7):5,axisLabel:{formatter:'{value}%',fontSize:12,color:'#777'},splitLine:{lineStyle:{color:'#eaeaea',type:'dashed'}}},
       series:funds.map(f=>({name:f.name,type:'line',showSymbol:false,symbol:'circle',symbolSize:6,connectNulls:false,silent:!isChartVisible(f,kind),itemStyle:{color:f.color},emphasis:{itemStyle:{color:'#fff',borderColor:f.color,borderWidth:1}},lineStyle:{color:f.color,width:1.3,opacity:isChartVisible(f,kind)?1:0},data:isChartVisible(f,kind)?dataById.get(f.id)[isDrawdown?'drawdown':'performance']:[]}))
     });
@@ -142,7 +179,7 @@ function datesForPeriod(range, value) {
   if (value === '共同时段') return {start:range.commonStart,end:range.commonEnd};
   if (value.includes('年度')) return {start:`${value.slice(0,4)}-01-01`,end:`${value.slice(0,4)}-12-31`};
   if (value === '今年以来') return {start:`${last.getFullYear()}-01-01`,end:range.commonEnd};
-  const months = {'近1月':1,'近3月':3,'近6月':6,'近1年':12,'近3年':36}[value];
+  const months = {'近1月':1,'近3月':3,'近6月':6,'近1年':12,'近3年':36,'近5年':60}[value];
   if (!months) return {start:range.start,end:range.end};
   const day = last.getDate();
   last.setDate(1);
@@ -163,7 +200,7 @@ function analysisRange(scope, initial = {}) {
 }
 
 function analysisOptions() {
-  return {funds,start,end,period,ui:analysisUi};
+  return {funds,start,end,period,referenceId:pinned,showDifferences,ui:analysisUi};
 }
 
 function analysisTimeControls(scope, initial = {}) {
@@ -177,7 +214,7 @@ function analysisTimeControls(scope, initial = {}) {
         <button type="button" data-analysis-more class="${moreSelected?'selected':''}" aria-pressed="${moreSelected}" aria-expanded="false">${moreLabel}<span class="zc-down"><img src="./assets/compare-controls/more.svg" width="10" height="10" alt=""></span></button>
       </div>
       <div class="zc-more-panel" hidden>
-        <div><small>区间</small>${['近1月','近3月','近6月'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
+        <div><small>区间</small>${['近3月','近6月','近5年'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
         <div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
       </div>
     </div>
@@ -215,7 +252,7 @@ function closeAnalysisMenu(toolbar) {
 }
 
 function performanceHeading() {
-  return `<div class="zc-section-head zc-overview-head"><h2>业绩走势<span title="展示所选基金在选定时间段内的模拟收益与动态回撤"><img src="./assets/compare-controls/help.svg" width="16" height="16" alt=""></span></h2><div class="zc-overview-actions">
+  return `<div class="zc-section-head zc-overview-head"><h2>业绩走势<span class="zc-overview-help"><button type="button" aria-label="业绩走势说明" aria-describedby="zc-overview-help"><img src="./assets/compare-controls/help.svg" width="16" height="16" alt=""></button><span role="tooltip" id="zc-overview-help">展示所选基金在选定时间段内的模拟收益与动态回撤。</span></span></h2><div class="zc-overview-actions">
     ${analysisTimeControls('overview-performance')}
     <div class="zc-overview-buttons"><button class="zc-text" data-download><img src="./assets/compare-controls/download.svg" width="14" height="14" alt="">下载</button><button class="zc-text" data-refresh="业绩走势"><img src="./assets/compare-controls/refresh.svg" width="14" height="14" alt="">刷新</button></div>
   </div></div>`;
@@ -355,6 +392,26 @@ function saveChartImage(name,sectionCharts){
     if(blob)download(`${name}.png`,blob,'image/png');
   },'image/png');
 }
+function exportComparison(){
+  const rows=[['基金比较',container.querySelector('[role="tab"][aria-selected="true"]')?.textContent||''],['参照基金',funds.find(fund=>fund.id===pinned)?.name||''],[],['基金名称','基金代码','基金类型','显示状态']];
+  funds.forEach(fund=>rows.push([fund.name,fund.code,fund.type,fund.visible?'显示':'隐藏']));
+  container.querySelectorAll('.zc-content section').forEach(section=>{
+    rows.push([], [section.querySelector('h2')?.childNodes[0]?.textContent.trim()||'']);
+    section.querySelectorAll('[data-analysis-date]').forEach(control=>rows.push(['日期范围',control.textContent.trim()]));
+    section.querySelectorAll('table').forEach(table=>{
+      [...table.rows].filter(row=>!row.closest('[hidden]')).forEach(row=>rows.push([...row.cells].map(cell=>cell.textContent.trim())));
+    });
+    charts.filter(chart=>section.contains(chart.getDom())).forEach(chart=>{
+      const option=chart.getOption();
+      const labels=option.xAxis?.[0]?.data||[];
+      const series=(option.series||[]).filter(item=>item.name);
+      rows.push(['时间或区间',...series.map(item=>item.name)]);
+      labels.forEach((label,index)=>rows.push([label,...series.map(item=>item.data?.[index]??'')]));
+    });
+  });
+  const csv=rows.map(row=>row.map(value=>`"${String(value).replaceAll('"','""')}"`).join(',')).join('\r\n');
+  download('基金对比.csv','\ufeff'+csv,'text/csv;charset=utf-8');
+}
 function downloadRiskSection(button){
   const section=button.closest('[data-risk-section]');
   const name=section.querySelector('h2').textContent.trim();
@@ -385,6 +442,12 @@ function bindRiskActions(scope){
   });
 }
 function bind(){
+  const differenceToggle=container.querySelector('[data-reference-toggle]');
+  if(differenceToggle)differenceToggle.onclick=()=>{
+    showDifferences=!showDifferences;
+    render();
+    container.querySelector('[data-reference-toggle]')?.focus({preventScroll:true});
+  };
   container.querySelectorAll('[data-tab]').forEach(button=>{
     const next=Number(button.dataset.tab);
     button.onclick=()=>{
@@ -425,10 +488,10 @@ function bind(){
   };
   container.querySelector('#zc-start').onclick=()=>{compared=true;renderWithFocus('data-tab',tab)};
   const exportButton=container.querySelector('#zc-export');
-  if(exportButton)exportButton.onclick=()=>download('基金对比.csv','\ufeff基金名称,基金代码,基金类型,起始日期,结束日期\n'+funds.map(f=>[f.name,f.code,f.type,start,end].join(',')).join('\n'),'text/csv;charset=utf-8');
+  if(exportButton)exportButton.onclick=exportComparison;
   container.querySelectorAll('[data-refresh]').forEach(b=>b.onclick=()=>refreshModule(b));
   container.querySelectorAll('[data-download]').forEach(b=>b.onclick=()=>{
-    if(charts[0])saveChartImage('基金收益走势',[charts[0]]);
+    if(charts.length)saveChartImage('基金收益走势',charts);
   });
   bindSearch();
   if(!compared)return;

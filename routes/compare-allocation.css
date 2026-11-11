@@ -152,12 +152,19 @@
 .zc-allocation-number { font-family: Roboto, Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .zc-allocation-table th > .zc-allocation-number { display: block; text-align: right; }
 .zc-allocation-number.is-negative { color: #36b397; }
-.zc-allocation-dash { color: #999; }
+.zc-allocation-dash { color: #333; }
+.zc-allocation-value-pair { display: flex; justify-content: flex-end; align-items: center; gap: 6px; }
+.zc-allocation-value-pair > .zc-allocation-number { flex: 1; min-width: 0; }
+.zc-allocation-difference { flex: 0 0 76px; font-family: Roboto, Arial, sans-serif; font-style: italic; font-variant-numeric: tabular-nums; color: #6865a7; }
+.zc-allocation-difference.is-negative { color: #36b397; }
 .zc-allocation-holding { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.zc-allocation-holding > :first-child { min-width: 0; text-align: left; }
+.zc-allocation-holding-name { flex: 1; min-width: 0; text-align: left; }
+.zc-allocation-holding-stripe { display: block; flex: 0 0 3px; height: 14px; border-radius: 1px; background: var(--holding-color, transparent); }
 .zc-allocation-holding .zc-allocation-number { flex: none; }
 .zc-allocation-table .zc-allocation-summary > * { background: #f7f8fa; color: #333; font-size: 14px; font-weight: 500; }
 .zc-allocation-table tr.is-chart-hovered > * { background: #f4f4fc; }
+.zc-allocation-table td.is-reference { background: #f8f7fc; }
+.zc-allocation-table tr.is-chart-hovered > td.is-reference { background: #f0edf9; }
 
 @media (max-width: 1050px) {
   .zc-allocation-head { flex-wrap: wrap; }
