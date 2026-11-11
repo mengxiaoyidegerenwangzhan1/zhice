@@ -31,7 +31,7 @@ function fundCards(){
       ${reference?`<button class="zc-reference-badge" data-pin="${f.id}" aria-label="取消参照 ${f.name}" aria-pressed="true"><img src="./assets/compare-controls/reference-pin.svg" width="14" height="14" alt=""><span>参照</span></button>`:''}
       <div class="zc-card-tools"><div>
         ${reference?'':`<button aria-label="钉住参照 ${f.name}" aria-pressed="false" data-pin="${f.id}">${img('47-50726_imgProperty3')}</button>
-        <button aria-label="${f.visible?'隐藏':'显示'} ${f.name}" aria-pressed="${f.visible}" data-eye="${f.id}">${img(f.visible?'47-50726_imgProperty1':'eye-hidden-latest')}</button>`}
+        <button aria-label="${f.visible?'隐藏':'显示'} ${f.name}" aria-pressed="${f.visible}" data-eye="${f.id}"><img src="./assets/compare-controls/eye-${f.visible?'visible':'hidden'}.svg" width="14" height="14" alt=""><img class="zc-eye-hover" src="./assets/compare-controls/eye-${f.visible?'visible':'hidden'}-hover.svg" width="14" height="14" alt=""></button>`}
       </div><button aria-label="移除 ${f.name}" data-remove="${f.id}">${img('47-50726_imgFrame2036082637')}</button></div>
       <strong title="${f.name}">${f.name}</strong><div class="zc-fund-code">${f.code}<span>${f.type}</span></div>
     </article>`;

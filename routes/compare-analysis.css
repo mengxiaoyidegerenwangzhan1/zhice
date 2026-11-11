@@ -134,6 +134,11 @@
 }
 .zc-reference-badge img { flex: none; }
 .zc-reference-badge:hover { background: #57548f; }
+.zc-card-tools [data-eye] { position: relative; }
+.zc-card-tools [data-eye] .zc-eye-hover { display: none; position: absolute; inset: 0; }
+.zc-card-tools [data-eye]:hover { opacity: 1; }
+.zc-card-tools [data-eye]:hover > img:first-child { visibility: hidden; }
+.zc-card-tools [data-eye]:hover .zc-eye-hover { display: block; }
 .zc-compare .zc-reference-toggle {
   display: flex;
   align-items: center;
