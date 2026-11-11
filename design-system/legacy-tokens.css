@@ -1,0 +1,115 @@
+
+      .visual-segmented { display: inline-grid; grid-template-columns: repeat(2, 92px); width: 188px; height: 32px; padding: 2px; overflow: visible; border: 0; border-radius: 20px; background: #fff; box-shadow: 0 0 12px rgba(0, 0, 0, 0.08); }
+
+      .visual-segmented button { min-height: 28px; padding: 4px 11px; border: 0; border-radius: 20px; background: transparent; color: #333; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 14px; font-weight: 400; line-height: 20px; white-space: nowrap; }
+
+      .visual-segmented button.is-active, .visual-segmented button[aria-pressed="true"] { background: #ecebf3; color: #333; }
+
+      .visual-segmented button:focus-visible { outline: 2px solid #6865a7; outline-offset: 2px; }
+
+      .visual-segmented.three-options { grid-template-columns: 92px 92px 114px; width: 302px; }
+
+      .business-tag-demo { display: grid; gap: 12px; }
+
+      .business-tag-example { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 12px; }
+
+      .business-tag-example > span { color: #999; font-size: 12px; line-height: 20px; }
+
+      .business-tag-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+
+      .business-tag { display: inline-flex; min-height: 24px; align-items: center; padding: 3px 10px 4px; border: 0; border-radius: 12px; background: #eeedff; color: #6865a7; font-size: 12px; font-weight: 400; line-height: 17px; white-space: nowrap; }
+
+      .business-tag-hierarchy { display: inline-flex; min-height: 24px; overflow: hidden; border-radius: 12px; color: #6865a7; font-size: 12px; font-weight: 400; line-height: 17px; white-space: nowrap; }
+
+      .business-tag-hierarchy span { display: inline-flex; align-items: center; padding: 3px 10px 4px; }
+
+      .business-tag-hierarchy span:nth-child(1) { background: rgba(169, 165, 255, 0.5); }
+
+      .business-tag-hierarchy span:nth-child(2) { background: rgba(169, 165, 255, 0.36); }
+
+      .business-tag-hierarchy span:nth-child(3) { background: rgba(169, 165, 255, 0.2); }
+
+      .fund-tabs-demo { display: inline-flex; height: 32px; align-items: stretch; padding: 0 8px; border-radius: 20px; background: #fff; }
+
+      .fund-tab-demo { position: relative; min-width: 74px; height: 32px; padding: 0 12px; border: 0; background: transparent; color: #333; font: 400 14px/32px "PingFang SC", "Microsoft YaHei", sans-serif; white-space: nowrap; }
+
+      .fund-tab-demo.is-active { color: #6865a7; font-weight: 600; }
+
+      .fund-tab-demo.is-active::after { content: ""; position: absolute; bottom: 0; left: 50%; width: 25px; height: 2px; border-radius: 1px; background: #6865a7; transform: translateX(-50%); }
+
+      .fund-tab-demo:focus-visible { outline: 2px solid #6865a7; outline-offset: 2px; }
+
+      .tab-variant-stack { display: grid; gap: 20px; }
+
+      .tab-variant { display: grid; gap: 8px; }
+
+      .tab-variant > span { color: #999; font-size: 12px; line-height: 20px; }
+
+      .select-control-demo { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 28px; }
+
+      .control-example { display: grid; gap: 8px; }
+
+      .control-example > span { color: #999; font-size: 12px; line-height: 20px; }
+
+      .select-control { display: inline-flex; width: 154px; height: 32px; flex: 0 0 154px; align-items: center; justify-content: space-between; padding: 0 10px 0 12px; border: 0; border-radius: 20px; background: #fff; box-shadow: 0 0 12px rgba(0, 0, 0, 0.08); color: #000; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 14px; font-weight: 400; line-height: 20px; cursor: pointer; }
+
+      .select-control::after { content: ""; width: 12px; height: 12px; background: no-repeat center / 12px 12px url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%23666' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+
+      .select-control:hover { box-shadow: 0 0 12px rgba(0, 0, 0, 0.12); }
+
+      .select-control:focus-visible { outline: 2px solid #6865a7; outline-offset: 2px; }
+
+      .select-control-rules { display: grid; grid-template-columns: repeat(4, auto); gap: 8px 24px; margin: 0; }
+
+      .select-control-rules div { display: grid; grid-template-columns: auto auto; gap: 8px; }
+
+      .select-control-rules dt { color: #999; font-size: 12px; }
+
+      .select-control-rules dd { margin: 0; color: #333; font-size: 12px; }
+
+      .cascader-path { display: inline-flex; min-width: 0; align-items: center; gap: 6px; }
+
+      .cascader-path em { color: #999; font-style: normal; }
+
+      .component-table-wrap { overflow-x: auto; border: 0; background: #fff; }
+
+      .component-table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; }
+
+      .component-table th, .component-table td { height: 42px; padding: 0 12px; border-bottom: 1px solid #eaeaea; color: #333; text-align: left; }
+
+      .component-table th { height: 38px; color: #999; font-size: 13px; font-weight: 500; }
+
+      .component-table .number { text-align: right; font-variant-numeric: tabular-nums; }
+
+      .component-table .negative { color: #36b397; }
+
+      .component-table .link { color: #6078d9; }
+
+        .fund-tabs-demo { flex: none; }
+
+        .select-control-demo { flex-direction: column; }
+
+        .select-control-rules { grid-template-columns: repeat(2, auto); }.control-example{position:relative}.legacy-menu{position:absolute;z-index:40;left:0;top:calc(100% + 8px);min-width:154px;padding:5px;border:1px solid #b9b8d8;border-radius:8px;background:#fff;box-shadow:0 0 12px #00000014}.legacy-menu button{display:block;width:100%;padding:7px 10px;border:0;border-radius:4px;text-align:left;background:#fff;color:#555759;font:inherit;white-space:nowrap;cursor:pointer}.legacy-menu button:hover,.legacy-menu button.selected{background:#f4f4fc;color:#6865a7}.legacy-cascade{display:flex;min-width:300px;gap:8px}.legacy-cascade>div{flex:1}.legacy-parent{border-right:1px solid #eaeaea;padding-right:8px}
+
+.fund-tabs-demo {
+  display:flex; width:100%; height:65px; min-height:65px;
+  align-items:flex-start; gap:20px; padding:0 20px;
+  border:0; border-bottom:1px solid #d9d9d9; border-radius:0;
+  background:#fff; overflow-x:auto; box-sizing:border-box;
+}
+.fund-tab-demo {
+  flex:0 0 auto; position:relative; min-width:0; width:auto;
+  height:64px; padding:0 0 3px; border:0; border-radius:0;
+  background:#fff; color:#555759;
+  font:400 16px/61px "PingFang SC","Microsoft YaHei",sans-serif;
+  white-space:nowrap; cursor:pointer;
+}
+.fund-tab-demo::after {
+  content:""; position:absolute; bottom:0; left:0; width:100%; height:3px;
+  border-radius:4px 4px 0 0; background:#6865a7; transform:none; opacity:0;
+}
+.fund-tab-demo:hover { color:#6865a7; }
+.fund-tab-demo.is-active { color:#333; font-weight:600; }
+.fund-tab-demo.is-active::after { left:0; width:100%; height:3px; transform:none; border-radius:4px 4px 0 0; opacity:1; }
+.fund-tab-demo:disabled { color:#cbcbcb; cursor:not-allowed; }
+.fund-tab-demo:disabled::after { opacity:0; }

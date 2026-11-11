@@ -1,0 +1,21 @@
+:root{
+  --zc-primary:#6865a7;
+  --zc-primary-hover:#7774b3;
+  --zc-heading:#333333;
+  --zc-body:#555759;
+  --zc-secondary:#666666;
+  --zc-muted:#999999;
+  --zc-disabled:#cbcbcb;
+  --zc-line:#eaeaea;
+  --zc-panel-line:#b9b8d8;
+  --zc-surface:#ffffff;
+  --zc-canvas:#f2f3f5;
+  --zc-hover:#f7f8fa;
+  --zc-range:#f4f4fc;
+  --zc-radius-control:20px;
+  --zc-radius-panel:8px;
+  --zc-control-height:32px;
+  --zc-font-body:14px;
+  --zc-font-note:12px;
+  --zc-shadow:0 0 12px rgba(0,0,0,.08);
+}
