@@ -86,3 +86,15 @@
   background:#f2f3f5; color:#333; font-weight:500;
 }
 .tab-variant .visual-segmented button:disabled { color:#cbcbcb; cursor:not-allowed; }
+
+.z-quick .quick-panel {
+  display:flex; flex-direction:column; align-items:stretch;
+  width:270px; height:auto; padding:12px; gap:12px;
+}
+.z-quick .quick-panel > div {
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  flex:none; width:100%; gap:8px 4px;
+}
+.z-quick .quick-panel > div + div { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.z-quick .quick-panel small { grid-column:1 / -1; }
+.z-quick .quick-panel button { justify-self:start; font-size:14px; }
