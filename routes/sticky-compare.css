@@ -57,6 +57,9 @@ body.zc-compare-mode .zc-compare.has-results {
 }
 
 .zc-compare .zc-pk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
   width: 139px;
   height: auto;
@@ -64,7 +67,14 @@ body.zc-compare-mode .zc-compare.has-results {
   margin: 0;
   border: 0;
   border-radius: 16px 0 0 0;
-  background: url('../assets/compare-sticky/fund-pk-expanded.png') center / 139px 126px no-repeat;
+  background: url('../assets/compare-sticky/fund-pk-background-expanded.png') center / auto 100% no-repeat;
+}
+
+.zc-compare .zc-pk > .zc-pk-logo {
+  display: block;
+  flex: none;
+  width: 72px;
+  height: 25px;
 }
 
 .zc-compare .zc-fund-slots {
@@ -167,8 +177,7 @@ body.zc-compare-mode .zc-compare.has-results {
 
 .zc-compare.is-sticky-compact .zc-pk {
   min-height: 104px;
-  background-image: url('../assets/compare-sticky/fund-pk-compact.png');
-  background-size: 139px 68px;
+  background-image: url('../assets/compare-sticky/fund-pk-background-compact.png');
 }
 
 .zc-compare.is-sticky-compact .zc-fund-slots {

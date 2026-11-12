@@ -36,7 +36,7 @@ function fundCards(){
       <strong title="${f.name}">${f.name}</strong><div class="zc-fund-code">${f.code}<span>${f.type}</span></div>
     </article>`;
   }).join('');
-  return `<div class="zc-fund-row"><div class="zc-pk" role="img" aria-label="基金 PK"></div><div class="zc-fund-slots">${slots}</div></div>`;
+  return `<div class="zc-fund-row"><div class="zc-pk" role="img" aria-label="基金 PK"><img class="zc-pk-logo" src="./assets/compare-sticky/fund-pk-logo.png" width="72" height="25" alt=""></div><div class="zc-fund-slots">${slots}</div></div>`;
 }
 function pill(labels,value,attr){return `<div class="zc-pill">${labels.map((l,i)=>`<button ${attr}="${i}" class="${i===value?'selected':''}">${l}</button>`).join('')}</div>`}
 function controls(){
