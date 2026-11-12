@@ -1196,17 +1196,19 @@ function renderIndexBrowse() { view.innerHTML=indexBrowseTemplate();document.get
 function renderIndexDetail() { view.innerHTML=indexDetailTemplate();let o=baseOption(),labels=Array.from({length:20},(_,i)=>`${2025+Math.floor((i+2)/12)}-${String((i+2)%12+1).padStart(2,'0')}`),line=labels.map((_,i)=>+(7+i*.5+Math.sin(i*.8)*2.3).toFixed(1));chart('index-trend-chart',{...o,legend:{top:0,left:0,itemWidth:18,itemHeight:3,textStyle:{fontSize:10}},xAxis:{type:'category',boundaryGap:false,data:labels,axisLabel:{fontSize:9,interval:3}},yAxis:{type:'value',axisLabel:{formatter:'{value}%',fontSize:9},splitLine:{lineStyle:{color:C.soft}}},series:[{name:'沪深300',type:'line',showSymbol:false,data:line,lineStyle:{color:C.blue,width:2}},{name:'估值分位',type:'line',showSymbol:false,data:line.map((v,i)=>+(45+Math.sin(i*.45)*14).toFixed(1)),lineStyle:{color:C.orange,width:1.4,type:'dashed'}}]});document.querySelectorAll('[data-relation]').forEach(b=>b.onclick=()=>{state.index.relation=b.dataset.relation;saveState();setParams({relation:state.index.relation});renderIndexDetail();syncIcons()});bindSegmented('index-period',()=>toast('指数周期已切换（效果交互）'));}
 
 function updateNav(module) {
-  const navKey = ({ screener: "fund-research", fund: "fund-research", compare: "fund-research", index: "fund-research" })[module] || module;
+  const navKey = ({ screener: "fund-research", fund: "fund-research", compare: "fund-research", "manager-compare": "fund-research", index: "fund-research" })[module] || module;
   document.querySelectorAll('[data-route-nav]').forEach(a=>{const active=a.dataset.routeNav===navKey;a.classList.toggle('is-active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   document.querySelectorAll('[data-route-leaf]').forEach(a=>a.classList.toggle('is-active',a.dataset.routeLeaf===module));
 }
 function renderRoute(preserveScroll=false) {
+  window.ManagerCompareView?.dispose();
   document.body.classList.remove("fund-sketch-mode");
   if(fundScrollCleanup){ document.removeEventListener("scroll", fundScrollCleanup); fundScrollCleanup=null; }
   const y=preserveScroll?scrollY:0; disposeCharts(); const route=parseRoute(); absorbParams(route); const module=route.segments[0]||'home'; updateNav(module); document.getElementById('route-progress').classList.add('is-running');
-  document.body.classList.toggle('zc-compare-mode',module==='compare');
-  if(module==='home')renderHome(); else if(module==='screener')renderScreener(); else if(module==='fund')renderFund(); else if(module==='compare')renderCompare(); else if(module==='index'&&route.segments[1])renderIndexDetail(); else if(module==='index')renderIndexBrowse(); else if(module==='research-tools')renderResearchTools(); else { location.hash='#/home'; return; }
-  syncIcons(); document.title=`${({home:'首页',screener:'基金筛选',fund:'基金分析',compare:'基金比较',index:'指数选基'})[module]} - 智策研究工作台`; requestAnimationFrame(()=>{if(preserveScroll)scrollTo(0,y);else if(!(module==='fund'&&route.params.get('anchor')))scrollTo(0,0);document.getElementById('route-progress').classList.remove('is-running')});
+  document.body.classList.toggle('zc-compare-mode',module==='compare'||module==='manager-compare');
+  document.body.classList.toggle('zc-manager-mode',module==='manager-compare');
+  if(module==='home')renderHome(); else if(module==='screener')renderScreener(); else if(module==='fund')renderFund(); else if(module==='compare')renderCompare(); else if(module==='manager-compare')window.ManagerCompareView.render(view); else if(module==='index'&&route.segments[1])renderIndexDetail(); else if(module==='index')renderIndexBrowse(); else if(module==='research-tools')renderResearchTools(); else { location.hash='#/home'; return; }
+  syncIcons(); document.title=`${({home:'首页',screener:'基金筛选',fund:'基金分析',compare:'基金比较','manager-compare':'经理比较',index:'指数选基'})[module]} - 智策研究工作台`; requestAnimationFrame(()=>{if(preserveScroll)scrollTo(0,y);else if(!(module==='fund'&&route.params.get('anchor')))scrollTo(0,0);document.getElementById('route-progress').classList.remove('is-running')});
 }
 window.addEventListener('hashchange',()=>renderRoute()); window.addEventListener('resize',()=>charts.forEach(c=>c.resize()));
 document.querySelectorAll('[data-soon]').forEach(btn=>btn.addEventListener('click',()=>toast(`「${btn.dataset.soon}」功能规划中，敬请期待`)));

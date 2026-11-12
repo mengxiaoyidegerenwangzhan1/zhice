@@ -1,0 +1,127 @@
+.zc-manager-risk-view .zc-risk-heading small {
+  color: #666;
+  font-size: 12px;
+  line-height: 17px;
+}
+
+.zc-manager-risk-view [data-risk-section="interval"] .zc-risk-chart,
+.zc-manager-risk-view [data-risk-section="drawdown"] .zc-risk-chart {
+  height: 242px;
+}
+
+.zc-manager-risk-view .zc-risk-legend {
+  gap: 8px 20px;
+}
+
+.zc-manager-risk-view .zc-risk-legend button {
+  flex: none;
+  width: auto;
+}
+
+.zc-manager-risk-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 99px;
+  background: #fff;
+  box-shadow: 0 0 6px #00000014;
+}
+
+.zc-manager-risk-actions .zc-manager-risk-action {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: #fff;
+}
+
+.zc-manager-risk-action:hover {
+  background: #f2f3f5;
+}
+
+.zc-manager-risk-action:focus-visible {
+  outline: 2px solid #6865a7;
+  outline-offset: 2px;
+}
+
+.zc-manager-risk-action img {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.zc-manager-risk-view .zc-risk-metric-tables {
+  gap: 24px;
+}
+
+.zc-manager-risk-view .zc-manager-benchmark-panel {
+  display: flex;
+  width: max-content;
+  max-width: calc(100vw - 64px);
+  height: 176px;
+  max-height: none;
+  padding: 8px 0;
+  border-color: #b9b8d8;
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 45;
+}
+
+.zc-manager-benchmark-level {
+  flex: 0 0 144px;
+  height: 160px;
+  border-right: 1px solid #eaeaea;
+  overflow-y: auto;
+}
+
+.zc-manager-benchmark-level:first-child {
+  flex-basis: 160px;
+}
+
+.zc-manager-benchmark-level:nth-child(3) {
+  flex-basis: 147px;
+}
+
+.zc-manager-benchmark-level:last-child {
+  flex-basis: 135px;
+  border-right: 0;
+}
+
+.zc-manager-benchmark-panel .zc-manager-benchmark-level button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  color: #333;
+  font-size: 14px;
+}
+
+.zc-manager-benchmark-level button.is-selected {
+  background: #f5f5ff;
+  color: #6865a7;
+}
+
+.zc-manager-benchmark-level button:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.zc-manager-benchmark-level button:focus-visible {
+  outline: 1px solid #6865a7;
+  outline-offset: -1px;
+}
+
+@media (max-width: 700px) {
+  .zc-manager-risk-view .zc-risk-heading {
+    flex-wrap: wrap;
+  }
+}

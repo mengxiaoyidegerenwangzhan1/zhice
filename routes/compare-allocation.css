@@ -138,10 +138,18 @@
 .zc-allocation-table-frame > .zc-allocation-table:first-child tr:first-child > *,
 .zc-allocation-chart-table tr:first-child > * { border-top: 0; }
 .zc-allocation-chart-table th,
-.zc-allocation-chart-table td { height: 260px; padding: 0; }
+.zc-allocation-chart-table td { height: auto; }
 .zc-allocation-chart-table th { padding: 10px 12px; }
-.zc-allocation-chart-table td { text-align: center; }
-.zc-allocation-chart { width: 100%; height: 260px; }
+.zc-allocation-chart-table td { padding: 30px 12px; text-align: center; }
+.zc-allocation-chart-slot {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 200px;
+  aspect-ratio: 1;
+  margin-inline: auto;
+}
+.zc-allocation-chart { width: 100%; height: 100%; }
 .zc-allocation-empty { color: #555759; }
 .zc-allocation-data-scroll.is-long { max-height: 427.5px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c6c7ca #f7f8fa; }
 .zc-allocation-data-scroll.is-long::-webkit-scrollbar { width: 6px; }

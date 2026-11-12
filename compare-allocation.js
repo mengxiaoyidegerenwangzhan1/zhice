@@ -136,7 +136,7 @@
     const { funds } = options;
     const labels = { asset: '大类资产类型<br>/<br>占总资产比', stock: state.stock.distribution === '板块分布' ? '板块分布<br>/<br>占净资产比' : '行业分布<br>/<br>占净资产比', bond: '债券类型 /<br>占净资产比' };
     return `<table class="zc-allocation-table zc-allocation-chart-table" aria-label="${definitions.find(item => item.key === key).title}图表">${columns()}<tbody><tr>
-      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}>${fund?.visible ? hasData(fund) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</td>`).join('')}
+      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}><div class="zc-allocation-chart-slot">${fund?.visible ? hasData(fund) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</div></td>`).join('')}
     </tr></tbody></table>`;
   }
 
@@ -233,7 +233,7 @@
         chart.setOption({
           animation: false,
           tooltip: { trigger: 'item', confine: true, formatter: params => `${escape(params.name)}<br><strong class="zc-allocation-number">${Number(params.value).toFixed(2)}%</strong>`, backgroundColor: 'rgba(255,255,255,.96)', borderColor: '#eaeaea', textStyle: { color: '#333', fontSize: 14 } },
-          series: [{ type: 'pie', radius: [64, 100], center: ['50%', '50%'], startAngle: 90, clockwise: true, label: { show: false }, labelLine: { show: false }, emphasis: { scale: false }, data: seriesData }],
+          series: [{ type: 'pie', radius: ['64%', '100%'], center: ['50%', '50%'], startAngle: 90, clockwise: true, label: { show: false }, labelLine: { show: false }, emphasis: { scale: false }, data: seriesData }],
         });
         chart.on('mouseover', params => {
           sectionRoot.querySelector(`[data-allocation-row="${params.data.rowIndex}"]`)?.classList.add('is-chart-hovered');

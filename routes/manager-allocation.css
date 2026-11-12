@@ -1,0 +1,70 @@
+.zc-manager-allocation-view > section:nth-child(2) {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.zc-manager-allocation-head,
+.zc-manager-allocation-heading,
+.zc-manager-allocation-actions {
+  display: flex;
+  align-items: center;
+}
+
+.zc-manager-allocation-head {
+  justify-content: space-between;
+  min-height: 32px;
+  margin-bottom: 16px;
+  gap: 20px;
+}
+
+.zc-manager-allocation-heading { gap: 4px; min-width: 0; }
+.zc-manager-allocation-heading h2 { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; color: #333; }
+.zc-manager-allocation-heading small { margin-left: 12px; color: #777; font-size: 14px; font-weight: 400; white-space: nowrap; }
+.zc-manager-allocation-heading small > span { margin-left: 4px; }
+.zc-manager-allocation-actions { gap: 20px; flex: none; }
+.zc-manager-allocation-actions.is-industry .zc-analysis-select { width: 252px; }
+
+.zc-manager-allocation-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 99px;
+  background: #fff;
+  box-shadow: 0 0 12px #00000014;
+}
+
+.zc-manager-allocation-tools button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+.zc-manager-allocation-tools button:hover { background: #f2f3f5; }
+.zc-manager-allocation-tools img { display: block; flex: none; }
+.zc-manager-allocation-tools button.is-refreshing img { animation: zc-refresh-spin .7s linear infinite; }
+.zc-manager-allocation-scroll.is-industry { max-height: 380px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c6c7ca #f7f8fa; }
+.zc-manager-allocation-scroll.is-industry::-webkit-scrollbar { width: 6px; }
+.zc-manager-allocation-scroll.is-industry::-webkit-scrollbar-thumb { background: #c6c7ca; border-radius: 3px; }
+.zc-manager-allocation-view .zc-allocation-chart-table th { color: #777; }
+.zc-manager-allocation-view .zc-allocation-table th { font-weight: 400; }
+.zc-manager-allocation-view .zc-allocation-table .zc-allocation-summary > * { font-weight: 500; }
+
+@media (max-width: 1150px) {
+  .zc-manager-allocation-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 0 12px; }
+  .zc-manager-allocation-heading { grid-column: 1; grid-row: 1; min-height: 32px; flex-wrap: wrap; }
+  .zc-manager-allocation-actions { display: contents; }
+  .zc-manager-allocation-tools { grid-column: 2; grid-row: 1; justify-self: end; }
+  .zc-manager-allocation-actions > .zc-analysis-select { grid-column: 1 / -1; margin-top: 12px; max-width: 100%; }
+  .zc-manager-allocation-heading small { margin-left: 0; white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zc-manager-allocation-tools button.is-refreshing img { animation: none; }
+}

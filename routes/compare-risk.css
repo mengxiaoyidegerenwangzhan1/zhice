@@ -142,6 +142,49 @@
   background: transparent;
 }
 
+.zc-risk-help > button,
+.zc-risk-metric-help,
+.zc-overview-help > button,
+.zc-mo-help > button,
+.zc-allocation-help > button,
+.zc-attr-help > button {
+  position: relative;
+  color: #999;
+}
+
+.zc-risk-help > button > img,
+.zc-risk-metric-help > img,
+.zc-overview-help > button > img,
+.zc-mo-help > button > img,
+.zc-allocation-help > button > img,
+.zc-attr-help > button > img {
+  visibility: hidden;
+}
+
+.zc-risk-help > button::after,
+.zc-risk-metric-help::after,
+.zc-overview-help > button::after,
+.zc-mo-help > button::after,
+.zc-allocation-help > button::after,
+.zc-attr-help > button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: url('../assets/compare-controls/help.svg') center / contain no-repeat;
+  mask: url('../assets/compare-controls/help.svg') center / contain no-repeat;
+  pointer-events: none;
+}
+
+.zc-risk-help > button:is(:hover, :focus-visible),
+.zc-risk-metric-help:is(:hover, :focus-visible),
+.zc-overview-help > button:is(:hover, :focus-visible),
+.zc-mo-help > button:is(:hover, :focus-visible),
+.zc-allocation-help > button:is(:hover, :focus-visible),
+.zc-attr-help > button:is(:hover, :focus-visible) {
+  color: #6865a7;
+}
+
 .zc-risk-help-popover {
   position: absolute;
   z-index: 3;
@@ -568,6 +611,93 @@
 
   .zc-risk-view .zc-risk-tree-table .zc-risk-tree-label-col {
     width: 120px !important;
+  }
+}
+
+@media (max-width: 1150px) {
+  .zc-compare .zc-overview-head,
+  .zc-compare .zc-attribution-view .zc-attr-head,
+  .zc-compare .zc-allocation-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0 12px;
+  }
+
+  .zc-compare .zc-overview-head > h2,
+  .zc-compare .zc-attr-head > h2,
+  .zc-compare .zc-allocation-heading {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    min-height: 32px;
+    flex-wrap: wrap;
+    white-space: normal;
+  }
+
+  .zc-compare .zc-overview-actions,
+  .zc-compare .zc-attr-toolbar,
+  .zc-compare .zc-allocation-actions { display: contents; }
+
+  .zc-compare .zc-overview-buttons,
+  .zc-compare .zc-attr-actions,
+  .zc-compare .zc-allocation-action-buttons {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .zc-compare .zc-overview-actions > .zc-analysis-time,
+  .zc-compare .zc-attr-toolbar > .zc-analysis-time,
+  .zc-compare .zc-attr-toolbar > .zc-attr-select,
+  .zc-compare .zc-allocation-actions > .zc-allocation-select {
+    grid-column: 1 / -1;
+    max-width: 100%;
+    margin-top: 12px;
+  }
+
+  .zc-compare .zc-overview-actions > .zc-analysis-time,
+  .zc-compare .zc-attr-toolbar > .zc-analysis-time { flex-wrap: wrap; }
+
+  .zc-risk-view .zc-risk-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: start;
+    gap: 0 12px;
+  }
+
+  .zc-risk-head .zc-risk-heading {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 32px;
+    flex-wrap: wrap;
+  }
+
+  .zc-risk-head .zc-risk-actions { display: contents; }
+
+  .zc-risk-head .zc-risk-actions-main,
+  .zc-risk-head .zc-manager-risk-actions {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .zc-risk-head .zc-risk-view-toggle {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .zc-risk-head .zc-risk-toolbar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-top: 12px;
+  }
+
+  .zc-risk-toolbar .zc-analysis-time {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    max-width: 100%;
   }
 }
 

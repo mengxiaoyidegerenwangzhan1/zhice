@@ -26,10 +26,41 @@
   const dateLabel = index => new Date(index * day).toISOString().slice(0, 10);
   const round = value => Math.round(value * 100) / 100;
 
+  function sampleProfile(fund) {
+    const ids = Object.keys(fundProfiles);
+    const explicitIndex = Number.isInteger(fund.profileIndex) && ids[fund.profileIndex] ? fund.profileIndex : null;
+    const productCode = String(fund.productCode || fund.representativeFund?.code || '');
+    const extended = explicitIndex !== null || Boolean(productCode);
+    const id = extended ? ids[explicitIndex ?? Math.max(0, ids.indexOf(fund.id))] : fund.id;
+    let seed = 2166136261;
+    for (const character of productCode) seed = Math.imul(seed ^ character.charCodeAt(0), 16777619) >>> 0;
+    const variation = productCode ? (seed % 10007) / 10006 : .5;
+    const scale = productCode ? .82 + variation * .36 : 1;
+    const offset = productCode ? (((seed >>> 12) % 1001) / 1000 - .5) * .7 : 0;
+    const base = fundProfiles[id] || fundProfiles.a;
+    return {
+      id, index: ids.indexOf(id), extended, productCode, scale, offset,
+      growth: base.growth * scale, swing: base.swing * scale,
+      phase: base.phase + (productCode ? (variation - .5) * 1.5 : 0),
+    };
+  }
+
+  function monthlyValues(fund) {
+    const profile = sampleProfile(fund);
+    const values = monthlySamples[profile.id];
+    return profile.productCode && values ? values.map(value => round(value * profile.scale + profile.offset)) : values;
+  }
+
+  function yearlyValue(year, fund) {
+    const profile = sampleProfile(fund);
+    const value = yearlySamples[year]?.[profile.id];
+    return profile.productCode && Number.isFinite(value) ? round(value * profile.scale + profile.offset * 6) : value;
+  }
+
   // The workbench prototype has no historical NAV feed for the comparison funds.
   // A repeatable sample series keeps all six charts consistent across date changes.
   function nav(index, fund) {
-    const { growth, swing, phase } = fundProfiles[fund.id] ?? fundProfiles.a;
+    const { growth, swing, phase } = sampleProfile(fund);
     const elapsed = index - epoch;
     const trend = .68 * Math.sin(elapsed * .032 + phase)
       + .43 * Math.cos(elapsed * .015 + phase)
@@ -45,7 +76,7 @@
 
   function periodGain(period, fund, months) {
     const date = new Date(period.first * day);
-    const samples = monthlySamples[fund.id];
+    const samples = monthlyValues(fund);
     if (date.getUTCFullYear() !== 2026 || !samples) return gain(period.first - 1, period.last, fund);
     const month = Math.floor(date.getUTCMonth() / months) * months;
     return round((samples.slice(month, month + months).reduce((total, value) => total * (1 + value / 100), 1) - 1) * 100);
@@ -125,10 +156,11 @@
           const firstMonth = new Date(periods[0].first * day).getUTCMonth();
           const lastMonth = new Date(periods.at(-1).last * day).getUTCMonth();
           const fullYear = firstMonth === 0 && lastMonth >= 10;
-          if (fullYear && year === 2026 && months === 1 && monthlySamples[fund.id]) values.splice(0, 12, ...monthlySamples[fund.id]);
+          const samples = monthlyValues(fund);
+          if (fullYear && year === 2026 && months === 1 && samples) values.splice(0, 12, ...samples);
           return {
             id: fund.id, name: fund.name, color: fund.color, values,
-            total: (fullYear ? yearlySamples[year]?.[fund.id] : undefined) ?? gain(periods[0].first - 1, periods.at(-1).last, fund),
+            total: (fullYear ? yearlyValue(year, fund) : undefined) ?? gain(periods[0].first - 1, periods.at(-1).last, fund),
           };
         }),
       })).reverse(),
@@ -180,7 +212,13 @@
     for (let index = last - 7; index >= first; index -= 7) forecastDates.push(index);
 
     function dataset(labels, values) {
-      const allSeries = funds.map(fund => ({ id: fund.id, name: fund.name, color: fund.color, values: values(fund) }));
+      const allSeries = funds.map(fund => {
+        const profile = sampleProfile(fund);
+        return {
+          id: fund.id, name: fund.name, color: fund.color, values: values(fund),
+          ...(profile.extended ? { profileId: profile.id } : {}),
+        };
+      });
       return {
         labels,
         series: allSeries.filter(series => active.some(fund => fund.id === series.id)),
@@ -398,21 +436,22 @@
       yAxis: {
         type: 'value', min, max, splitNumber: 6,
         axisLabel: { formatter: '{value}%', color: '#555759', fontSize: 12, margin: 9 },
-        splitLine: { lineStyle: { color: '#e9eaec', type: 'dashed' } },
+        splitLine: { lineStyle: { color: '#e9eaec', width: 1, type: [3, 3], dashOffset: 0, cap: 'butt' } },
       },
       dataZoom: slider ? [{ id: returnZoomId, type: 'inside', xAxisIndex: 0, disabled: true }] : [],
       series: series.map(item => ({
-        name: item.name, type: key === 'forecast' ? 'pictorialBar' : line ? 'line' : 'bar', data: item.values,
-        showSymbol: false, symbolSize: key === 'forecast' ? ['100%', '100%'] : 5,
-        ...(key === 'forecast' && {
-          symbol: `image://./assets/compare-risk/forecast-${item.id}.png`,
-          symbolPosition: 'start', symbolKeepAspect: false,
-        }),
-        lineStyle: { color: item.color, width: 1.25 },
+        name: item.name, type: line ? 'line' : 'bar', data: item.values,
+        showSymbol: false, symbolSize: 5, connectNulls: false,
+        lineStyle: { color: item.color, width: 1.25, type: 'solid' },
         barMaxWidth: overview ? 16 : 30, barGap: '10%', barCategoryGap: '35%',
         itemStyle: {
           color: item.color,
           borderRadius: line || key === 'drawdown' ? 0 : [2, 2, 0, 0],
+          ...(key === 'forecast' && {
+            color: window.echarts.color.modifyAlpha(item.color, .18),
+            borderColor: item.color, borderWidth: 1, borderType: [4, 4],
+            borderDashOffset: 0, borderCap: 'butt', borderJoin: 'miter', borderRadius: 0,
+          }),
         },
       })),
     };
@@ -466,5 +505,5 @@
     legendChoices.delete(fund);
   }
 
-  window.CompareRiskCharts = { data, mount, resetFundVisibility };
+  window.CompareRiskCharts = { data, mount, resetFundVisibility, sampleProfile };
 })();

@@ -253,16 +253,26 @@
     return `<section data-risk-section="${key}">${heading(key, title, details)}${chart(key, title, funds, details.referenceId)}</section>`;
   }
 
+  function metricValue(values, fund) {
+    if (!fund) return undefined;
+    const profile = window.CompareRiskCharts?.sampleProfile?.(fund);
+    const index = profile?.extended ? profile.index : sampleFundIds.indexOf(fund.id);
+    const value = values[index];
+    if (!profile?.productCode || !value || /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+    const number = parseFloat(value) * profile.scale + (value.endsWith('%') ? profile.offset : 0);
+    if (/^-?\d+$/.test(value)) return String(Math.max(0, Math.round(number)));
+    return `${number.toFixed(2)}${value.endsWith('%') ? '%' : ''}`;
+  }
+
   function metricTable(title, metrics, funds, referenceId) {
     const slots = Array.from({ length: 4 }, (_, i) => funds[i]);
-    const referenceIndex = sampleFundIds.indexOf(referenceId);
+    const referenceFund = funds.find(fund => fund.id === referenceId);
     const rows = metrics.map(([label, values, description]) => `<tr>
       <th scope="row"><span class="zc-risk-metric-label"><span>${label}</span>
         <button type="button" class="zc-risk-metric-help" aria-label="${label}说明，${description}" title="${description}">${icon('metric-help')}</button>
       </span></th>
       ${slots.map(fund => {
-        const fundIndex = sampleFundIds.indexOf(fund?.id);
-        return comparisonCell(fund, values[fundIndex], values[referenceIndex], referenceId);
+        return comparisonCell(fund, metricValue(values, fund), metricValue(values, referenceFund), referenceId);
       }).join('')}
     </tr>`).join('');
     return `<article class="zc-risk-metric-block"><h3>${title}</h3><div class="zc-table-wrap"><table class="zc-table zc-risk-table" aria-label="${title}">
@@ -295,7 +305,7 @@
       ${chartSection('rolling', options.view === 'table' ? '年化动态波动率' : '收益波动走势', funds, { referenceId, description: rollingHelp, controls: timeControls(options, 'rolling', rollingRange) })}
       ${chartSection('drawdown', '区间最大回撤', funds, { referenceId, note: `区间最小起始日期为：2022-11-06　 截止日期：${escape(drawdownRange.end)}` })}
       <section class="zc-risk-metrics" data-risk-section="metrics">
-        ${heading('metrics', '收益风险指标', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
+        ${heading('metrics', '年化动态波动率', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
         <div class="zc-risk-metric-tables">
           ${metricTable('收益指标', returnMetrics, funds, referenceId)}
           ${metricTable('风险指标', riskMetrics, funds, referenceId)}

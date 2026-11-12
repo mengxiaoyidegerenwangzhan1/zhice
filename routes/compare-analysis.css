@@ -55,7 +55,7 @@
 .zc-analysis-time .zc-more-panel > div { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; }
 .zc-analysis-time .zc-more-panel > div:nth-child(2) { grid-template-columns: repeat(2,minmax(0,1fr)); }
 .zc-analysis-time .zc-more-panel small { grid-column: 1 / -1; margin: 0 0 4px; }
-.zc-analysis-time .zc-more-panel button { margin: 0; padding: 6px 8px; text-align: left; }
+.zc-analysis-time .zc-more-panel button { margin: 0; padding: 6px 8px; text-align: center; }
 .zc-analysis-time .zc-more-panel button.selected {
   background: #f2f3f5;
   color: #333;
@@ -104,6 +104,8 @@
 .zc-compare .zc-overview-table col:first-child { width: 120px !important; }
 .zc-compare .zc-overview-table td { background: #fff; font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; }
 .zc-compare .zc-overview-table .zc-number-cell { font-family: Roboto, Arial, sans-serif; text-align: right; }
+.zc-compare .zc-basic-info .zc-overview-table th,
+.zc-compare .zc-basic-info .zc-overview-table td { text-align: left; }
 .zc-compare .zc-overview-table.zc-returns td { text-align: left; }
 .zc-compare .zc-overview-table.zc-returns td.best { background: #fceef0; }
 .zc-compare .zc-overview-table.zc-returns td > b {
@@ -180,15 +182,33 @@
 .zc-rank-total { color: #999; }
 .zc-empty-value { color: #555759; }
 .zc-compare .zc-type-notice {
-  left: 50%;
+  left: 56px;
   right: auto;
-  width: 600px;
-  max-width: calc(100% - 24px);
+  width: max-content;
+  max-width: calc(100% - 112px);
   min-height: 35px;
-  transform: translateX(-50%);
+  transform: none;
   background: #fffaf2;
   border-color: #ffecd2;
   box-shadow: 0 0 6px #00000014;
+  text-align: left;
+}
+.zc-compare .zc-type-notice > .zc-warning { flex: none; }
+.zc-compare .zc-type-notice > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.zc-compare .zc-type-notice > button {
+  flex: none;
+  margin-left: auto;
+}
+@media (max-width: 999px) {
+  .zc-compare .zc-type-notice { left: 32px; max-width: calc(100% - 64px); }
+}
+@media (max-width: 900px) {
+  .zc-compare .zc-type-notice { left: 16px; max-width: calc(100% - 32px); }
 }
 .zc-compare .zc-chart-legend button.is-hidden { text-decoration: line-through; }
 .zc-compare .zc-chart-legend button.is-reference { font-weight: 500; }
