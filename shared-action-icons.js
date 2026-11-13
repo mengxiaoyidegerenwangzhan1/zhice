@@ -19,6 +19,55 @@
   };
   const chartSelector = '[data-risk-chart], [data-manager-chart], [data-manager-allocation-chart], .zc-chart, canvas';
   const automaticLabels = new WeakSet();
+  const activeRefreshes = new Map();
+
+  function isRefreshing(button) {
+    return button.getAttribute('aria-busy') === 'true' || button.classList.contains('is-refreshing');
+  }
+
+  function finishRefresh(button) {
+    const state = activeRefreshes.get(button);
+    if (!state) return;
+    activeRefreshes.delete(button);
+    state.observer.disconnect();
+    state.overlay.remove();
+    state.section.classList.remove('site-section-refreshing');
+    if (state.previousBusy === null) state.section.removeAttribute('aria-busy');
+    else state.section.setAttribute('aria-busy', state.previousBusy);
+  }
+
+  function showRefreshingContent(button) {
+    if (!button.isConnected || !isRefreshing(button) || activeRefreshes.has(button)) return;
+    const section = button.closest('section');
+    const heading = section?.querySelector(':scope > .zc-section-head, :scope > .zc-mo-head, :scope > .zc-manager-allocation-head');
+    const content = heading?.nextElementSibling;
+    if (!content) return;
+
+    const previousBusy = section.getAttribute('aria-busy');
+    section.classList.add('site-section-refreshing');
+    section.setAttribute('aria-busy', 'true');
+    const sectionBounds = section.getBoundingClientRect();
+    const scale = sectionBounds.width / section.offsetWidth || 1;
+    const overlay = document.createElement('div');
+    overlay.className = 'site-refresh-overlay';
+    overlay.style.top = `${(content.getBoundingClientRect().top - sectionBounds.top) / scale}px`;
+    overlay.setAttribute('role', 'status');
+    overlay.innerHTML = '<span class="site-refresh-spinner" aria-hidden="true"></span><span>正在刷新…</span>';
+
+    const observer = new MutationObserver(() => {
+      if (!button.isConnected || !isRefreshing(button)) finishRefresh(button);
+    });
+    activeRefreshes.set(button, { section, overlay, observer, previousBusy });
+    observer.observe(button, { attributes: true, attributeFilter: ['aria-busy', 'class'] });
+    section.append(overlay);
+  }
+
+  // Module click handlers set their loading state before this bubbling listener runs.
+  document.addEventListener('click', event => {
+    const button = event.target.closest('button[data-refresh], button[data-risk-refresh], button[data-analysis-refresh]');
+    if (!button || !button.closest('.zc-compare')) return;
+    showRefreshingContent(button);
+  });
 
   function actionFor(button) {
     if (button.id === 'zc-export') return null;
@@ -79,6 +128,9 @@
   // Route and module renders replace their content. Only child-list changes are
   // observed, so adding presentation attributes cannot trigger another pass.
   new MutationObserver(records => {
+    activeRefreshes.forEach((state, button) => {
+      if (!button.isConnected || !state.section.isConnected) finishRefresh(button);
+    });
     const roots = new Set();
     records.forEach(record => {
       const section = record.target.closest?.('section');

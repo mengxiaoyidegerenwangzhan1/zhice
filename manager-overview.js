@@ -133,10 +133,10 @@
     const reference = subjects.find(subject => subject.id === options.referenceId);
     const rows = intervalLabels.map((label, index) => {
       const values = subjects.filter(visible).map(subject => returnEntry(subject, index, options)?.[0]).filter(Number.isFinite);
-      const maximum = values.length > 1 ? Math.max(...values) : null;
+      const maximum = values.length ? Math.max(...values) : null;
       return {
         label,
-        bestIds: new Set(subjects.filter(subject => returnEntry(subject, index, options)?.[0] === maximum).map(subject => subject.id)),
+        bestIds: new Set(subjects.filter(subject => visible(subject) && Number.isFinite(maximum) && returnEntry(subject, index, options)?.[0] === maximum).map(subject => subject.id)),
         cell(subject) {
           const entry = returnEntry(subject, index, options);
           if (!entry || !Number.isFinite(entry[0])) return '<span class="zc-mo-missing">--</span>';

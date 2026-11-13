@@ -29,7 +29,7 @@
 .zc-mo-table th { position: sticky; left: 0; z-index: 1; background: #f7f8fa; color: #666; }
 .zc-mo-table td { background: #fff; }
 .zc-mo-table td.is-reference { background: #f8f7fc; }
-.zc-mo-table td.is-best { background: #fdf5f7; }
+.zc-mo-table td.is-best { background: #fef5f5; }
 .zc-mo-number { font-family: Roboto, 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .zc-mo-number.is-negative { color: #36b397; }
 .zc-mo-number.is-positive { color: #bf3a61; }

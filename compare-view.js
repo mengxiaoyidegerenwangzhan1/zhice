@@ -44,12 +44,16 @@ function controls(){
 }
 function table(rows,returns=false){
   const numericRows=['基金代码','成立日期','最新单位净值','最新规模','管理费率','托管费率'];
-  return `<div class="zc-table-wrap"><table class="zc-table zc-overview-table ${returns?'zc-returns':''}"><colgroup><col style="width:120px">${'<col>'.repeat(4)}</colgroup><tbody>${rows.map(row=>`<tr><th scope="row">${row[0]}</th>${Array.from({length:4},(_,index)=>{
+  return `<div class="zc-table-wrap"><table class="zc-table zc-overview-table ${returns?'zc-returns':''}"><colgroup><col style="width:120px">${'<col>'.repeat(4)}</colgroup><tbody>${rows.map((row,rowIndex)=>{
+    const values=returns?funds.filter(fund=>fund.visible).map(fund=>intervalData[fund.id]?.[rowIndex]?.[0]).filter(Number.isFinite):[];
+    const maximum=values.length?Math.max(...values):null;
+    return `<tr><th scope="row">${row[0]}</th>${Array.from({length:4},(_,index)=>{
     const fund=funds[index];
-    const classes=[!returns&&numericRows.includes(row[0])?'zc-number-cell':'',fund?.id===pinned?'is-reference':''].filter(Boolean).join(' ');
+    const best=returns&&fund?.visible&&Number.isFinite(maximum)&&intervalData[fund.id]?.[rowIndex]?.[0]===maximum;
+    const classes=[!returns&&numericRows.includes(row[0])?'zc-number-cell':'',fund?.id===pinned?'is-reference':'',best?'best':''].filter(Boolean).join(' ');
     const value=fund?.visible?(typeof row[1]==='function'?row[1](index):row[seed.findIndex(item=>item.id===fund.id)+1]??row[1]):'';
     return `<td class="${classes}">${value}</td>`;
-  }).join('')}</tr>`).join('')}</tbody></table></div>`;
+  }).join('')}</tr>`;}).join('')}</tbody></table></div>`;
 }
 const intervalData={
   a:[[-6.82,526,941],[2.38,186,1082],[-3.76,438,1036],[5.42,267,997],null,null,null,null,[-4.95,412,941]],
@@ -66,7 +70,7 @@ function returnsTable(){
   return table(['今年以来','近1月','近3月','近6月','近1年','近2年','近3年','近5年','成立以来'].map((label,rowIndex)=>[label,index=>{
     const fund=funds[index];
     const entry=intervalData[fund.id]?.[rowIndex];
-    if(!entry)return '<span class="zc-empty-value">--</span>';
+    if(!entry||!Number.isFinite(entry[0]))return '<span class="zc-empty-value">--</span>';
     const [value,rank,total]=entry;
     const reference=intervalData[pinned]?.[rowIndex]?.[0];
     const delta=pinned&&fund.id!==pinned?`<em class="zc-reference-difference">${difference(value,reference,' pp')}</em>`:'';

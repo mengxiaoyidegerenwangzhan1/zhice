@@ -124,7 +124,7 @@
 .zc-compare .zc-basic-info .zc-overview-table th,
 .zc-compare .zc-basic-info .zc-overview-table td { text-align: left; }
 .zc-compare .zc-overview-table.zc-returns td { text-align: left; }
-.zc-compare .zc-overview-table.zc-returns td.best { background: #fceef0; }
+.zc-compare .zc-overview-table.zc-returns td.best { background: #fef5f5; }
 .zc-compare .zc-overview-table.zc-returns td > b {
   font-family: Roboto, Arial, sans-serif;
   font-size: 14px;
