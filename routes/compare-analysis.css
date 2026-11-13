@@ -267,7 +267,39 @@
 .zc-overview-help:hover > [role="tooltip"],
 .zc-overview-help:focus-within > [role="tooltip"] { display: block !important; }
 
+.zc-compare {
+  --zc-module-space: 28px;
+}
+
+.zc-compare .zc-content > section + section,
+.zc-compare .zc-risk-view > section + section,
+.zc-compare .zc-allocation-view > section + section,
+.zc-compare .zc-attribution-view > section + section,
+.zc-compare .zc-manager-overview > section + section,
+.zc-compare .zc-manager-allocation-view > section + section {
+  margin-top: var(--zc-module-space);
+  border-top: 1px solid #eaeaea;
+  padding-top: var(--zc-module-space);
+}
+
+.zc-compare .zc-section-head,
+.zc-compare .zc-mo-head,
+.zc-compare .zc-manager-allocation-head {
+  min-height: 32px;
+  margin-bottom: 16px;
+}
+
+.zc-compare .zc-section-head h2 {
+  flex: none;
+  margin: 0;
+  white-space: nowrap;
+}
+
 @media (min-width: 1201px) {
+  .zc-compare {
+    --zc-module-space: calc(28px / var(--zc-scale, 1));
+  }
+
   .zc-compare .zc-section-head,
   .zc-compare .zc-mo-head,
   .zc-compare .zc-manager-allocation-head {
