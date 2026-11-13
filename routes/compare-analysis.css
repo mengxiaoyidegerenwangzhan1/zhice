@@ -182,12 +182,12 @@
 .zc-rank-total { color: #999; }
 .zc-empty-value { color: #555759; }
 .zc-compare .zc-type-notice {
-  left: 56px;
+  left: 50%;
   right: auto;
   width: max-content;
   max-width: calc(100% - 112px);
   min-height: 35px;
-  transform: none;
+  transform: translateX(-50%);
   background: #fffaf2;
   border-color: #ffecd2;
   box-shadow: 0 0 6px #00000014;
@@ -205,10 +205,10 @@
   margin-left: auto;
 }
 @media (max-width: 999px) {
-  .zc-compare .zc-type-notice { left: 32px; max-width: calc(100% - 64px); }
+  .zc-compare .zc-type-notice { max-width: calc(100% - 64px); }
 }
 @media (max-width: 900px) {
-  .zc-compare .zc-type-notice { left: 16px; max-width: calc(100% - 32px); }
+  .zc-compare .zc-type-notice { max-width: calc(100% - 32px); }
 }
 .zc-compare .zc-chart-legend button.is-hidden { text-decoration: line-through; }
 .zc-compare .zc-chart-legend button.is-reference { font-weight: 500; }
