@@ -40,10 +40,10 @@
   function viewToggle(view) {
     return `<div class="zc-risk-view-toggle" role="group" aria-label="收益与风险视图">
       <button type="button" data-risk-view="chart" aria-pressed="${view === 'chart'}" aria-label="图表视图" title="图表视图">
-        <img src="${assets}view-chart-${view === 'chart' ? 'selected' : 'unselected'}.png" width="24" height="24" alt="">
+        <img src="${assets}view-chart-${view === 'chart' ? 'selected' : 'unselected'}.png?v=2" width="28" height="28" alt="">
       </button>
       <button type="button" data-risk-view="table" aria-pressed="${view === 'table'}" aria-label="列表视图" title="列表视图">
-        <img src="${assets}view-list-${view === 'table' ? 'selected' : 'unselected'}.png" width="24" height="24" alt="">
+        <img src="${assets}view-list-${view === 'table' ? 'selected' : 'unselected'}.png?v=2" width="28" height="28" alt="">
       </button>
     </div>`;
   }
@@ -302,7 +302,7 @@
         description: forecastHelp,
         controls: timeControls(options, 'forecast', forecastRange, holding, options.view === 'table'),
       })}
-      ${chartSection('rolling', options.view === 'table' ? '年化动态波动率' : '收益波动走势', funds, { referenceId, description: rollingHelp, controls: timeControls(options, 'rolling', rollingRange) })}
+      ${chartSection('rolling', '年化动态波动率', funds, { referenceId, description: rollingHelp, controls: timeControls(options, 'rolling', rollingRange) })}
       ${chartSection('drawdown', '区间最大回撤', funds, { referenceId, note: `区间最小起始日期为：2022-11-06　 截止日期：${escape(drawdownRange.end)}` })}
       <section class="zc-risk-metrics" data-risk-section="metrics">
         ${heading('metrics', '年化动态波动率', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
