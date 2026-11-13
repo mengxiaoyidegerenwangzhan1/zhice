@@ -397,6 +397,17 @@
     element.after(slider);
   }
 
+  function forecastLayout(dataset, selected, element) {
+    const width = element.clientWidth;
+    const renderedWidth = element.getBoundingClientRect?.().width || width;
+    const scale = width > 0 ? renderedWidth / width : 1;
+    const gap = 4 / (scale || 1);
+    const visibleCount = Math.max(1, dataset.series.filter(series => selected[series.name] !== false).length);
+    const bandWidth = Math.max(1, width - 43) / Math.max(1, dataset.labels.length);
+    const barWidth = Math.min(30, Math.max(1, (bandWidth * .65 - gap * (visibleCount - 1)) / visibleCount));
+    return { barWidth, barGap: `${gap / barWidth * 100}%`, gap };
+  }
+
   function chartOption(key, dataset, selected, element, referenceId) {
     const { labels, series } = dataset;
     const overview = key === 'returns' || key === 'distribution';
@@ -409,6 +420,7 @@
     const maximum = Math.max(0, ...allValues);
     const min = probability ? 0 : key === 'drawdown' ? Math.min(-40, Math.floor(minimum / 10) * 10) : Math.min(key === 'returns' ? -15 : 0, Math.floor(minimum / 5) * 5);
     const max = key === 'drawdown' ? 0 : key === 'distribution' ? 100 : Math.max(key === 'returns' ? 15 : 30, Math.ceil(maximum / 5) * 5);
+    const forecast = key === 'forecast' ? forecastLayout(dataset, selected, element) : null;
     return {
       animation: false,
       legend: { show: false, selected, data: series.map(item => item.name) },
@@ -444,12 +456,13 @@
         showSymbol: false, symbolSize: 5, connectNulls: false,
         lineStyle: { color: item.color, width: 1.25, type: 'solid' },
         barMaxWidth: overview ? 16 : 30, barGap: '10%', barCategoryGap: '35%',
+        ...(forecast && { barWidth: forecast.barWidth, barGap: forecast.barGap }),
         itemStyle: {
           color: item.color,
           borderRadius: line || key === 'drawdown' ? 0 : [2, 2, 0, 0],
           ...(key === 'forecast' && {
             color: window.echarts.color.modifyAlpha(item.color, .18),
-            borderColor: item.color, borderWidth: 1, borderType: [4, 4],
+            borderColor: item.color, borderWidth: 1, borderType: [forecast.gap, forecast.gap],
             borderDashOffset: 0, borderCap: 'butt', borderJoin: 'miter', borderRadius: 0,
           }),
         },
@@ -475,6 +488,18 @@
       const selected = Object.fromEntries(section.options.funds.map(fund => [fund.name, fund.visible && !legendChoices.get(fund)?.has(key)]));
       const chart = window.echarts.init(element);
       chart.setOption(chartOption(key, dataset, selected, element, section.options.referenceId));
+      if (key === 'forecast') {
+        let currentLayout = forecastLayout(dataset, selected, element);
+        chart.on('finished', () => {
+          const nextLayout = forecastLayout(dataset, selected, element);
+          if (nextLayout.barWidth === currentLayout.barWidth && nextLayout.gap === currentLayout.gap) return;
+          currentLayout = nextLayout;
+          chart.setOption({ series: dataset.series.map(item => ({
+            name: item.name, barWidth: nextLayout.barWidth, barGap: nextLayout.barGap,
+            itemStyle: { borderType: [nextLayout.gap, nextLayout.gap] },
+          })) });
+        });
+      }
       if (key === 'returns' && dataset.labels.length > 1) mountReturnRange(element, chart, dataset);
       legend?.querySelectorAll('[data-risk-fund]').forEach(button => {
         const fund = section.options.funds.find(item => item.id === button.dataset.riskFund);

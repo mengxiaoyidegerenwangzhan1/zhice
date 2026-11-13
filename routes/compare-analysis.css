@@ -19,6 +19,18 @@
   font-weight: 700 900;
   font-display: swap;
 }
+.zc-compare .zc-pill {
+  box-sizing: border-box;
+  align-items: center;
+  height: 32px;
+  padding: 2px;
+}
+.zc-compare .zc-pill > button {
+  box-sizing: border-box;
+  height: 28px;
+  padding-block: 0;
+  line-height: 20px;
+}
 .zc-analysis-time {
   display: flex;
   align-items: center;
@@ -41,6 +53,11 @@
   color: #ccc;
   box-shadow: none;
   cursor: default;
+}
+.zc-analysis-time .zc-date {
+  box-sizing: border-box;
+  height: 32px;
+  min-height: 32px;
 }
 .zc-analysis-time .zc-date:disabled img { opacity: 1; }
 .zc-analysis-time .zc-date:disabled small { color: #ccc; }
@@ -72,11 +89,11 @@
 }
 
 .zc-overview-head { height: auto; min-height: 32px; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
-.zc-overview-actions { align-items: center; flex-wrap: wrap; }
+.zc-overview-actions { align-items: center; flex-wrap: wrap; gap: 20px; }
 .zc-overview-buttons { display: flex; align-items: center; gap: 16px; }
 .zc-overview-buttons .is-refreshing img { animation: zc-refresh-spin .7s linear infinite; }
 .zc-analysis-select { position: relative; width: 154px; flex: none; }
-.zc-analysis-select summary { display: flex; align-items: center; gap: 8px; height: 32px; border-radius: 20px; padding: 0 12px; background: #fff; box-shadow: 0 0 6px #00000014; color: #333; cursor: pointer; list-style: none; }
+.zc-analysis-select summary { box-sizing: border-box; display: flex; align-items: center; gap: 8px; height: 32px; min-height: 32px; border-radius: 20px; padding: 0 12px; background: #fff; box-shadow: 0 0 6px #00000014; color: #333; cursor: pointer; list-style: none; }
 .zc-analysis-select summary::-webkit-details-marker { display: none; }
 .zc-analysis-select summary > span { flex: none; color: #999; }
 .zc-analysis-select summary > strong { flex: 1; min-width: 0; font-weight: 400; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -249,3 +266,11 @@
 }
 .zc-overview-help:hover > [role="tooltip"],
 .zc-overview-help:focus-within > [role="tooltip"] { display: block !important; }
+
+@media (min-width: 1201px) {
+  .zc-compare .zc-section-head,
+  .zc-compare .zc-mo-head,
+  .zc-compare .zc-manager-allocation-head {
+    zoom: calc(1 / var(--zc-scale, 1));
+  }
+}

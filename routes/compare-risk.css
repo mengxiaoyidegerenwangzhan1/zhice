@@ -3,7 +3,7 @@
 }
 
 .zc-risk-frequency {
-  margin-inline-end: 8px;
+  margin-inline-end: 0;
 }
 
 .zc-risk-view > section + section {
@@ -42,8 +42,10 @@
 }
 
 .zc-risk-heading small {
-  color: #555759;
+  color: #666;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
   font-size: 14px;
+  font-weight: 400;
   line-height: 20px;
 }
 
@@ -102,7 +104,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 20px;
   min-width: 0;
   max-width: 100%;
 }
@@ -118,7 +120,7 @@
 }
 
 .zc-risk-setting-benchmark {
-  margin-inline-end: 8px;
+  margin-inline-end: 0;
 }
 
 .zc-risk-setting-benchmark > * {
@@ -653,7 +655,7 @@
   .zc-compare .zc-allocation-actions > .zc-allocation-select {
     grid-column: 1 / -1;
     max-width: 100%;
-    margin-top: 12px;
+    margin-top: 20px;
   }
 
   .zc-compare .zc-overview-actions > .zc-analysis-time,
@@ -691,7 +693,7 @@
   .zc-risk-head .zc-risk-toolbar {
     grid-column: 1 / -1;
     grid-row: 2;
-    margin-top: 12px;
+    margin-top: 20px;
   }
 
   .zc-risk-toolbar .zc-analysis-time {
@@ -717,8 +719,8 @@
   }
 
   .zc-risk-heading small {
-    font-size: 12px;
-    line-height: 17px;
+    font-size: 14px;
+    line-height: 20px;
   }
 
   .zc-risk-head .zc-risk-actions,

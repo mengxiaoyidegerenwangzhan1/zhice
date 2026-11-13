@@ -10,7 +10,7 @@
 .zc-attr-help [role="tooltip"] { position: absolute; z-index: 10; top: 24px; left: -8px; width: 220px; border: 1px solid #b9b8d8; border-radius: 8px; padding: 8px 12px; background: #fff; box-shadow: 0 4px 12px #00000014; font-size: 12px; font-weight: 400; line-height: 18px; white-space: normal; visibility: hidden; pointer-events: none; }
 .zc-attr-help:hover [role="tooltip"], .zc-attr-help:focus-within [role="tooltip"] { visibility: visible; }
 .zc-attr-select { position: relative; width: 192px; flex: none; }
-.zc-attr-select summary { display: flex; align-items: center; gap: 8px; min-width: 0; height: 32px; padding: 0 12px; border-radius: 20px; background: #fff; box-shadow: 0 0 12px #00000014; color: #333; cursor: pointer; list-style: none; }
+.zc-attr-select summary { box-sizing: border-box; display: flex; align-items: center; gap: 8px; min-width: 0; height: 32px; min-height: 32px; padding: 0 12px; border-radius: 20px; background: #fff; box-shadow: 0 0 12px #00000014; color: #333; cursor: pointer; list-style: none; }
 .zc-attr-select summary::-webkit-details-marker { display: none; }
 .zc-attr-select summary > span { flex: none; color: #999; line-height: 20px; }
 .zc-attr-select summary strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 20px; font-weight: 400; }
@@ -77,11 +77,11 @@
 .zc-attr-factor-label { display: block; }
 @media (max-width: 1380px) {
   .zc-attribution-view .zc-attr-head { flex-wrap: wrap; }
-  .zc-attr-toolbar { flex-wrap: wrap; justify-content: flex-start; row-gap: 12px; }
+  .zc-attr-toolbar { flex-wrap: wrap; justify-content: flex-start; row-gap: 20px; }
 }
 @media (max-width: 900px) {
   .zc-attr-table { min-width: 1100px; }
   .zc-attr-factor-table { min-width: 720px; }
-  .zc-attr-toolbar { gap: 12px; }
+  .zc-attr-toolbar { gap: 20px; }
   .zc-attr-select { width: 192px; }
 }

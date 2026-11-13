@@ -61,7 +61,7 @@
   .zc-manager-allocation-heading { grid-column: 1; grid-row: 1; min-height: 32px; flex-wrap: wrap; }
   .zc-manager-allocation-actions { display: contents; }
   .zc-manager-allocation-tools { grid-column: 2; grid-row: 1; justify-self: end; }
-  .zc-manager-allocation-actions > .zc-analysis-select { grid-column: 1 / -1; margin-top: 12px; max-width: 100%; }
+  .zc-manager-allocation-actions > .zc-analysis-select { grid-column: 1 / -1; margin-top: 20px; max-width: 100%; }
   .zc-manager-allocation-heading small { margin-left: 0; white-space: normal; }
 }
 
