@@ -73,9 +73,6 @@
 .lt-month-options{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:56px;gap:20px 8px;align-items:center;justify-items:center;padding-top:12px}
 .lt-month-options>button{width:100%;height:40px;border-radius:8px}
 .lt-month-options>button:hover,.lt-month-options>button.is-selected{background:var(--lt-range);color:var(--lt-primary)}
-.lt-result{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin-top:24px;min-height:20px;font-size:12px;color:#666}
-.lt-result-label{color:#999}
-.lt-result-meta{color:#999}
 .lt-error{font-size:12px;line-height:20px;color:#c64659;margin:8px 0 0}
 @media(max-width:1080px){.lt-calendar{left:auto;right:0}}
 @media(max-width:700px){.lt-controls{gap:16px}.lt-calendar{left:0;right:auto;width:min(627px,calc(100vw - 56px));height:auto;min-height:324px}.lt-month{padding:12px 8px}.lt-month-head{margin-bottom:12px}.linked-time-widget .lt-nav{width:18px}.lt-year-month{font-size:14px;gap:4px}.lt-days{grid-auto-rows:30px;row-gap:6px}.linked-time-widget .lt-days>button{height:30px}.lt-date-wrap{max-width:100%}.lt-month-options{gap:10px 4px;grid-auto-rows:56px}.lt-calendar{z-index:36}.lt-more-panel{z-index:37}}
