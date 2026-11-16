@@ -26,7 +26,7 @@
 .lt-icon-prev-year{--lt-icon:url("assets/time/prev-year.svg");mask-size:9.2px 9.2px;-webkit-mask-size:9.2px 9.2px}
 .lt-icon-next-year{--lt-icon:url("assets/time/next-year.svg");mask-size:9.2px 9.2px;-webkit-mask-size:9.2px 9.2px}
 .lt-more-panel{position:absolute;z-index:35;top:40px;left:0;width:271px;padding:16px 12px;border:1px solid var(--lt-line);border-radius:8px;box-shadow:0 4px 12px #00000014;background:#fff;display:flex;flex-direction:column;gap:12px}
-.lt-menu-group{display:flex;flex-direction:column;gap:6px}
+.lt-menu-group{position:relative;display:flex;flex-direction:column;gap:6px}
 .lt-menu-heading{color:var(--lt-muted);font-size:12px;line-height:17px}
 .lt-option-grid{display:grid;gap:8px 16px;justify-items:start}
 .lt-intervals{grid-template-columns:repeat(3,max-content)}
@@ -35,7 +35,7 @@
 .lt-special-options>.lt-manager-toggle.is-open{background:var(--lt-canvas);color:#7774b3;border:1px solid var(--lt-line)}
 .lt-manager-toggle .lt-icon-caret{transform:rotate(90deg)}
 .lt-manager-toggle.is-open .lt-icon-caret{transform:rotate(-90deg)}
-.lt-manager-list{display:flex;flex-direction:column;margin-top:0}
+.lt-manager-list{position:absolute;z-index:2;top:calc(100% + 6px);left:0;width:100%;max-height:240px;overflow:auto;display:flex;flex-direction:column;padding:6px 4px;border:1px solid var(--lt-line);border-radius:8px;box-shadow:0 4px 12px #00000014;background:#fff}
 .linked-time-widget .lt-manager-row{display:flex;align-items:center;gap:6px;min-height:29px;padding:6px 8px;border-radius:4px;font-size:12px;line-height:17px;text-align:left;white-space:nowrap;width:100%}
 .lt-manager-row .lt-icon-check{opacity:0;width:10px;height:10px;margin-right:2px}
 .lt-manager-row.is-selected{color:var(--lt-primary)}
