@@ -51,7 +51,8 @@
 .linked-time-widget .lt-input.is-active{color:var(--lt-primary)}
 .lt-input.is-active::placeholder{color:var(--lt-primary)}
 .lt-to{flex:none;color:var(--lt-muted);width:14px;text-align:center}
-.linked-time-widget .lt-clear{width:14px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--lt-muted);flex:none}
+.linked-time-widget .lt-clear{width:14px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--lt-muted);flex:none;opacity:0;pointer-events:none}
+.lt-date-field:hover .lt-clear:not(:disabled),.lt-date-field:focus-within .lt-clear:not(:disabled){opacity:1;pointer-events:auto}
 .lt-clear:hover{color:var(--lt-primary)}
 .lt-calendar{position:absolute;top:40px;left:0;z-index:34;display:flex;width:314px;height:324px;border:1px solid var(--lt-line);border-radius:8px;box-shadow:0 4px 12px #00000014;background:#fff;overflow:hidden}
 .lt-month{width:312px;flex:none;min-width:0;padding:16px;display:flex;flex-direction:column;gap:0}
