@@ -6,7 +6,7 @@
   directory.setAttribute('aria-label', '组件目录');
   directory.innerHTML = '<div class="directory-links"></div>';
   const directoryLinks = directory.querySelector('.directory-links');
-  const componentIds = ['business-tags', 'tabs', 'select', 'table', 'buttons', 'date', 'quick', 'back-top'];
+  const componentIds = ['business-tags', 'tabs', 'select', 'table', 'buttons', 'time-range', 'back-top'];
 
   components.forEach((component, index) => {
     component.id = 'component-' + (component.dataset.catalogId || componentIds[index]);
@@ -20,7 +20,8 @@
   componentPanel.classList.add('has-component-directory');
 
   function visitComponentHash() {
-    const id = location.hash.slice(1);
+    let id = location.hash.slice(1);
+    if (id === 'component-date' || id === 'component-quick') id = 'component-time-range';
     if (!id.startsWith('component-')) return;
     const component = document.getElementById(id);
     if (!component) return;
