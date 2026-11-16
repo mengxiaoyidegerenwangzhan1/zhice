@@ -7,8 +7,8 @@
     ['选择更多区间或年度', '其他选项取消高亮，更多回显所选名称，面板收起。'],
     ['展开经理任期', '在下方展开经理名单，保留同级的共同任期入口及当前生效的范围。'],
     ['选择经理', '更多与特殊区间入口均回显经理任期名称，日期和结果同步更新，面板收起；再次展开时显示经理名单并保留勾选。'],
-    ['手动修改日期', '完整有效的范围生效后，清除快捷项高亮，更多恢复原名称。'],
-    ['选择起止日期', '点击字段切换单日历，选好开始日期后自动进入结束日期选择。'],
+    ['手动修改日期', '可在快捷区间基础上单独修改任一端，保留另一端；有效的新范围生效后清除快捷项高亮，更多恢复原名称。'],
+    ['选择起止日期', '点击字段切换单日历，首次选好开始日期后自动进入结束日期选择；开始不能晚于结束，结束不能早于开始。'],
     ['打开日历或尚未选完', '保留上一次生效的结果及快捷项选中态。'],
     ['清空日期', '有日期时，移入日期框或获得焦点后显示右侧清空按钮，提示“清空日期”；一次清空两端日期和快捷项选中态。']
   ];
@@ -17,7 +17,8 @@
     ['更多面板', '宽271px，内边距上下16px、左右12px，圆角8px，描边#B9B8D8'],
     ['日期输入框', '294 × 32px，圆角20px，日历图标默认#666，移入或展开使用#6865A7'],
     ['单日历', '314 × 324px，内边距16px，日期单元格40 × 32px，行间距6px；打开时定位当前字段对应月份'],
-    ['当前字段', '开始或结束字段使用主色强调；开始选定后自动切换结束字段，完整合法的起止日期选定后关闭面板'],
+    ['当前字段', '开始或结束字段使用主色强调；首次开始选定后自动切换结束字段，已有完整范围时可单独修改任一端，另一端保留'],
+    ['日期边界', '结束日历禁用开始日期之前的日期；开始日历禁用结束日期之后的日期，允许起止同一天；月份和年份导航遵循相同边界'],
     ['选中区间', '起止数字使用24px圆形主色底；浅紫区间端点圆弧半径16px，上下及外侧与主色圆均间隔4px'],
     ['日单元格', '40 × 32px，数字区域24 × 24px，14px / 20px；普通#666，悬停仅数字变为#6865A7，今日使用Medium，禁用#CCC'],
     ['日状态', '普通、悬停、今日、禁用、区间内、区间内今日、起点、终点；区间底色#F4F4FC，起止数字为白色Regular'],
@@ -67,7 +68,7 @@
         committed:{...initial},
         draft:{...initial},
         selected:restored ? host.dataset.ltSelection || null : null,moreLabel:restored ? host.dataset.ltLabel || '更多' : '更多',moreOpen:false,managerOpen:false,calendarOpen:false,
-        months:[monthValue(today),monthValue(today)+1],views:[null,null],active:'start',previewEnd:'',endFirst:false,revision:0,error:''
+        months:[monthValue(today),monthValue(today)+1],views:[null,null],active:'start',previewEnd:'',revision:0,error:''
       };
       const buttons = ['成立以来','近1年','近3年'];
       host.innerHTML = '<div class="lt-controls"><div class="lt-quick"><div class="lt-bar" role="group" aria-label="快捷时间范围">' +
@@ -146,7 +147,6 @@
         state.managerOpen = false;
         state.views = [null,null];
         state.previewEnd = '';
-        state.endFirst = false;
         state.calendarOpen = false;
         setError('');
         renderFields();
@@ -180,7 +180,6 @@
           const currentMonth = monthValue(today);
           state.months = [state.committed.start?monthValue(state.committed.start):currentMonth,state.committed.end?monthValue(state.committed.end):currentMonth];
           state.views = [null,null];
-          state.endFirst = false;
         }
         if (changedField) {
           const value = state.draft[active] || state.draft.start || today;
@@ -198,16 +197,25 @@
         state.calendarOpen = false;
         state.views = [null,null];
         state.previewEnd = '';
-        state.endFirst = false;
         if (discard) state.draft = {...state.committed};
         setError('');
         renderFields();
       }
-      function monthAvailable(month) { return monthEnd(month) >= minimum && monthStart(month) <= maximum; }
+      function dateBounds(side) {
+        return {
+          min: side === 1 && withinBounds(state.draft.start) ? state.draft.start : minimum,
+          max: side === 0 && withinBounds(state.draft.end) ? state.draft.end : maximum
+        };
+      }
+      function monthAvailable(month) {
+        const bounds = dateBounds(state.active === 'start' ? 0 : 1);
+        return monthEnd(month) >= bounds.min && monthStart(month) <= bounds.max;
+      }
       function renderCalendar() {
         const panel = get('[data-lt-calendar]');
         const side = state.active==='start' ? 0 : 1;
         const month = state.months[side];
+        const bounds = dateBounds(side);
         const fieldName = side ? '结束日期' : '开始日期';
         panel.innerHTML = (() => {
           const year = Math.floor(month/12), mon = month%12;
@@ -221,16 +229,18 @@
           if (view) {
             const values = view==='year'?Array.from({length:12},(_,i)=>year-5+i):Array.from({length:12},(_,i)=>i);
             body = '<div class="lt-month-options">' + values.map(value => {
-              const candidate = view==='year'?value*12+mon:year*12+value;
+              let candidate = view==='year'?value*12+mon:year*12+value;
+              if (view === 'year') candidate = Math.min(monthValue(bounds.max), Math.max(monthValue(bounds.min), candidate));
+              const available = view === 'year' ? Math.floor(candidate/12) === value : monthAvailable(candidate);
               const selected = view==='year'?value===year:value===mon;
-              return '<button type="button" data-lt-pick="'+candidate+'" data-lt-side="'+side+'" class="'+(selected?'is-selected':'')+'" '+(monthAvailable(candidate)?'':'disabled')+'>'+ (view==='year'?value:(value+1)+'月') + '</button>';
+              return '<button type="button" data-lt-pick="'+candidate+'" data-lt-side="'+side+'" class="'+(selected?'is-selected':'')+'" '+(available?'':'disabled')+'>'+ (view==='year'?value:(value+1)+'月') + '</button>';
             }).join('') + '</div>';
           } else {
             const first = new Date(Date.UTC(year,mon,1)).getUTCDay();
             const cells = Array.from({length:42},(_,index) => {
               const date = new Date(Date.UTC(year,mon,1-first+index)), value = format(date);
               const own = date.getUTCMonth()===mon;
-              const disabled = !own || !withinBounds(value) || (side===1 && parse(state.draft.start) && value<state.draft.start);
+              const disabled = !own || !withinBounds(value) || value < bounds.min || value > bounds.max;
               return {date,value,own,disabled};
             });
             const rangeStart = state.draft.start;
@@ -280,7 +290,6 @@
           state.calendarOpen=false;
           state.draft={...state.committed};
           state.previewEnd='';
-          state.endFirst=false;
           renderMore();renderFields();return;
         }
         if (button?.hasAttribute('data-lt-manager-toggle')) {state.managerOpen=!state.managerOpen;renderMore();return;}
@@ -306,18 +315,13 @@
           const side=Number(button.dataset.ltSide), value=button.dataset.ltDay;
           state.previewEnd='';
           setError('');
+          state.draft[side ? 'end' : 'start'] = value;
+          if (commit('manual')) return;
           if (!side) {
-            state.draft.start=value;
-            if (state.endFirst && state.draft.end>=value && commit('manual')) return;
-            state.draft.end='';
-            state.endFirst=false;
             state.active='end';
             state.months[1]=state.months[0];
             state.views[1]=null;
           } else {
-            state.draft.end=value;
-            if (commit('manual')) return;
-            state.endFirst=true;
             state.active='start';
             state.months[0]=state.months[1];
             state.views[0]=null;
