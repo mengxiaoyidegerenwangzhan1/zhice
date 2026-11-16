@@ -19,22 +19,13 @@
   componentPanel.prepend(directory);
   componentPanel.classList.add('has-component-directory');
 
-  const lastComponent = components[components.length - 1];
-  const scrollSpace = document.createElement('div');
-  scrollSpace.setAttribute('aria-hidden', 'true');
-  lastComponent.after(scrollSpace);
+  let navigationScrollY = null;
+  let arrivalAnimation = null;
 
   function scrollOffset() {
     const headerHeight = document.querySelector('.topbar').getBoundingClientRect().height;
     const directoryHeight = window.matchMedia('(max-width: 1050px)').matches ? directory.getBoundingClientRect().height : 0;
     return Math.max(85, headerHeight + directoryHeight + 16);
-  }
-
-  function updateScrollSpace() {
-    if (componentPanel.hidden) return;
-    const lastTop = lastComponent.getBoundingClientRect().top + window.scrollY;
-    const naturalTail = document.documentElement.scrollHeight - lastTop - scrollSpace.offsetHeight;
-    scrollSpace.style.height = Math.max(0, window.innerHeight - scrollOffset() - naturalTail) + 'px';
   }
 
   function highlightComponent(id) {
@@ -54,9 +45,18 @@
     if (!component) return;
     document.getElementById('visual-tab-components').click();
     requestAnimationFrame(() => {
-      updateScrollSpace();
       window.scrollTo({ top: window.scrollY + component.getBoundingClientRect().top - scrollOffset(), behavior: 'instant' });
+      navigationScrollY = window.scrollY;
       highlightComponent(component.id);
+      if (arrivalAnimation) arrivalAnimation.cancel();
+      arrivalAnimation = component.animate([
+        { backgroundColor: '#eeedf8' },
+        { backgroundColor: '#eeedf8', offset: 0.2 },
+        { backgroundColor: '#ffffff' }
+      ], {
+        duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 200 : 1600,
+        easing: 'ease-out'
+      });
     });
   }
   directoryLinks.addEventListener('click', event => {
@@ -72,15 +72,13 @@
     if (scrollFrame || componentPanel.hidden) return;
     scrollFrame = requestAnimationFrame(() => {
       scrollFrame = 0;
+      if (navigationScrollY !== null && Math.abs(window.scrollY - navigationScrollY) < 1) return;
+      navigationScrollY = null;
       const passed = components.filter(component => component.getBoundingClientRect().top <= scrollOffset() + 8);
       highlightComponent((passed[passed.length - 1] || components[0]).id);
     });
   }, { passive: true });
-  window.addEventListener('resize', updateScrollSpace);
-  document.fonts.ready.then(() => {
-    updateScrollSpace();
-    visitComponentHash();
-  });
+  document.fonts.ready.then(visitComponentHash);
 
   const iconGrid = document.getElementById('icon-library-grid');
   const icons = Array.from(iconGrid.querySelectorAll('.icon-cell'));
