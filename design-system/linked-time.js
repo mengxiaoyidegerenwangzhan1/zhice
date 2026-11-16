@@ -10,7 +10,7 @@
     ['手动修改日期', '完整有效的范围生效后，清除快捷项高亮，更多恢复原名称。'],
     ['选择起止日期', '点击字段切换单日历，选好开始日期后自动进入结束日期选择。'],
     ['打开日历或尚未选完', '保留上一次生效的结果及快捷项选中态。'],
-    ['清空日期', '清空日期和快捷项选中态，恢复占位提示。']
+    ['清空日期', '有日期时，移入日期框或获得焦点后显示右侧清空按钮，提示“清空日期”；一次清空两端日期和快捷项选中态。']
   ];
   const specHtml = '<h3>尺寸与样式</h3><table><thead><tr><th>规范项</th><th>值 / 说明</th></tr></thead><tbody>' + [
     ['快捷选择', '高32px，选项高28px，左右内边距12px，容器圆角32px，选项圆角22px'],
@@ -77,7 +77,7 @@
         '<div class="lt-date-wrap"><div class="lt-date-field" data-lt-date-field>' + icon('calendar') +
         '<input class="lt-input" data-lt-input="start" aria-label="开始日期" placeholder="开始日期" inputmode="numeric" maxlength="10" autocomplete="off">' +
         '<span class="lt-to">至</span><input class="lt-input" data-lt-input="end" aria-label="结束日期" placeholder="结束日期" inputmode="numeric" maxlength="10" autocomplete="off">' +
-        '<button type="button" class="lt-clear" data-lt-clear aria-label="清空日期">' + icon('clear') + '</button></div>' +
+        '<button type="button" class="lt-clear" data-lt-clear aria-label="清空日期" title="清空日期">' + icon('clear') + '</button></div>' +
         '<div class="lt-calendar" data-lt-calendar aria-label="开始日期选择面板" hidden></div></div></div>' +
         '<p class="lt-error" data-lt-error role="alert" hidden></p>';
       const get = selector => host.querySelector(selector);
@@ -108,7 +108,7 @@
         fields.start.setAttribute('aria-expanded',String(state.calendarOpen && state.active==='start'));
         fields.end.setAttribute('aria-expanded',String(state.calendarOpen && state.active==='end'));
         get('[data-lt-calendar]').setAttribute('aria-label',(state.active==='start'?'开始':'结束')+'日期选择面板');
-        get('[data-lt-clear]').hidden = !state.draft.start && !state.draft.end && !state.committed.start && !state.committed.end;
+        get('[data-lt-clear]').disabled = !state.draft.start && !state.draft.end && !state.committed.start && !state.committed.end;
       }
       function renderFields() {
         fields.start.value = state.draft.start;
@@ -375,7 +375,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-single-calendar')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-clear-hover')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
