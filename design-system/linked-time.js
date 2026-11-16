@@ -74,8 +74,7 @@
         '<span class="lt-to">至</span><input class="lt-input" data-lt-input="end" aria-label="结束日期" placeholder="结束日期" inputmode="numeric" maxlength="10" autocomplete="off">' +
         '<button type="button" class="lt-clear" data-lt-clear aria-label="清空日期">' + icon('clear') + '</button></div>' +
         '<div class="lt-calendar" data-lt-calendar aria-label="日期范围选择面板" hidden></div></div></div>' +
-        '<p class="lt-error" data-lt-error role="alert" hidden></p>' +
-        '<div class="lt-result" role="status" aria-live="polite"><span class="lt-result-label">当前生效范围</span><span data-lt-result></span><span class="lt-result-meta" data-lt-result-meta></span></div>';
+        '<p class="lt-error" data-lt-error role="alert" hidden></p>';
       const get = selector => host.querySelector(selector);
       const getAll = selector => host.querySelectorAll(selector);
       const fields = {start:get('[data-lt-input="start"]'),end:get('[data-lt-input="end"]')};
@@ -105,15 +104,13 @@
         fields.end.value = state.draft.end;
         renderSelection();
       }
-      function renderResult() {
+      function syncCommittedState() {
         const {start,end} = state.committed;
         host.dataset.ltState='committed';
         host.dataset.ltStart=start;
         host.dataset.ltEnd=end;
         host.dataset.ltSelection=state.selected || '';
         host.dataset.ltLabel=state.moreLabel;
-        get('[data-lt-result]').textContent = start && end ? start + ' 至 ' + end : '未选择日期';
-        get('[data-lt-result-meta]').textContent = start && end ? (Math.round((parse(end)-parse(start))/86400000)+1) + ' 天 · 演示数据' : '';
       }
       function setError(message) {
         state.error = message;
@@ -140,7 +137,7 @@
         state.calendarOpen = false;
         setError('');
         renderFields();
-        renderResult();
+        syncCommittedState();
         emitChange(source);
         return true;
       }
@@ -253,7 +250,7 @@
         if (button?.dataset.ltOption) return selectOption(button.dataset.ltOption);
         if (button?.hasAttribute('data-lt-clear')) {
           state.committed={start:'',end:''};state.draft={start:'',end:''};state.selected=null;state.moreLabel='更多';
-          closePanels();renderResult();emitChange('clear');return;
+          closePanels();syncCommittedState();emitChange('clear');return;
         }
         if (button?.dataset.ltNav) {
           state.months[Number(button.dataset.ltSide)]+=Number(button.dataset.ltNav);renderCalendar();return;
@@ -292,7 +289,7 @@
         if (event.key==='Enter' && event.target.dataset.ltInput) {event.preventDefault();commit('manual');}
       });
       host.linkedTimeApi={getState:()=>JSON.parse(JSON.stringify(state)),select:selectOption,clear:()=>get('[data-lt-clear]').click(),close:closePanels};
-      renderMore();renderFields();renderResult();
+      renderMore();renderFields();syncCommittedState();
     });
     if (!document.linkedTimeOutsideListening) {
       document.linkedTimeOutsideListening = true;
