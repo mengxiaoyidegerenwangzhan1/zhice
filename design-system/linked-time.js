@@ -16,6 +16,7 @@
     ['更多面板', '宽271px，内边距上下16px、左右12px，圆角8px，描边#B9B8D8'],
     ['日期输入框', '294 × 32px，圆角20px，日历图标默认#666，移入或展开使用#6865A7'],
     ['双日历', '627 × 324px，左右年月独立，单侧内边距16px，日期行高32px、行间距6px'],
+    ['选中区间', '起止数字使用24px圆形主色底；浅紫区间起点左侧、终点右侧使用16px圆弧'],
     ['字体与配色', '苹方14px，经理任期明细12px；选中背景#F2F3F5，区间底色#F4F4FC'],
     ['演示数据', '成立日2001-12-18；孙悦萌2025-08-25至今；姜华2024-06-07至2025-08-25。共同任期使用演示重叠范围。']
   ].map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') +
@@ -214,7 +215,7 @@
                 const endpoint = cell.own && (cell.value===rangeStart || cell.value===rangeEnd);
                 const range = cell.own && inRange(cell.value);
                 return '<button type="button" data-lt-day="'+cell.value+'" data-lt-side="'+side+'" aria-label="'+(side?'结束日期 ':'开始日期 ')+cell.value+'" aria-pressed="'+Boolean(endpoint)+'" '+(cell.disabled?'disabled':'')+' class="'+
-                  [endpoint?'is-endpoint':'',range?'is-range':'',cell.value===today?'is-today':''].join(' ')+'"><span>'+cell.date.getUTCDate()+'</span></button>';
+                  [endpoint?'is-endpoint':'',range?'is-range':'',range&&cell.value===rangeStart?'is-range-start':'',range&&cell.value===rangeEnd?'is-range-end':'',cell.value===today?'is-today':''].join(' ')+'"><span>'+cell.date.getUTCDate()+'</span></button>';
               }).join('') + '</div>';
           }
           return '<div class="lt-month" data-lt-month="'+side+'">'+header+body+'</div>';
