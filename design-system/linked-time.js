@@ -17,6 +17,8 @@
     ['日期输入框', '294 × 32px，圆角20px，日历图标默认#666，移入或展开使用#6865A7'],
     ['双日历', '627 × 324px，左右年月独立，单侧内边距16px，日期行高32px、行间距6px'],
     ['选中区间', '起止数字使用24px圆形主色底；浅紫区间端点圆弧半径16px，上下及外侧与主色圆均间隔4px'],
+    ['日单元格', '40 × 32px，数字区域24 × 24px，14px / 20px；普通#666，悬停仅数字变为#6865A7，今日使用Medium，禁用#CCC'],
+    ['日状态', '普通、悬停、今日、禁用、区间内、区间内今日、起点、终点；区间底色#F4F4FC，起止数字为白色Regular'],
     ['字体与配色', '苹方14px，经理任期明细12px；选中背景#F2F3F5，区间底色#F4F4FC'],
     ['演示数据', '成立日2001-12-18；孙悦萌2025-08-25至今；姜华2024-06-07至2025-08-25。共同任期使用演示重叠范围。']
   ].map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') +
@@ -305,7 +307,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-gap4')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-day-atoms')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
