@@ -66,6 +66,9 @@
 .linked-time-widget .lt-days>button{height:32px;position:relative;display:flex;align-items:center;justify-content:center;border-radius:0;font-size:14px;min-width:0;background:transparent}
 .lt-days>button>span{display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;position:relative}
 .lt-days>button.is-range{background:var(--lt-range)}
+.lt-days>button.is-range.is-range-start{border-radius:16px 0 0 16px}
+.lt-days>button.is-range.is-range-end{border-radius:0 16px 16px 0}
+.lt-days>button.is-range.is-range-start.is-range-end{border-radius:16px}
 .lt-days>button.is-endpoint>span{background:var(--lt-primary);color:#fff}
 .lt-days>button.is-today:not(.is-endpoint)>span{color:var(--lt-primary);font-weight:500}
 .lt-days>button:not(:disabled):not(.is-endpoint):hover>span{outline:1px solid var(--lt-primary);outline-offset:-1px;color:var(--lt-primary)}
