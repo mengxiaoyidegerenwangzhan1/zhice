@@ -59,7 +59,7 @@
 .lt-month-head{display:flex;align-items:center;justify-content:center;height:24px;flex:none;width:100%;margin-bottom:12px}
 .linked-time-widget .lt-nav{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex:none;color:var(--lt-text)}
 .lt-nav:hover{color:var(--lt-primary)}
-.lt-nav:disabled{opacity:.35}
+.linked-time-widget .lt-nav:disabled{color:#cbcbcb;opacity:1}
 .lt-year-month{display:flex;justify-content:center;align-items:center;gap:8px;flex:1;height:24px;min-width:0;color:var(--lt-heading);font-size:16px;font-weight:500;white-space:nowrap}
 .lt-year-month button{height:24px}
 .lt-year-month button:hover,.lt-year-month button.is-active{color:var(--lt-primary)}
