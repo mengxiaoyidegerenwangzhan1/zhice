@@ -5,7 +5,7 @@
   const rules = [
     ['点击快捷项', '选项高亮，日期框同步显示起止日期，结果立即更新。'],
     ['选择更多区间或年度', '其他选项取消高亮，更多回显所选名称，面板收起。'],
-    ['展开经理任期', '展开经理名单，保持当前生效的范围。'],
+    ['展开经理任期', '在下方展开经理名单，保留同级的共同任期入口及当前生效的范围。'],
     ['选择经理', '更多与特殊区间入口均回显经理任期名称，日期和结果同步更新，面板收起；再次展开时显示经理名单并保留勾选。'],
     ['手动修改日期', '完整有效的范围生效后，清除快捷项高亮，更多恢复原名称。'],
     ['选择起止日期', '点击字段切换单日历，选好开始日期后自动进入结束日期选择。'],
@@ -166,7 +166,7 @@
           icon('check') + '<span class="lt-manager-name">' + manager.name + '</span><span class="lt-manager-dates">' + manager.start + ' – ' + manager.endLabel + '</span></button>').join('');
         get('[data-lt-more-panel]').innerHTML = '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
           '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '">' + (selectedManager?selectedManager.name+'任期':'经理任期') + icon('caret') + '</button>' +
-          (state.managerOpen?'':option('common','共同任期')) + '</div>' +
+          option('common','共同任期') + '</div>' +
           (state.managerOpen?'<div class="lt-manager-list">'+managerRows+'</div>':'') + '</div>' +
           '<div class="lt-menu-group"><span class="lt-menu-heading">区间</span><div class="lt-option-grid lt-intervals">' +
           [['month','近1月'],['three-months','近3月'],['six-months','近6月'],['five-years','近5年']].map(row=>option(...row)).join('') + '</div></div>' +
