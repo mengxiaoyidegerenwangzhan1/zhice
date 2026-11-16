@@ -19,6 +19,7 @@
     ['单日历', '314 × 324px，内边距16px，日期单元格40 × 32px，行间距6px；打开时定位当前字段对应月份'],
     ['当前字段', '开始或结束字段使用主色强调；首次开始选定后自动切换结束字段，已有完整范围时可单独修改任一端，另一端保留'],
     ['日期边界', '结束日历禁用开始日期之前的日期；开始日历禁用结束日期之后的日期，允许起止同一天；月份和年份导航遵循相同边界'],
+    ['日历导航', '双箭头位于外侧，切换年份；单箭头位于内侧，切换月份；不可切换时禁用并使用#CBCBCB'],
     ['选中区间', '起止数字使用24px圆形主色底；浅紫区间端点圆弧半径16px，上下及外侧与主色圆均间隔4px'],
     ['日单元格', '40 × 32px，数字区域24 × 24px，14px / 20px；普通#666，悬停仅数字变为#6865A7，今日使用Medium，禁用#CCC'],
     ['日状态', '普通、悬停、今日、禁用、区间内、区间内今日、起点、终点；区间底色#F4F4FC，起止数字为白色Regular'],
@@ -221,10 +222,10 @@
           const year = Math.floor(month/12), mon = month%12;
           const arrow = (kind,amount,aria) => '<button type="button" class="lt-nav" data-lt-nav="' + amount + '" data-lt-side="' + side + '" aria-label="' + fieldName + aria + '" ' + (monthAvailable(month+amount)?'':'disabled') + '>' + icon(kind) + '</button>';
           const view = state.views[side];
-          const header = '<div class="lt-month-head">' + arrow('prev-month',-1,'上个月') + arrow('prev-year',-12,'上一年') +
+          const header = '<div class="lt-month-head">' + arrow('prev-year',-12,'上一年') + arrow('prev-month',-1,'上个月') +
             '<div class="lt-year-month"><button type="button" data-lt-view="year" data-lt-side="'+side+'" aria-label="'+fieldName+'选择年份" class="'+(view==='year'?'is-active':'')+'">'+year+'</button>' +
             '<button type="button" data-lt-view="month" data-lt-side="'+side+'" aria-label="'+fieldName+'选择月份" class="'+(view==='month'?'is-active':'')+'">'+(mon+1)+'月</button></div>' +
-            arrow('next-year',12,'下一年') + arrow('next-month',1,'下个月') + '</div>';
+            arrow('next-month',1,'下个月') + arrow('next-year',12,'下一年') + '</div>';
           let body = '';
           if (view) {
             const values = view==='year'?Array.from({length:12},(_,i)=>year-5+i):Array.from({length:12},(_,i)=>i);
@@ -381,7 +382,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-manager-selected')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-calendar-arrows')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
