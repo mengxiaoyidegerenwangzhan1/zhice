@@ -528,7 +528,15 @@ async function svgFor(element) {
     const border = parseFloat(style.borderTopWidth);
     const background = style.backgroundColor;
     if (background !== 'rgba(0, 0, 0, 0)' || border) {
-      parts.push('<rect x="' + (x + border / 2) + '" y="' + (y + border / 2) + '" width="' + Math.max(0, rectangle.width - border) + '" height="' + Math.max(0, rectangle.height - border) + '" rx="' + Math.min(parseFloat(style.borderTopLeftRadius) || 0, rectangle.height / 2) + '" fill="' + (background === 'rgba(0, 0, 0, 0)' ? 'none' : background) + '" stroke="' + (border ? style.borderTopColor : 'none') + '" stroke-width="' + border + '"/>');
+      if (node.classList.contains('is-range-start') || node.classList.contains('is-range-end')) {
+        const leftRadius = node.classList.contains('is-range-start') ? rectangle.height / 2 : 0;
+        const rightRadius = node.classList.contains('is-range-end') ? rectangle.height / 2 : 0;
+        const right = x + rectangle.width;
+        const bottom = y + rectangle.height;
+        parts.push('<path d="M' + (x + leftRadius) + ' ' + y + 'H' + (right - rightRadius) + 'Q' + right + ' ' + y + ' ' + right + ' ' + (y + rightRadius) + 'V' + (bottom - rightRadius) + 'Q' + right + ' ' + bottom + ' ' + (right - rightRadius) + ' ' + bottom + 'H' + (x + leftRadius) + 'Q' + x + ' ' + bottom + ' ' + x + ' ' + (bottom - leftRadius) + 'V' + (y + leftRadius) + 'Q' + x + ' ' + y + ' ' + (x + leftRadius) + ' ' + y + 'Z" fill="' + background + '"/>');
+      } else {
+        parts.push('<rect x="' + (x + border / 2) + '" y="' + (y + border / 2) + '" width="' + Math.max(0, rectangle.width - border) + '" height="' + Math.max(0, rectangle.height - border) + '" rx="' + Math.min(parseFloat(style.borderTopLeftRadius) || 0, rectangle.height / 2) + '" fill="' + (background === 'rgba(0, 0, 0, 0)' ? 'none' : background) + '" stroke="' + (border ? style.borderTopColor : 'none') + '" stroke-width="' + border + '"/>');
+      }
     }
     if (node.classList.contains('fund-tabs-demo')) {
       parts.push('<rect x="'+x+'" y="'+(y+rectangle.height-1)+'" width="'+rectangle.width+'" height="1" fill="#d9d9d9"/>');
