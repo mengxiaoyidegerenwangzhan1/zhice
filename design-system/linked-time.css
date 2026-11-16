@@ -70,9 +70,9 @@
 .lt-days>button.is-range.is-range-end{clip-path:inset(0 max(0px,calc(50% - 16px)) 0 0 round 0 16px 16px 0)}
 .lt-days>button.is-range.is-range-start.is-range-end{clip-path:inset(0 max(0px,calc(50% - 16px)) 0 max(0px,calc(50% - 16px)) round 16px)}
 .lt-days>button.is-endpoint>span{background:var(--lt-primary);color:#fff}
-.lt-days>button.is-today:not(.is-endpoint)>span{color:var(--lt-primary);font-weight:500}
-.lt-days>button:not(:disabled):not(.is-endpoint):hover>span{outline:1px solid var(--lt-primary);outline-offset:-1px;color:var(--lt-primary)}
-.lt-days>button:disabled{color:#cbcbcb}
+.lt-days>button.is-today:not(:disabled):not(.is-endpoint)>span{color:var(--lt-primary);font-weight:500}
+.lt-days>button:not(:disabled):not(.is-endpoint):hover>span{color:var(--lt-primary)}
+.linked-time-widget .lt-days>button:disabled{color:#ccc}
 .lt-month-options{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:56px;gap:20px 8px;align-items:center;justify-items:center;padding-top:12px}
 .lt-month-options>button{width:100%;height:40px;border-radius:8px}
 .lt-month-options>button:hover,.lt-month-options>button.is-selected{background:var(--lt-range);color:var(--lt-primary)}
