@@ -3,6 +3,7 @@
 
   const title = '时段快捷选择与日期区间';
   const rules = [
+    ['默认进入', '有时段快捷选择时，选中配置的默认项并同步日期范围；单独使用日期框时保持为空。'],
     ['点击快捷项', '选项高亮，日期框同步显示起止日期，结果立即更新。'],
     ['选择更多区间或年度', '其他选项取消高亮，更多回显所选名称，面板收起。'],
     ['展开经理任期', '点击后在入口下方显示二级浮层，保留同级特殊区间及其他选项的位置；当前生效范围保持不变。'],
@@ -13,6 +14,7 @@
     ['清空日期', '有日期时，移入日期框或获得焦点后显示右侧清空按钮，提示“清空日期”；一次清空两端日期和快捷项选中态。']
   ];
   const specHtml = '<h3>尺寸与样式</h3><table><thead><tr><th>规范项</th><th>值 / 说明</th></tr></thead><tbody>' + [
+    ['默认范围', '组合组件默认选中成立以来；可用data-default-shortcut指定其他默认项；data-shortcuts="false"时仅显示日期框，初始为空'],
     ['快捷选择', '高32px，选项高28px，左右内边距12px，容器圆角32px，选项圆角22px'],
     ['更多面板', '宽271px，内边距上下16px、左右12px，圆角8px，描边#B9B8D8'],
     ['经理任期浮层', '与主面板内容区等宽，距入口下方6px，圆角8px，描边#B9B8D8；悬停底色铺满整行，左右无外间距；选中经理显示勾选和主色文字'],
@@ -67,6 +69,7 @@
         {key:'jiang',name:'姜华',start:'2024-06-07',end:'2025-08-25',endLabel:'2025-08-25'}
       ];
       const restored = host.dataset.ltState === 'committed';
+      const hasShortcuts = host.dataset.shortcuts !== 'false';
       const initial = restored ? {start:host.dataset.ltStart || '',end:host.dataset.ltEnd || ''} : {start:'',end:''};
       const state = {
         committed:{...initial},
@@ -87,6 +90,7 @@
         '<p class="lt-error" data-lt-error role="alert" hidden></p>';
       const get = selector => host.querySelector(selector);
       const getAll = selector => host.querySelectorAll(selector);
+      get('.lt-quick').hidden = !hasShortcuts;
       const fields = {start:get('[data-lt-input="start"]'),end:get('[data-lt-input="end"]')};
 
       function emitChange(source) {
@@ -160,7 +164,7 @@
       }
       function applyRange(start,end,selection,label) {
         state.draft = {start:clamp(start),end:clamp(end)};
-        commit('shortcut',selection,label);
+        return commit('shortcut',selection,label);
       }
       function renderMore() {
         const year = Number(parts.year);
@@ -379,6 +383,7 @@
       });
       host.linkedTimeApi={getState:()=>JSON.parse(JSON.stringify(state)),select:selectOption,clear:()=>get('[data-lt-clear]').click(),close:closePanels};
       renderMore();renderFields();syncCommittedState();
+      if (!restored && hasShortcuts && !selectOption(host.dataset.defaultShortcut || 'inception')) selectOption('inception');
     });
     if (!document.linkedTimeOutsideListening) {
       document.linkedTimeOutsideListening = true;
@@ -409,7 +414,7 @@
       const saved=document.createElement('div');
       saved.className='linked-time-widget';
       saved.setAttribute('data-linked-time','');
-      ['ltState','ltStart','ltEnd','ltSelection','ltLabel','inception','min','max'].forEach(key=>{
+      ['ltState','ltStart','ltEnd','ltSelection','ltLabel','inception','min','max','shortcuts','defaultShortcut'].forEach(key=>{
         if (current.dataset[key]!==undefined) saved.dataset[key]=current.dataset[key];
       });
       example=saved.outerHTML;
