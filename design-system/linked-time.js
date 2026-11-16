@@ -20,6 +20,7 @@
     ['当前字段', '开始或结束字段使用主色强调；首次开始选定后自动切换结束字段，已有完整范围时可单独修改任一端，另一端保留'],
     ['日期边界', '结束日历禁用开始日期之前的日期；开始日历禁用结束日期之后的日期，允许起止同一天；月份和年份导航遵循相同边界'],
     ['日历导航', '双箭头位于外侧，切换年份；单箭头位于内侧，切换月份；不可切换时禁用并使用#CBCBCB'],
+    ['年份快切', '目标年份仍有可选日期时允许切换；原月份超出范围时定位至该年的边界月份，整年无可选日期时禁用'],
     ['选中区间', '起止数字使用24px圆形主色底；浅紫区间端点圆弧半径16px，上下及外侧与主色圆均间隔4px'],
     ['日单元格', '40 × 32px，数字区域24 × 24px，14px / 20px；普通#666，悬停仅数字变为#6865A7，今日使用Medium，禁用#CCC'],
     ['日状态', '普通、悬停、今日、禁用、区间内、区间内今日、起点、终点；区间底色#F4F4FC，起止数字为白色Regular'],
@@ -212,6 +213,13 @@
         const bounds = dateBounds(state.active === 'start' ? 0 : 1);
         return monthEnd(month) >= bounds.min && monthStart(month) <= bounds.max;
       }
+      function navigationMonth(month, amount) {
+        const target = month + amount;
+        if (Math.abs(amount) !== 12) return target;
+        const bounds = dateBounds(state.active === 'start' ? 0 : 1);
+        const bounded = Math.min(monthValue(bounds.max), Math.max(monthValue(bounds.min), target));
+        return Math.floor(bounded / 12) === Math.floor(target / 12) ? bounded : target;
+      }
       function renderCalendar() {
         const panel = get('[data-lt-calendar]');
         const side = state.active==='start' ? 0 : 1;
@@ -220,7 +228,7 @@
         const fieldName = side ? '结束日期' : '开始日期';
         panel.innerHTML = (() => {
           const year = Math.floor(month/12), mon = month%12;
-          const arrow = (kind,amount,aria) => '<button type="button" class="lt-nav" data-lt-nav="' + amount + '" data-lt-side="' + side + '" aria-label="' + fieldName + aria + '" ' + (monthAvailable(month+amount)?'':'disabled') + '>' + icon(kind) + '</button>';
+          const arrow = (kind,amount,aria) => '<button type="button" class="lt-nav" data-lt-nav="' + amount + '" data-lt-side="' + side + '" aria-label="' + fieldName + aria + '" ' + (monthAvailable(navigationMonth(month,amount))?'':'disabled') + '>' + icon(kind) + '</button>';
           const view = state.views[side];
           const header = '<div class="lt-month-head">' + arrow('prev-year',-12,'上一年') + arrow('prev-month',-1,'上个月') +
             '<div class="lt-year-month"><button type="button" data-lt-view="year" data-lt-side="'+side+'" aria-label="'+fieldName+'选择年份" class="'+(view==='year'?'is-active':'')+'">'+year+'</button>' +
@@ -304,7 +312,8 @@
           closePanels();syncCommittedState();emitChange('clear');return;
         }
         if (button?.dataset.ltNav) {
-          state.previewEnd='';state.months[Number(button.dataset.ltSide)]+=Number(button.dataset.ltNav);renderCalendar();return;
+          const side = Number(button.dataset.ltSide);
+          state.previewEnd='';state.months[side]=navigationMonth(state.months[side],Number(button.dataset.ltNav));renderCalendar();return;
         }
         if (button?.dataset.ltView) {
           const side=Number(button.dataset.ltSide);state.views[side]=state.views[side]===button.dataset.ltView?null:button.dataset.ltView;renderCalendar();return;
