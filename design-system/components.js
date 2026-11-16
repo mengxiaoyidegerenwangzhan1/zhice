@@ -531,9 +531,15 @@ async function svgFor(element) {
       if (node.classList.contains('is-range-start') || node.classList.contains('is-range-end')) {
         const leftRadius = node.classList.contains('is-range-start') ? rectangle.height / 2 : 0;
         const rightRadius = node.classList.contains('is-range-end') ? rectangle.height / 2 : 0;
-        const right = x + rectangle.width;
+        const left = x + (leftRadius ? Math.max(0, (rectangle.width - 32) / 2) : 0);
+        const right = x + rectangle.width - (rightRadius ? Math.max(0, (rectangle.width - 32) / 2) : 0);
         const bottom = y + rectangle.height;
-        parts.push('<path d="M' + (x + leftRadius) + ' ' + y + 'H' + (right - rightRadius) + 'Q' + right + ' ' + y + ' ' + right + ' ' + (y + rightRadius) + 'V' + (bottom - rightRadius) + 'Q' + right + ' ' + bottom + ' ' + (right - rightRadius) + ' ' + bottom + 'H' + (x + leftRadius) + 'Q' + x + ' ' + bottom + ' ' + x + ' ' + (bottom - leftRadius) + 'V' + (y + leftRadius) + 'Q' + x + ' ' + y + ' ' + (x + leftRadius) + ' ' + y + 'Z" fill="' + background + '"/>');
+        const path = 'M' + (left + leftRadius) + ' ' + y +
+          'H' + (right - rightRadius) + 'A' + rightRadius + ' ' + rightRadius + ' 0 0 1 ' + right + ' ' + (y + rightRadius) +
+          'V' + (bottom - rightRadius) + 'A' + rightRadius + ' ' + rightRadius + ' 0 0 1 ' + (right - rightRadius) + ' ' + bottom +
+          'H' + (left + leftRadius) + 'A' + leftRadius + ' ' + leftRadius + ' 0 0 1 ' + left + ' ' + (bottom - leftRadius) +
+          'V' + (y + leftRadius) + 'A' + leftRadius + ' ' + leftRadius + ' 0 0 1 ' + (left + leftRadius) + ' ' + y + 'Z';
+        parts.push('<path d="' + path + '" fill="' + background + '"/>');
       } else {
         parts.push('<rect x="' + (x + border / 2) + '" y="' + (y + border / 2) + '" width="' + Math.max(0, rectangle.width - border) + '" height="' + Math.max(0, rectangle.height - border) + '" rx="' + Math.min(parseFloat(style.borderTopLeftRadius) || 0, rectangle.height / 2) + '" fill="' + (background === 'rgba(0, 0, 0, 0)' ? 'none' : background) + '" stroke="' + (border ? style.borderTopColor : 'none') + '" stroke-width="' + border + '"/>');
       }
