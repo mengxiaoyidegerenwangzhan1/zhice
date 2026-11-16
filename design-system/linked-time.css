@@ -48,12 +48,13 @@
 .lt-date-field:hover>.lt-icon-calendar,.lt-date-field.is-open>.lt-icon-calendar,.lt-date-field:focus-within>.lt-icon-calendar{color:var(--lt-primary)}
 .linked-time-widget .lt-input{flex:1;min-width:0;width:94px;height:24px;padding:0;border:0;outline:0;background:transparent;text-align:center;color:var(--lt-text);font-size:14px;border-radius:0;box-shadow:none}
 .lt-input::placeholder{color:var(--lt-muted);opacity:1}
+.linked-time-widget .lt-input.is-active{color:var(--lt-primary)}
+.lt-input.is-active::placeholder{color:var(--lt-primary)}
 .lt-to{flex:none;color:var(--lt-muted);width:14px;text-align:center}
 .linked-time-widget .lt-clear{width:14px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--lt-muted);flex:none}
 .lt-clear:hover{color:var(--lt-primary)}
-.lt-calendar{position:absolute;top:40px;left:0;z-index:34;display:flex;width:627px;height:324px;border:1px solid var(--lt-line);border-radius:8px;box-shadow:0 4px 12px #00000014;background:#fff;overflow:hidden}
-.lt-month{width:312px;flex:1;min-width:0;padding:16px;display:flex;flex-direction:column;gap:0}
-.lt-month+.lt-month{border-left:1px solid #eaeaea}
+.lt-calendar{position:absolute;top:40px;left:0;z-index:34;display:flex;width:314px;height:324px;border:1px solid var(--lt-line);border-radius:8px;box-shadow:0 4px 12px #00000014;background:#fff;overflow:hidden}
+.lt-month{width:312px;flex:none;min-width:0;padding:16px;display:flex;flex-direction:column;gap:0}
 .lt-month-head{display:flex;align-items:center;justify-content:center;height:24px;flex:none;width:100%;margin-bottom:12px}
 .linked-time-widget .lt-nav{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex:none;color:var(--lt-text)}
 .lt-nav:hover{color:var(--lt-primary)}
@@ -78,5 +79,5 @@
 .lt-month-options>button:hover,.lt-month-options>button.is-selected{background:var(--lt-range);color:var(--lt-primary)}
 .lt-error{font-size:12px;line-height:20px;color:#c64659;margin:8px 0 0}
 @media(max-width:1080px){.lt-calendar{left:auto;right:0}}
-@media(max-width:700px){.lt-controls{gap:16px}.lt-calendar{left:0;right:auto;width:min(627px,calc(100vw - 56px));height:auto;min-height:324px}.lt-month{padding:12px 8px}.lt-month-head{margin-bottom:12px}.linked-time-widget .lt-nav{width:18px}.lt-year-month{font-size:14px;gap:4px}.lt-days{grid-auto-rows:32px;row-gap:6px}.linked-time-widget .lt-days>button{height:32px}.lt-date-wrap{max-width:100%}.lt-month-options{gap:10px 4px;grid-auto-rows:56px}.lt-calendar{z-index:36}.lt-more-panel{z-index:37}}
+@media(max-width:700px){.lt-controls{gap:16px}.lt-calendar{left:0;right:auto;width:min(314px,calc(100vw - 56px));height:324px}.lt-month{width:100%;padding:16px}.lt-date-wrap{max-width:100%}.lt-calendar{z-index:36}.lt-more-panel{z-index:37}}
 @media(prefers-reduced-motion:no-preference){.lt-bar button,.lt-days button>span{transition:background-color .12s,color .12s}}
