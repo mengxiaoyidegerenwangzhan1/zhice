@@ -305,7 +305,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-gap4')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
