@@ -6,7 +6,7 @@
     ['点击快捷项', '选项高亮，日期框同步显示起止日期，结果立即更新。'],
     ['选择更多区间或年度', '其他选项取消高亮，更多回显所选名称，面板收起。'],
     ['展开经理任期', '展开经理名单，保持当前生效的范围。'],
-    ['选择经理', '更多回显经理任期名称，日期和结果同步更新，面板收起。'],
+    ['选择经理', '更多与特殊区间入口均回显经理任期名称，日期和结果同步更新，面板收起；再次展开时显示经理名单并保留勾选。'],
     ['手动修改日期', '完整有效的范围生效后，清除快捷项高亮，更多恢复原名称。'],
     ['选择起止日期', '点击字段切换单日历，选好开始日期后自动进入结束日期选择。'],
     ['打开日历或尚未选完', '保留上一次生效的结果及快捷项选中态。'],
@@ -160,11 +160,12 @@
       }
       function renderMore() {
         const year = Number(parts.year);
-        const option = (key,label) => '<button type="button" data-lt-option="' + key + '" class="' + (state.selected===key?'is-selected':'') + '">' + label + '</button>';
-        const managerRows = managers.map(manager => '<button type="button" class="lt-manager-row ' + (state.selected==='manager-'+manager.key?'is-selected':'') + '" data-lt-manager="' + manager.key + '">' +
+        const selectedManager = managers.find(manager => state.selected === 'manager-' + manager.key);
+        const option = (key,label) => '<button type="button" data-lt-option="' + key + '" aria-pressed="' + (state.selected===key) + '" class="' + (state.selected===key?'is-selected':'') + '">' + label + '</button>';
+        const managerRows = managers.map(manager => '<button type="button" class="lt-manager-row ' + (state.selected==='manager-'+manager.key?'is-selected':'') + '" aria-pressed="' + (state.selected==='manager-'+manager.key) + '" data-lt-manager="' + manager.key + '">' +
           icon('check') + '<span class="lt-manager-name">' + manager.name + '</span><span class="lt-manager-dates">' + manager.start + ' – ' + manager.endLabel + '</span></button>').join('');
         get('[data-lt-more-panel]').innerHTML = '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
-          '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open':'') + '" data-lt-manager-toggle aria-expanded="' + state.managerOpen + '">经理任期' + icon('caret') + '</button>' +
+          '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '">' + (selectedManager?selectedManager.name+'任期':'经理任期') + icon('caret') + '</button>' +
           (state.managerOpen?'':option('common','共同任期')) + '</div>' +
           (state.managerOpen?'<div class="lt-manager-list">'+managerRows+'</div>':'') + '</div>' +
           '<div class="lt-menu-group"><span class="lt-menu-heading">区间</span><div class="lt-option-grid lt-intervals">' +
@@ -275,6 +276,7 @@
         if (shortcut) return selectOption(shortcut);
         if (button?.hasAttribute('data-lt-more')) {
           state.moreOpen=!state.moreOpen;
+          if (state.moreOpen) state.managerOpen=Boolean(state.selected?.startsWith('manager-'));
           state.calendarOpen=false;
           state.draft={...state.committed};
           state.previewEnd='';
@@ -375,7 +377,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-clear-hover')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-manager-selected')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
