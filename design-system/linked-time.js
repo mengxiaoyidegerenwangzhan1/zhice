@@ -5,7 +5,7 @@
   const rules = [
     ['点击快捷项', '选项高亮，日期框同步显示起止日期，结果立即更新。'],
     ['选择更多区间或年度', '其他选项取消高亮，更多回显所选名称，面板收起。'],
-    ['展开经理任期', '在下方展开经理名单，保留同级的共同任期入口及当前生效的范围。'],
+    ['展开经理任期', '点击后在入口下方显示二级浮层，保留同级特殊区间及其他选项的位置；当前生效范围保持不变。'],
     ['选择经理', '更多与特殊区间入口均回显经理任期名称，日期和结果同步更新，面板收起；再次展开时显示经理名单并保留勾选。'],
     ['手动修改日期', '可在快捷区间基础上单独修改任一端，保留另一端；有效的新范围生效后清除快捷项高亮，更多恢复原名称。'],
     ['选择起止日期', '点击字段切换单日历，首次选好开始日期后自动进入结束日期选择；开始不能晚于结束，结束不能早于开始。'],
@@ -15,6 +15,7 @@
   const specHtml = '<h3>尺寸与样式</h3><table><thead><tr><th>规范项</th><th>值 / 说明</th></tr></thead><tbody>' + [
     ['快捷选择', '高32px，选项高28px，左右内边距12px，容器圆角32px，选项圆角22px'],
     ['更多面板', '宽271px，内边距上下16px、左右12px，圆角8px，描边#B9B8D8'],
+    ['经理任期浮层', '与主面板内容区等宽，距入口下方6px，圆角8px，描边#B9B8D8；白底轻阴影，选中经理显示勾选和主色文字'],
     ['日期输入框', '294 × 32px，圆角20px，日历图标默认#666，移入或展开使用#6865A7'],
     ['单日历', '314 × 324px，内边距16px，日期单元格40 × 32px，行间距6px；打开时定位当前字段对应月份'],
     ['当前字段', '开始或结束字段使用主色强调；首次开始选定后自动切换结束字段，已有完整范围时可单独修改任一端，另一端保留'],
@@ -169,7 +170,7 @@
         get('[data-lt-more-panel]').innerHTML = '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
           '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '">' + (selectedManager?selectedManager.name+'任期':'经理任期') + icon('caret') + '</button>' +
           option('common','共同任期') + '</div>' +
-          (state.managerOpen?'<div class="lt-manager-list">'+managerRows+'</div>':'') + '</div>' +
+          (state.managerOpen?'<div class="lt-manager-list" role="group" aria-label="经理任期列表">'+managerRows+'</div>':'') + '</div>' +
           '<div class="lt-menu-group"><span class="lt-menu-heading">区间</span><div class="lt-option-grid lt-intervals">' +
           [['month','近1月'],['three-months','近3月'],['six-months','近6月'],['five-years','近5年']].map(row=>option(...row)).join('') + '</div></div>' +
           '<div class="lt-menu-group"><span class="lt-menu-heading">年度</span><div class="lt-option-grid lt-years">' + option('year-to-date','今年以来') +
@@ -391,7 +392,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-calendar-arrows')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-manager-popover')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
