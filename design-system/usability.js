@@ -19,6 +19,33 @@
   componentPanel.prepend(directory);
   componentPanel.classList.add('has-component-directory');
 
+  const lastComponent = components[components.length - 1];
+  const scrollSpace = document.createElement('div');
+  scrollSpace.setAttribute('aria-hidden', 'true');
+  lastComponent.after(scrollSpace);
+
+  function scrollOffset() {
+    const headerHeight = document.querySelector('.topbar').getBoundingClientRect().height;
+    const directoryHeight = window.matchMedia('(max-width: 1050px)').matches ? directory.getBoundingClientRect().height : 0;
+    return Math.max(85, headerHeight + directoryHeight + 16);
+  }
+
+  function updateScrollSpace() {
+    if (componentPanel.hidden) return;
+    const lastTop = lastComponent.getBoundingClientRect().top + window.scrollY;
+    const naturalTail = document.documentElement.scrollHeight - lastTop - scrollSpace.offsetHeight;
+    scrollSpace.style.height = Math.max(0, window.innerHeight - scrollOffset() - naturalTail) + 'px';
+  }
+
+  function highlightComponent(id) {
+    directoryLinks.querySelectorAll('a').forEach(link => {
+      const active = link.hash === '#' + id;
+      link.classList.toggle('active', active);
+      if (active) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  }
+
   function visitComponentHash() {
     let id = location.hash.slice(1);
     if (id === 'component-date' || id === 'component-quick') id = 'component-time-range';
@@ -26,21 +53,34 @@
     const component = document.getElementById(id);
     if (!component) return;
     document.getElementById('visual-tab-components').click();
-    requestAnimationFrame(() => component.scrollIntoView({ behavior: 'smooth', block: 'start' }));
-  }
-  window.addEventListener('hashchange', visitComponentHash);
-  visitComponentHash();
-  const observer = new IntersectionObserver(entries => {
-    const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-    if (!visible.length) return;
-    directoryLinks.querySelectorAll('a').forEach(link => {
-      const active = link.hash === '#' + visible[0].target.id;
-      link.classList.toggle('active', active);
-      if (active) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
+    requestAnimationFrame(() => {
+      updateScrollSpace();
+      window.scrollTo({ top: window.scrollY + component.getBoundingClientRect().top - scrollOffset(), behavior: 'instant' });
+      highlightComponent(component.id);
     });
-  }, { rootMargin: '-100px 0px -50% 0px' });
-  components.forEach(component => observer.observe(component));
+  }
+  directoryLinks.addEventListener('click', event => {
+    const link = event.target.closest('a');
+    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (location.hash !== link.hash) history.pushState(null, '', link.hash);
+    visitComponentHash();
+  });
+  window.addEventListener('hashchange', visitComponentHash);
+  let scrollFrame = 0;
+  window.addEventListener('scroll', () => {
+    if (scrollFrame || componentPanel.hidden) return;
+    scrollFrame = requestAnimationFrame(() => {
+      scrollFrame = 0;
+      const passed = components.filter(component => component.getBoundingClientRect().top <= scrollOffset() + 8);
+      highlightComponent((passed[passed.length - 1] || components[0]).id);
+    });
+  }, { passive: true });
+  window.addEventListener('resize', updateScrollSpace);
+  document.fonts.ready.then(() => {
+    updateScrollSpace();
+    visitComponentHash();
+  });
 
   const iconGrid = document.getElementById('icon-library-grid');
   const icons = Array.from(iconGrid.querySelectorAll('.icon-cell'));
