@@ -6,6 +6,8 @@ buttons:{title:'按钮',en:'Button',node:'110-5339',desc:'明确操作层级，�
 date:{title:'日期范围选择器',en:'Date Range Picker',node:'93-4904',desc:'从起点到终点，清晰展示日期选择的每一个状态。',rules:['初始显示灰色占位文字，默认图标 #666666；悬停或展开使用主题色。选完起止日期后回显并收起。','左右展示连续月份，仅在各自本月绘制选区。','年、月可独立切换，导航按月或年浏览并保留已选区间。','默认范围为 2020-01-01 至今天，可通过容器 data-min / data-max 配置。边界日期外禁用，年份与月份选项按范围生成。','点击外部或按 Esc 收起，未完成的选择恢复到上次确认结果。'],spec:[['选择框','260 × 32 px · 圆角 20 px'],['日历面板','526 × 310 px · 圆角 8 px'],['日期单元格','26 × 26 px · 间距 8 px'],['面板内边距','16 px'],['面板描边','#B9B8D8'],['日历图标','默认 #666666 / 展开 #6865A7'],['文字','14 px · PingFang SC Regular']]},
 quick:{title:'快捷时间选择器',en:'Quick Time Select',node:'117-5215',desc:'常用区间一步直达，更多选项保持轻巧、有序。',rules:['默认选择共同时段，常用区间互斥。','移入更多展开，移出触发项和面板后收起；点击更多也可展开，点击外部或按 Esc 收起。','展开时保留当前选择；点选后收起并回显所选项；再次展开保留面板内高亮；点击常用项恢复“更多”。'],spec:[['整体 / 选项高度','32 / 28 px'],['选项左右内边距','12 px'],['外壳 / 选项圆角','32 / 22 px'],['更多面板','270px 宽 / 高度自适应'],['面板间距','8 px'],['面板布局','区间三列；年度两列，分组纵向排列'],['选中样式','#F2F3F5 背景 / #333333 Medium']]},
 top:{title:'回到顶部',en:'Back to Top',node:'117-5943',desc:'在长页面中提供轻量、稳定的返回入口。',rules:['页面滚动超过一屏显示，一屏以内隐藏。','固定在可视区域右下角，不随内容滚动。','点击平滑回到顶部，返回一屏以内时隐藏。'],spec:[['组件外框','80 × 80 px'],['按钮容器','68 × 68 px'],['圆角','8 px'],['图标槽','40 × 40 px'],['图形','26.92 × 38.263 px'],['描边 / 阴影','1 px #E2E2E2 / 0 0 12 px rgba(0,0,0,.08)'],['固定位置示例','右 24 px / 下 24 px']]}}
+pages.time={title:'时段与日期范围',en:'Time Range',node:'564-54914',spec:[],rules:[]};
+delete pages.date;delete pages.quick;
 let current='buttons',tab='components',filter='',cards=[],codeValue='';
 function toast(t){$('#toast').textContent=t;$('#toast').style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>$('#toast').style.display='none',2300)}
 async function copy(t){try{await navigator.clipboard.writeText(t);toast('已复制到剪贴板')}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();const ok=document.execCommand('copy');a.remove();toast(ok?'已复制到剪贴板':'复制失败，请下载代码')}}
@@ -18,6 +20,7 @@ function panel(s=0){return '<div class="quick-panel"><div><small>区间</small>'
 function quick(s=0){const open=[3,4,7].includes(s),selected=s===1?1:s===2?2:[5,6,7].includes(s)?3:0;return '<div class="z-quick '+(open?'open':'')+'"><div class="quick-bar">'+['共同时段','近1年','近3年',s===6?'2025年度':[5,7].includes(s)?'近3月':'更多'].map((x,i)=>'<button data-quick="'+i+'" class="'+(i===selected?'chosen ':'')+(i===3?'more':'')+'" '+(s===8?'disabled':'')+'>'+x+(i===3?'<img alt="" width="10" height="10" src="assets/f2d08.svg">':'')+'</button>').join('')+'</div>'+(open?panel(s):'')+'</div>'}
 function getCards(){
  const items={
+ time:{name:'时段快捷选择与日期区间',html:window.ZhiceLinkedTime.markup(),dim:'32 高 · 联动交互'},
  buttons:{name:'操作按钮组',html:'<div class="z-group">'+btn()+btn('secondary')+dl()+'</div>',dim:'34 高 / 16 间距'},
  date:{name:'日期范围选择器',html:date(false),dim:'260 × 32'},
  quick:{name:'快捷时间选择器',html:quick(),dim:'270 × 32'},
@@ -29,19 +32,21 @@ function specText(c){const p=pages[c?.page||current];return p.title+(c?' / '+c.n
 function specs(){const p=pages[current];return '<div class="spec-box"><h3>尺寸与样式 <button class="source-link" data-copy-spec style="float:right;background:white">复制规范说明</button></h3><table><thead><tr><th>规范项</th><th>值 / 规则</th></tr></thead><tbody>'+p.spec.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')+'</tbody></table></div><div class="spec-box"><h3>交互规则</h3>'+p.rules.map((r,i)=>'<p>0'+(i+1)+' &nbsp; '+r+'</p>').join('')+'</div><div class="spec-box"><h3>设计变量 <small style="color:#aaa;font-weight:400">点击复制色值</small></h3><div class="swatches">'+[['主色','#6865A7'],['移入主色','#7774B3'],['面板描边','#B9B8D8'],['日历图标','默认 #666666 / 展开 #6865A7'],['选区 / 禁用底色','#F4F4FC'],['正文','#555759'],['禁用文字','#CBCBCB']].map(r=>'<button class="swatch" data-color="'+r[1]+'" style="background:white;text-align:left"><div style="background:'+r[1]+'"></div>'+r[0]+'<code>'+r[1]+'</code></button>').join('')+'</div></div>'+(current==='date'?'<div class="notice">源稿导航描述同时存在月 / 日及月 / 年，本实现按母组件说明采用月 / 年。示例日历使用 2026 年 11、12 月。</div>':'')}
 function card(c,i){
  const p=pages[c.page||current];
- return '<article class="component-spec card integrated-spec" data-card="'+i+'"><div class="spec-heading"><h3>'+c.name+'</h3><div class="actions"><button data-action="svg" data-i="'+i+'">复制 SVG</button><button data-action="spec" data-i="'+i+'">查看规范</button><button data-action="code" data-i="'+i+'">&lt;/&gt; 查看代码</button><a class="component-source-link" href="'+base+p.node+'" target="_blank" rel="noreferrer">Figma 源组件 ↗</a></div></div><div class="component-spec-layout"><div class="preview-column"><div class="component-demo-surface stage"><div class="sample">'+c.html+'</div></div></div></div></article>';
+ return '<article class="component-spec card integrated-spec" data-catalog-id="'+(c.page==='time'?'time-range':c.page==='top'?'back-top':c.page)+'" data-card="'+i+'"><div class="spec-heading"><h3>'+c.name+'</h3><div class="actions"><button data-action="svg" data-i="'+i+'">复制 SVG</button><button data-action="spec" data-i="'+i+'">查看规范</button><button data-action="code" data-i="'+i+'">&lt;/&gt; 查看代码</button><a class="component-source-link" href="'+base+p.node+'" target="_blank" rel="noreferrer">Figma 源组件 ↗</a></div></div><div class="component-spec-layout"><div class="preview-column"><div class="component-demo-surface stage"><div class="sample">'+c.html+'</div></div></div></div></article>';
 }
 function viewSpec(c){
  const p=pages[c.page];
  $('#spec-dialog-title').textContent=c.name+' · 设计规范';
+ if(c.page==='time'){$('#spec-dialog-body').innerHTML=window.ZhiceLinkedTime.specHtml;$('#spec-dialog').showModal();return;}
  $('#spec-dialog-body').innerHTML='<h3>尺寸与样式</h3><table><thead><tr><th>规范项</th><th>值 / 说明</th></tr></thead><tbody>'+p.spec.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><h3>交互规则</h3><ol>'+p.rules.map(r=>'<li>'+r+'</li>').join('')+'</ol>';
  $('#spec-dialog').showModal();
 }
 function render(){
  const previous=current;
- cards=Object.keys(pages).flatMap(key=>{current=key;return getCards()});
+ cards=['buttons','time','top'].flatMap(key=>{current=key;return getCards()});
  current=previous;
  $('#content').innerHTML=cards.map((c,i)=>card(c,i)).join('');
+ window.ZhiceLinkedTime.mount(document.getElementById('content'));
  document.querySelectorAll('.z-calendar').forEach(initCalendar);
  document.querySelectorAll('.z-date').forEach(b=>b.setAttribute('aria-expanded',String(b.classList.contains('open'))));
 }
@@ -427,6 +432,7 @@ function runtime(root = document) {
 runtime();
 async function svgFor(element) {
   await document.fonts.ready;
+  element = element.querySelector('.lt-controls') || element;
   let bounds = element.getBoundingClientRect();
   for (const child of element.querySelectorAll('*')) {
     const rectangle = child.getBoundingClientRect();
@@ -475,11 +481,33 @@ async function svgFor(element) {
     if (node.nodeType !== Node.ELEMENT_NODE) return;
     const style = getComputedStyle(node);
     const rectangle = node.getBoundingClientRect();
-    if (!rectangle.width || !rectangle.height || style.display === 'none' || style.visibility === 'hidden') return;
+    if (!rectangle.width || !rectangle.height || style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return;
     const x = rectangle.x - bounds.x;
     const y = rectangle.y - bounds.y;
     if (node.tagName.toLowerCase() === 'svg') {
       parts.push(vectorMarkup(node.outerHTML, x, y, rectangle.width, rectangle.height, style.color));
+      return;
+    }
+    if (node.tagName === 'INPUT') {
+      const value = node.value || node.placeholder;
+      const padding = parseFloat(style.paddingLeft) || 0;
+      const anchor = style.textAlign === 'center' ? 'middle' : 'start';
+      parts.push('<text x="' + (anchor === 'middle' ? x + rectangle.width / 2 : x + padding) + '" y="' + (y + rectangle.height / 2 + parseFloat(style.fontSize) * .35) + '" text-anchor="' + anchor + '" fill="' + (node.value ? style.color : '#999999') + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '">' + esc(value) + '</text>');
+      return;
+    }
+    const maskImage = style.maskImage || style.webkitMaskImage;
+    const maskMatch = maskImage && maskImage.match(/^url\(["']?(.*?)["']?\)$/);
+    if (maskMatch) {
+      const response = await fetch(maskMatch[1]);
+      if (!response.ok) throw new Error('图标资源读取失败');
+      let source = await response.text();
+      source = source.replace(/stroke="#[0-9a-fA-F]{3,8}"/g, 'stroke="currentColor"').replace(/fill="#[0-9a-fA-F]{3,8}"/g, 'fill="currentColor"');
+      let angle=0;
+      if(style.transform.startsWith('matrix(')){const matrix=style.transform.slice(7,-1).split(',').map(Number);angle=Math.atan2(matrix[1],matrix[0])*180/Math.PI;}
+      const maskSize = (style.maskSize || style.webkitMaskSize).split(' ').map(parseFloat);
+      const iconWidth = Number.isFinite(maskSize[0]) ? maskSize[0] : rectangle.width;
+      const iconHeight = Number.isFinite(maskSize[1]) ? maskSize[1] : rectangle.height;
+      parts.push(vectorMarkup(source,x+(rectangle.width-iconWidth)/2,y+(rectangle.height-iconHeight)/2,iconWidth,iconHeight,style.color,angle));
       return;
     }
     if (node.tagName === 'IMG') {
@@ -523,7 +551,7 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
   if (file.endsWith('.ttf')) {
