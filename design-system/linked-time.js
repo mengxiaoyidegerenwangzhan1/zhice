@@ -8,6 +8,7 @@
     ['展开经理任期', '展开经理名单，保持当前生效的范围。'],
     ['选择经理', '更多回显经理任期名称，日期和结果同步更新，面板收起。'],
     ['手动修改日期', '完整有效的范围生效后，清除快捷项高亮，更多恢复原名称。'],
+    ['选择起止日期', '点击字段切换单日历，选好开始日期后自动进入结束日期选择。'],
     ['打开日历或尚未选完', '保留上一次生效的结果及快捷项选中态。'],
     ['清空日期', '清空日期和快捷项选中态，恢复占位提示。']
   ];
@@ -15,7 +16,8 @@
     ['快捷选择', '高32px，选项高28px，左右内边距12px，容器圆角32px，选项圆角22px'],
     ['更多面板', '宽271px，内边距上下16px、左右12px，圆角8px，描边#B9B8D8'],
     ['日期输入框', '294 × 32px，圆角20px，日历图标默认#666，移入或展开使用#6865A7'],
-    ['双日历', '627 × 324px，左右年月独立，单侧内边距16px，日期行高32px、行间距6px'],
+    ['单日历', '314 × 324px，内边距16px，日期单元格40 × 32px，行间距6px；打开时定位当前字段对应月份'],
+    ['当前字段', '开始或结束字段使用主色强调；开始选定后自动切换结束字段，完整合法的起止日期选定后关闭面板'],
     ['选中区间', '起止数字使用24px圆形主色底；浅紫区间端点圆弧半径16px，上下及外侧与主色圆均间隔4px'],
     ['日单元格', '40 × 32px，数字区域24 × 24px，14px / 20px；普通#666，悬停仅数字变为#6865A7，今日使用Medium，禁用#CCC'],
     ['日状态', '普通、悬停、今日、禁用、区间内、区间内今日、起点、终点；区间底色#F4F4FC，起止数字为白色Regular'],
@@ -65,7 +67,7 @@
         committed:{...initial},
         draft:{...initial},
         selected:restored ? host.dataset.ltSelection || null : null,moreLabel:restored ? host.dataset.ltLabel || '更多' : '更多',moreOpen:false,managerOpen:false,calendarOpen:false,
-        months:[monthValue(today),monthValue(today)+1],views:[null,null],revision:0,error:''
+        months:[monthValue(today),monthValue(today)+1],views:[null,null],active:'start',previewEnd:'',endFirst:false,revision:0,error:''
       };
       const buttons = ['成立以来','近1年','近3年'];
       host.innerHTML = '<div class="lt-controls"><div class="lt-quick"><div class="lt-bar" role="group" aria-label="快捷时间范围">' +
@@ -76,7 +78,7 @@
         '<input class="lt-input" data-lt-input="start" aria-label="开始日期" placeholder="开始日期" inputmode="numeric" maxlength="10" autocomplete="off">' +
         '<span class="lt-to">至</span><input class="lt-input" data-lt-input="end" aria-label="结束日期" placeholder="结束日期" inputmode="numeric" maxlength="10" autocomplete="off">' +
         '<button type="button" class="lt-clear" data-lt-clear aria-label="清空日期">' + icon('clear') + '</button></div>' +
-        '<div class="lt-calendar" data-lt-calendar aria-label="日期范围选择面板" hidden></div></div></div>' +
+        '<div class="lt-calendar" data-lt-calendar aria-label="开始日期选择面板" hidden></div></div></div>' +
         '<p class="lt-error" data-lt-error role="alert" hidden></p>';
       const get = selector => host.querySelector(selector);
       const getAll = selector => host.querySelectorAll(selector);
@@ -100,6 +102,12 @@
         get('[data-lt-more-panel]').hidden = !state.moreOpen;
         get('[data-lt-calendar]').hidden = !state.calendarOpen;
         get('[data-lt-date-field]').classList.toggle('is-open',state.calendarOpen);
+        host.dataset.ltActive=state.calendarOpen ? state.active : '';
+        fields.start.classList.toggle('is-active',state.calendarOpen && state.active==='start');
+        fields.end.classList.toggle('is-active',state.calendarOpen && state.active==='end');
+        fields.start.setAttribute('aria-expanded',String(state.calendarOpen && state.active==='start'));
+        fields.end.setAttribute('aria-expanded',String(state.calendarOpen && state.active==='end'));
+        get('[data-lt-calendar]').setAttribute('aria-label',(state.active==='start'?'开始':'结束')+'日期选择面板');
         get('[data-lt-clear]').hidden = !state.draft.start && !state.draft.end && !state.committed.start && !state.committed.end;
       }
       function renderFields() {
@@ -137,6 +145,8 @@
         state.moreOpen = false;
         state.managerOpen = false;
         state.views = [null,null];
+        state.previewEnd = '';
+        state.endFirst = false;
         state.calendarOpen = false;
         setError('');
         renderFields();
@@ -162,13 +172,21 @@
           '<div class="lt-menu-group"><span class="lt-menu-heading">年度</span><div class="lt-option-grid lt-years">' + option('year-to-date','今年以来') +
           [year-1,year-2,year-3].map(value=>option('annual-'+value,value+'年度')).join('') + '</div></div>';
       }
-      function openCalendar() {
+      function openCalendar(active = 'start') {
+        const changedField = state.active !== active;
         if (!state.calendarOpen) {
           state.draft = {...state.committed};
           const currentMonth = monthValue(today);
-          state.months = [state.committed.start?monthValue(state.committed.start):currentMonth,state.committed.end?monthValue(state.committed.end):currentMonth+1];
+          state.months = [state.committed.start?monthValue(state.committed.start):currentMonth,state.committed.end?monthValue(state.committed.end):currentMonth];
           state.views = [null,null];
+          state.endFirst = false;
         }
+        if (changedField) {
+          const value = state.draft[active] || state.draft.start || today;
+          state.months[active==='start'?0:1] = monthValue(parse(value)?value:today);
+        }
+        state.active = active;
+        state.previewEnd = '';
         state.calendarOpen = true;
         state.moreOpen = false;
         renderFields();
@@ -178,6 +196,8 @@
         state.moreOpen = false;
         state.calendarOpen = false;
         state.views = [null,null];
+        state.previewEnd = '';
+        state.endFirst = false;
         if (discard) state.draft = {...state.committed};
         setError('');
         renderFields();
@@ -185,13 +205,16 @@
       function monthAvailable(month) { return monthEnd(month) >= minimum && monthStart(month) <= maximum; }
       function renderCalendar() {
         const panel = get('[data-lt-calendar]');
-        panel.innerHTML = state.months.map((month,side) => {
+        const side = state.active==='start' ? 0 : 1;
+        const month = state.months[side];
+        const fieldName = side ? '结束日期' : '开始日期';
+        panel.innerHTML = (() => {
           const year = Math.floor(month/12), mon = month%12;
-          const arrow = (kind,amount,aria) => '<button type="button" class="lt-nav" data-lt-nav="' + amount + '" data-lt-side="' + side + '" aria-label="' + (side?'右侧':'左侧') + aria + '" ' + (monthAvailable(month+amount)?'':'disabled') + '>' + icon(kind) + '</button>';
+          const arrow = (kind,amount,aria) => '<button type="button" class="lt-nav" data-lt-nav="' + amount + '" data-lt-side="' + side + '" aria-label="' + fieldName + aria + '" ' + (monthAvailable(month+amount)?'':'disabled') + '>' + icon(kind) + '</button>';
           const view = state.views[side];
           const header = '<div class="lt-month-head">' + arrow('prev-month',-1,'上个月') + arrow('prev-year',-12,'上一年') +
-            '<div class="lt-year-month"><button type="button" data-lt-view="year" data-lt-side="'+side+'" aria-label="'+(side?'右侧':'左侧')+'选择年份" class="'+(view==='year'?'is-active':'')+'">'+year+'</button>' +
-            '<button type="button" data-lt-view="month" data-lt-side="'+side+'" aria-label="'+(side?'右侧':'左侧')+'选择月份" class="'+(view==='month'?'is-active':'')+'">'+(mon+1)+'月</button></div>' +
+            '<div class="lt-year-month"><button type="button" data-lt-view="year" data-lt-side="'+side+'" aria-label="'+fieldName+'选择年份" class="'+(view==='year'?'is-active':'')+'">'+year+'</button>' +
+            '<button type="button" data-lt-view="month" data-lt-side="'+side+'" aria-label="'+fieldName+'选择月份" class="'+(view==='month'?'is-active':'')+'">'+(mon+1)+'月</button></div>' +
             arrow('next-year',12,'下一年') + arrow('next-month',1,'下个月') + '</div>';
           let body = '';
           if (view) {
@@ -210,18 +233,18 @@
               return {date,value,own,disabled};
             });
             const rangeStart = state.draft.start;
-            const rangeEnd = state.draft.end;
+            const rangeEnd = state.draft.end || (state.active==='end'?state.previewEnd:'');
             const inRange = value => parse(rangeStart)&&parse(rangeEnd)&&rangeStart<=rangeEnd&&value>=rangeStart&&value<=rangeEnd;
             body = '<div class="lt-week">'+['日','一','二','三','四','五','六'].map(label=>'<span>'+label+'</span>').join('')+'</div><div class="lt-days">' +
               cells.map((cell,index) => {
-                const endpoint = cell.own && (cell.value===rangeStart || cell.value===rangeEnd);
+                const endpoint = cell.own && (cell.value===rangeStart || cell.value===state.draft.end);
                 const range = cell.own && inRange(cell.value);
                 return '<button type="button" data-lt-day="'+cell.value+'" data-lt-side="'+side+'" aria-label="'+(side?'结束日期 ':'开始日期 ')+cell.value+'" aria-pressed="'+Boolean(endpoint)+'" '+(cell.disabled?'disabled':'')+' class="'+
                   [endpoint?'is-endpoint':'',range?'is-range':'',range&&cell.value===rangeStart?'is-range-start':'',range&&cell.value===rangeEnd?'is-range-end':'',cell.value===today?'is-today':''].join(' ')+'"><span>'+cell.date.getUTCDate()+'</span></button>';
               }).join('') + '</div>';
           }
           return '<div class="lt-month" data-lt-month="'+side+'">'+header+body+'</div>';
-        }).join('');
+        })();
       }
       function selectOption(key) {
         if (key==='inception') return applyRange(inception,today,key,'更多');
@@ -234,6 +257,17 @@
         if (key==='year-to-date') return applyRange(parts.year+'-01-01',today,key,'今年以来');
         if (key.startsWith('annual-')) { const year=key.slice(7); return applyRange(year+'-01-01',year+'-12-31',key,year+'年度'); }
       }
+      function renderPreview() {
+        const start = state.draft.start;
+        const end = state.draft.end || state.previewEnd;
+        getAll('[data-lt-day]').forEach(button => {
+          const value = button.dataset.ltDay;
+          const inRange = !button.disabled && Boolean(parse(start) && parse(end) && value >= start && value <= end);
+          button.classList.toggle('is-range', inRange);
+          button.classList.toggle('is-range-start', inRange && value === start);
+          button.classList.toggle('is-range-end', inRange && value === end);
+        });
+      }
       host.addEventListener('click',event => {
         const button = event.target.closest('button');
         if (button?.disabled) return;
@@ -243,6 +277,8 @@
           state.moreOpen=!state.moreOpen;
           state.calendarOpen=false;
           state.draft={...state.committed};
+          state.previewEnd='';
+          state.endFirst=false;
           renderMore();renderFields();return;
         }
         if (button?.hasAttribute('data-lt-manager-toggle')) {state.managerOpen=!state.managerOpen;renderMore();return;}
@@ -256,7 +292,7 @@
           closePanels();syncCommittedState();emitChange('clear');return;
         }
         if (button?.dataset.ltNav) {
-          state.months[Number(button.dataset.ltSide)]+=Number(button.dataset.ltNav);renderCalendar();return;
+          state.previewEnd='';state.months[Number(button.dataset.ltSide)]+=Number(button.dataset.ltNav);renderCalendar();return;
         }
         if (button?.dataset.ltView) {
           const side=Number(button.dataset.ltSide);state.views[side]=state.views[side]===button.dataset.ltView?null:button.dataset.ltView;renderCalendar();return;
@@ -266,17 +302,49 @@
         }
         if (button?.dataset.ltDay) {
           const side=Number(button.dataset.ltSide), value=button.dataset.ltDay;
-          state.draft[side?'end':'start']=value;
-          if (!side) state.draft.end='';
-          if (!commit('manual')) {renderFields();renderCalendar();}
+          state.previewEnd='';
+          setError('');
+          if (!side) {
+            state.draft.start=value;
+            if (state.endFirst && state.draft.end>=value && commit('manual')) return;
+            state.draft.end='';
+            state.endFirst=false;
+            state.active='end';
+            state.months[1]=state.months[0];
+            state.views[1]=null;
+          } else {
+            state.draft.end=value;
+            if (commit('manual')) return;
+            state.endFirst=true;
+            state.active='start';
+            state.months[0]=state.months[1];
+            state.views[0]=null;
+          }
+          renderFields();renderCalendar();
+          fields[state.active].focus({preventScroll:true});
           return;
         }
-        if (event.target.closest('[data-lt-date-field]')) openCalendar();
+        if (event.target.closest('[data-lt-date-field]')) openCalendar(event.target.dataset.ltInput || 'start');
+      });
+      host.addEventListener('focusin',event => {
+        if (event.target.dataset.ltInput) openCalendar(event.target.dataset.ltInput);
+      });
+      host.addEventListener('pointerover',event => {
+        const day=event.target.closest('[data-lt-day]');
+        if (!day || day.disabled || state.active!=='end' || state.draft.end || !parse(state.draft.start)) return;
+        if (state.previewEnd!==day.dataset.ltDay) {
+          state.previewEnd=day.dataset.ltDay;
+          renderPreview();
+        }
+      });
+      get('[data-lt-calendar]').addEventListener('pointerleave',() => {
+        if (state.previewEnd) {state.previewEnd='';renderPreview();}
       });
       host.addEventListener('input',event => {
         const side=event.target.dataset.ltInput;
         if (!side) return;
         state.draft[side]=event.target.value.trim();
+        state.previewEnd='';
         setError('');
         if (validRange()) commit('manual');
         else {renderSelection();if(state.calendarOpen)renderCalendar();}
@@ -288,7 +356,7 @@
       });
       host.addEventListener('keydown',event => {
         if (event.key==='Escape') {event.preventDefault();closePanels();}
-        if (event.key==='ArrowDown' && event.target.dataset.ltInput) {event.preventDefault();openCalendar();get('[data-lt-nav]')?.focus();}
+        if (event.key==='ArrowDown' && event.target.dataset.ltInput) {event.preventDefault();openCalendar(event.target.dataset.ltInput);get('[data-lt-nav]')?.focus();}
         if (event.key==='Enter' && event.target.dataset.ltInput) {event.preventDefault();commit('manual');}
       });
       host.linkedTimeApi={getState:()=>JSON.parse(JSON.stringify(state)),select:selectOption,clear:()=>get('[data-lt-clear]').click(),close:closePanels};
@@ -307,7 +375,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-day-atoms')).text();
+    let css = await (await fetch('linked-time.css?v=20261116-single-calendar')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
