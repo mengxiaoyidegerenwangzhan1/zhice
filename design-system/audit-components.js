@@ -191,12 +191,25 @@ function installAuditedComponents() {
   const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','普通154px起；级联188px起'],['内边距','左右12px'],['菜单','圆角8px / 内边距8px / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；重开恢复路径。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
   for(const cascade of [false,true])for(const position of ['', 'inside'])add(selectStack,(cascade?'级联选择器':'普通下拉')+(position==='inside'?' · 内置标题':position==='outside'?' · 前置标题':''),auditSelectMarkup(cascade,position),selectSpec);
   const tables = document.querySelector('.table-spec .audit-table-examples');
+  const tableSpec = spec([
+    ['表面', '白底，无竖向分割线'],
+    ['单元格内边距', '上、下各 12px，行高随内容自适应'],
+    ['表头', '14px Medium，文字 #333333，左对齐，长名称换行'],
+    ['汇总行', '14px Medium，可展开一级明细'],
+    ['一级', '14px Regular，可展开项左侧显示箭头'],
+    ['二级', '12px Regular，文字 #666666'],
+    ['列宽', '首列 120px，基金列等宽'],
+    ['缩进', '汇总 10px / 一级 28px / 二级 46px'],
+    ['数值', 'Roboto 等宽数字，右对齐，缺失值显示 --'],
+    ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线']
+  ], '点击汇总行或可展开的一级行，显示或收起下一级明细。表头和行高可随内容换行增高，窄屏可横向滚动。', '564-55005');
+  add(tables, '简洁表格 · 层级规范', auditTableMarkup(), tableSpec);
+
   const pair = document.createElement('div');
   pair.className = 'audit-table-pair';
   tables.append(pair);
 
   const flatRules = [
-    ['表头', '14px Medium，文字 #333333，左对齐'],
     ['单元格内边距', '上、下各 12px，行高随内容自适应'],
     ['对齐', '项目名称和纯数值左对齐，含文字的值右对齐'],
     ['数值字体', 'Roboto 等宽数字']
@@ -204,7 +217,11 @@ function installAuditedComponents() {
 
   function addFlatTable(container, name, columns, rows, note, extraRules = [], groups = []) {
     const markup = auditFlatTableMarkup(name, columns, rows, groups);
-    const documentation = spec([...flatRules, ...extraRules], note);
+    const headerRules = groups.length ? [
+      ['第一层表头', '14px Medium，文字 #333333，左对齐'],
+      ['第二层表头', '12px Medium，文字 #333333，左对齐']
+    ] : [['表头', '14px Medium，文字 #333333，左对齐']];
+    const documentation = spec([...headerRules, ...flatRules, ...extraRules], note);
     add(container, name, markup, documentation);
   }
 
@@ -230,19 +247,6 @@ function installAuditedComponents() {
     {label:'基准对比', span:2}
   ]);
 
-  const tableSpec = spec([
-    ['表面', '白底，无竖向分割线'],
-    ['单元格内边距', '上、下各 12px，行高随内容自适应'],
-    ['表头', '14px Medium，文字 #333333，左对齐，长名称换行'],
-    ['汇总行', '14px Medium，可展开一级明细'],
-    ['一级', '14px Regular，可展开项左侧显示箭头'],
-    ['二级', '12px Regular，文字 #666666'],
-    ['列宽', '首列 120px，基金列等宽'],
-    ['缩进', '汇总 10px / 一级 28px / 二级 46px'],
-    ['数值', 'Roboto 等宽数字，右对齐，缺失值显示 --'],
-    ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线']
-  ], '点击汇总行或可展开的一级行，显示或收起下一级明细。表头和行高可随内容换行增高，窄屏可横向滚动。', '564-55005');
-  add(tables, '简洁表格 · 层级规范', auditTableMarkup(), tableSpec);
   tables.querySelectorAll('th,td').forEach(cell => {
     if (cell.classList.contains('audit-number')) return;
     const walker=document.createTreeWalker(cell,NodeFilter.SHOW_TEXT);

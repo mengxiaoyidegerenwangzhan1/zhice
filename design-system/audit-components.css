@@ -39,6 +39,7 @@
 .audit-table button:focus-visible,.audit-table-scroll:focus-visible{outline:2px solid #6865a7;outline-offset:-2px}
 .audit-table-examples{width:100%;min-width:0}
 .audit-table-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:24px;margin-bottom:24px}
+#visual-panel-components .audit-table-examples > .individual-component + .audit-table-pair{border-top:1px solid #eaeaea;margin-top:24px;padding-top:24px}
 #visual-panel-components .audit-table-pair > .individual-component + .individual-component{margin-top:0;padding-top:0;border-top:0}
 #visual-panel-components .audit-table-pair .individual-component-heading{flex-wrap:wrap;gap:8px 16px}
 #visual-panel-components .audit-table-pair .actions{flex-wrap:wrap;margin-left:0}
@@ -46,6 +47,7 @@
 .audit-table-flat-preview{padding:0}
 .audit-table-flat{min-width:300px}
 .audit-table-grouped{min-width:500px}
+.audit-table-group-heading + .audit-table-header th{font-size:12px}
 .audit-table-flat .audit-table-header th:first-child,.audit-table-flat .audit-total th{padding-inline:12px}
 .audit-table-flat .audit-number{text-align:left}
 .audit-table-flat .audit-value-text{text-align:right}
