@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>经理比较 · 交互确认稿</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./assets.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <main id="manager-demo" data-mode="comprehensive">
+    <header class="review-heading">
+      <div><h1>经理比较 · 交互确认稿</h1><p>先试用顶部选择区域，确认操作逻辑后再整理正式交付包。</p></div>
+      <nav aria-label="比较模式" class="mode-switch">
+        <button type="button" data-mode="comprehensive" aria-pressed="true">综合比较</button>
+        <button type="button" data-mode="representative" aria-pressed="false">代表产品比较</button>
+      </nav>
+    </header>
+    <div id="previewViewport" class="preview-viewport" aria-label="经理比较滚动预览">
+      <section id="managerSelector" class="manager-selector" aria-label="选择基金经理">
+        <div class="selection-row">
+          <div class="manager-brand">
+            <img id="managerPkBackground" alt="" class="manager-background">
+            <div class="manager-logo"><span>经理</span><img id="managerPkLogo" alt="PK"></div>
+          </div>
+          <div id="managerSlots" class="manager-slots"></div>
+        </div>
+        <div class="selection-actions">
+          <button id="startCompare" class="primary-button" type="button">开始比较</button>
+          <button id="clearManagers" class="secondary-button" type="button">清空</button>
+          <button id="exportCompare" class="secondary-button" type="button">导出对比</button>
+        </div>
+      </section>
+      <div class="preview-content">
+        <div id="demoStatus" class="demo-status" role="status" aria-live="polite">可搜索添加经理，也可试用置前、显隐和移除。向下滚动此区域查看收起状态。</div>
+        <section class="selection-result" aria-label="选择结果预览">
+          <h2 id="comparisonSummary">当前选择</h2>
+          <div class="result-scroll"><table><thead><tr><th>基金经理</th><th>基金公司</th><th>代表基金</th><th>显示状态</th></tr></thead><tbody id="comparisonBody"></tbody></table></div>
+        </section>
+        <section class="review-rules" aria-label="待确认规则">
+          <h2>这次需要你确认</h2>
+          <ul>
+            <li>下滑收起后，综合比较展示经理姓名，代表产品比较展示基金名称。</li>
+            <li>置前操作将该经理移到首列，取消后恢复加入顺序。</li>
+            <li>显隐操作保留已选经理，通过下方表格展示其显示状态变化。</li>
+          </ul>
+          <h3>暂按以下规则演示</h3>
+          <ul>
+            <li>向下滚动超过120px收起，向上滚动或点击搜索框展开。120px为待确认值。</li>
+            <li>展开、收起都搜索基金经理，统一使用“输入基金经理姓名”。原稿收起态的搜索提示与展开态不同。</li>
+            <li>收起态所有已选经理均可置前和显隐。原稿首列省略操作图标的条件待确认。</li>
+          </ul>
+          <p>本次为顶部交互样例，下方为选择结果演示，使用样例数据。</p>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
