@@ -48,24 +48,13 @@ function auditTableMarkup() {
   </div>`;
 }
 
-function auditFlatTableMarkup(name, columns, rows, groups = []) {
+function auditFlatTableMarkup(name, columns, rows) {
   const columnHeader = label => `<th scope="col">${esc(label)}</th>`;
-  const colgroups = groups.length
-    ? `<colgroup><col></colgroup>${groups.map(group => `<colgroup span="${group.span}"></colgroup>`).join('')}`
-    : '';
-  const groupHeader = groups.length
-    ? `<tr class="audit-table-header audit-table-group-heading">
-        <th scope="col" rowspan="2">${esc(columns[0])}</th>
-        ${groups.map(group => `<th scope="colgroup" colspan="${group.span}">${esc(group.label)}</th>`).join('')}
-      </tr>`
-    : '';
 
   return `<div class="audit-table-scroll audit-table-flat-preview" role="region" aria-label="${esc(name)}示例" tabindex="0">
-    <table class="audit-table audit-table-flat${groups.length ? ' audit-table-grouped' : ''}">
-      ${colgroups}
+    <table class="audit-table audit-table-flat">
       <thead>
-        ${groupHeader}
-        <tr class="audit-table-header">${columns.slice(groups.length ? 1 : 0).map(columnHeader).join('')}</tr>
+        <tr class="audit-table-header">${columns.map(columnHeader).join('')}</tr>
       </thead>
       <tbody>
         ${rows.map(({label, values, total}) => `<tr${total ? ' class="audit-total"' : ''}>
@@ -218,12 +207,9 @@ function installAuditedComponents() {
     ['数值字体', 'Roboto 等宽数字']
   ];
 
-  function addFlatTable(container, name, columns, rows, note, extraRules = [], groups = []) {
-    const markup = auditFlatTableMarkup(name, columns, rows, groups);
-    const headerRules = groups.length ? [
-      ['第一层表头', '14px Medium，文字 #333333，左对齐'],
-      ['第二层表头', '12px Medium，文字 #333333，左对齐']
-    ] : [['表头', '14px Medium，文字 #333333，左对齐']];
+  function addFlatTable(container, name, columns, rows, note, extraRules = []) {
+    const markup = auditFlatTableMarkup(name, columns, rows);
+    const headerRules = [['表头', '14px Medium，文字 #333333，左对齐']];
     const documentation = spec([...headerRules, ...flatRules, ...extraRules], note);
     add(container, name, markup, documentation);
   }
@@ -240,15 +226,6 @@ function installAuditedComponents() {
     {label:'宝盈中证A500指数增强 A', values:['3.46%', '8 个月']},
     {label:'易方达蓝筹精选混合', values:['−2.18%', '未持有']}
   ], '示例为持有明细，收益率是纯数值，持有时长包含文字。');
-
-  addFlatTable(tables, '分组表头', ['区间', '基金收益', '排名分位', '基准收益', '超额收益'], [
-    {label:'近 1 月', values:['1.28%', '28%', '0.90%', '0.38%']},
-    {label:'近 3 月', values:['3.46%', '32%', '2.64%', '0.82%']},
-    {label:'近 1 年', values:['6.63%', '21%', '4.52%', '2.11%']}
-  ], '示例为区间收益对比，每组表头下放置相关指标。', [['分组', '上层显示分组名称，下层显示指标名称']], [
-    {label:'基金表现', span:2},
-    {label:'基准对比', span:2}
-  ]);
 
   tables.querySelectorAll('th,td').forEach(cell => {
     if (cell.classList.contains('audit-number')) return;
