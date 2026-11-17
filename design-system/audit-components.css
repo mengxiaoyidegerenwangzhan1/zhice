@@ -31,6 +31,9 @@
 .audit-table .audit-level-2 th{padding-left:46px}
 .audit-table .audit-table-caption td{padding-inline:0;color:#666;font-size:12px;line-height:18px}
 .audit-table tr[hidden]{display:none}
+@media (hover:hover){
+  .audit-table tbody tr:not(.audit-table-caption):hover{background-color:var(--zc-hover)}
+}
 .audit-table button{display:flex;gap:6px;align-items:center;border:0;background:transparent;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
 .audit-table .audit-total button{gap:4px}
 .audit-table button img{flex:0 0 14px}
