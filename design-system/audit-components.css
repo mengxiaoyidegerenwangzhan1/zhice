@@ -49,8 +49,8 @@
 .audit-table-flat-preview{padding:0}
 .audit-table-flat{min-width:300px}
 .audit-table-flat .audit-table-header th:first-child,.audit-table-flat .audit-total th{padding-inline:12px}
-.audit-table-flat .audit-number{text-align:left}
-.audit-table-flat .audit-value-text{text-align:right}
+.audit-table-flat .audit-number,.audit-table-flat .audit-value-text{text-align:left}
+.audit-table-numeric .audit-number,.audit-table-numeric .audit-table-header th:not(:first-child){text-align:right}
 .audit-table-flat tbody tr:not(:last-child){border-bottom:1px solid rgba(234,234,234,.85)}
 .audit-range{width:100%;min-width:320px;height:260px;padding:0 12px;box-sizing:border-box}
 .audit-range-track{height:100%;position:relative;background:#f7f8fa}

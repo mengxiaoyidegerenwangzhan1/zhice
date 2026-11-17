@@ -48,11 +48,11 @@ function auditTableMarkup() {
   </div>`;
 }
 
-function auditFlatTableMarkup(name, columns, rows) {
+function auditFlatTableMarkup(name, columns, rows, numericColumns = false) {
   const columnHeader = label => `<th scope="col">${esc(label)}</th>`;
 
   return `<div class="audit-table-scroll audit-table-flat-preview" role="region" aria-label="${esc(name)}示例" tabindex="0">
-    <table class="audit-table audit-table-flat">
+    <table class="audit-table audit-table-flat${numericColumns ? ' audit-table-numeric' : ''}">
       <thead>
         <tr class="audit-table-header">${columns.map(columnHeader).join('')}</tr>
       </thead>
@@ -203,14 +203,14 @@ function installAuditedComponents() {
   const flatRules = [
     tableHoverRule,
     ['单元格内边距', '上、下各 12px，行高随内容自适应'],
-    ['对齐', '项目名称和纯数值左对齐，含文字的值右对齐'],
     ['数值字体', 'Roboto 等宽数字']
   ];
 
-  function addFlatTable(container, name, columns, rows, note, extraRules = []) {
-    const markup = auditFlatTableMarkup(name, columns, rows);
-    const headerRules = [['表头', '14px Medium，文字 #333333，左对齐']];
-    const documentation = spec([...headerRules, ...flatRules, ...extraRules], note);
+  function addFlatTable(container, name, columns, rows, note, extraRules = [], numericColumns = false) {
+    const markup = auditFlatTableMarkup(name, columns, rows, numericColumns);
+    const headerRules = [['表头', '14px Medium，文字 #333333']];
+    const alignmentRule = ['对齐', numericColumns ? '项目名称居左，数字及对应列标题居右' : '所有表头与表体内容均居左'];
+    const documentation = spec([...headerRules, ...flatRules, alignmentRule, ...extraRules], note);
     add(container, name, markup, documentation);
   }
 
@@ -219,7 +219,7 @@ function installAuditedComponents() {
     {label:'股票', values:['620.5', '62.05%']},
     {label:'债券', values:['248.3', '24.83%']},
     {label:'现金', values:['131.2', '13.12%']}
-  ], '示例为资产配置，汇总行在明细上方。', [['汇总行', '14px Medium，与明细共享列宽和对齐方式']]);
+  ], '示例为资产配置，汇总行在明细上方。', [['汇总行', '14px Medium，与明细共享列宽和对齐方式']], true);
 
   addFlatTable(pair, '文字与数字混合表', ['基金名称', '近1年收益', '持有时长'], [
     {label:'华夏成长混合', values:['6.63%', '1 年 5 个月']},
