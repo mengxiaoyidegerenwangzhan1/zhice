@@ -4,9 +4,9 @@
 .zc-mo-head h2 { display: flex; align-items: center; gap: 4px; margin: 0; color: #333; font-size: 16px; font-weight: 600; line-height: 22px; white-space: nowrap; }
 .zc-mo-toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 20px; min-width: 0; }
 .zc-mo-toolbar .zc-analysis-select { width: 188px; }
-.zc-mo-actions { display: flex; align-items: center; gap: 6px; padding: 2px; background: #fff; border-radius: 99px; box-shadow: 0 0 6px #00000014; }
+.zc-mo-actions { display: flex; flex: none; align-items: center; gap: 2px; padding: 2px; background: #fff; border-radius: 99px; box-shadow: 0 0 6px #00000014; }
 .zc-mo-actions button { display: grid; flex: none; place-items: center; width: 28px; height: 28px; padding: 0; border: 0; border-radius: 99px; background: #fff; color: #666; }
-.zc-mo-actions button:hover { background: #f7f8fa; }
+.zc-mo-actions button:hover { background: #f2f3f5; }
 .zc-mo-actions button img { display: block; width: 18px; height: 18px; }
 .zc-mo-actions button.is-refreshing img { animation: zc-refresh-spin .7s linear infinite; }
 .zc-mo-help { position: relative; display: flex; align-items: center; }
@@ -20,6 +20,8 @@
 .zc-mo-legend { display: flex; align-items: flex-start; justify-content: center; flex-wrap: wrap; gap: 8px 20px; margin-top: 12px; min-height: 17px; }
 .zc-mo-legend button { display: flex; align-items: center; gap: 6px; max-width: 100%; padding: 0; border: 0; background: transparent; color: #333; font-size: 12px; line-height: 17px; text-align: left; }
 .zc-mo-legend button i { display: block; flex: none; width: 10px; height: 2px; }
+.zc-manager-overview.is-comprehensive .zc-mo-legend button { flex: 0 1 80px; }
+.zc-mo-legend button i { border-radius: 7px; }
 .zc-mo-legend button.is-hidden { color: #999; text-decoration: line-through; }
 .zc-mo-legend button.is-reference { font-weight: 500; }
 .zc-mo-legend button:disabled { cursor: default; }
@@ -30,6 +32,9 @@
 .zc-mo-table td { background: #fff; }
 .zc-mo-table td.is-reference { background: #f8f7fc; }
 .zc-mo-table td.is-best { background: #fef5f5; }
+.zc-manager-overview.is-comprehensive .zc-mo-table-wrap { border: 0; }
+.zc-manager-overview.is-comprehensive :is(.zc-mo-table th, .zc-mo-table td) { border-right: 0; border-bottom-color: rgba(234, 234, 234, .85); padding-inline: 10px 12px; }
+.zc-manager-overview.is-comprehensive .zc-mo-table th { background: #fff; color: #333; }
 .zc-mo-number { font-family: Roboto, 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .zc-mo-number.is-negative { color: #36b397; }
 .zc-mo-number.is-positive { color: #bf3a61; }
@@ -39,7 +44,8 @@
 .zc-mo-stars img { display: block; flex: none; }
 .zc-mo-missing { color: #999; }
 .zc-mo-return-value { display: flex; align-items: center; gap: 6px; }
-.zc-mo-interval-table small { display: block; margin-top: 6px; color: #666; font-size: 12px; line-height: 17px; }
+.zc-mo-return-value .zc-mo-number { font-weight: 500; }
+.zc-mo-interval-table small { display: block; margin-top: 4px; color: #666; font-size: 12px; line-height: 17px; }
 .zc-mo-total { color: #999; }
 .zc-mo-difference { color: #6865a7; font-family: Roboto, Arial, sans-serif; font-size: 14px; font-style: italic; font-variant-numeric: tabular-nums; }
 .zc-mo-tooltip { min-width: 160px; max-width: 360px; padding: 12px 16px; color: #333; font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; font-size: 12px; line-height: 18px; }

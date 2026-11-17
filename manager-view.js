@@ -10,10 +10,6 @@
       { code: '020011', name: '国联安中证100指数(LOF)', type: '指数型', tenureReturn: 12.28 },
       { code: '020021', name: '国泰上证180金融ETF联接A', type: '指数型', tenureReturn: 9.13 },
     ] },
-    { id: 'c', name: '孟棋', company: '景顺长城基金管理有限公司', type: '偏股型', profileIndex: 2, products: [
-      { code: '002244', name: '景顺长城低碳科技主题灵活配置混合A', type: '混合型', tenureReturn: 15.75 },
-      { code: '000059', name: '景顺长城优信增利债券A', type: '债券型', tenureReturn: 6.32 },
-    ] },
     { id: 'd', name: '李笑薇', company: '富国基金管理有限公司', type: '指数型', profileIndex: 3, products: [
       { code: '100038', name: '富国沪深300增强A', type: '指数型', tenureReturn: 13.08 },
       { code: '100032', name: '富国中证红利指数增强A', type: '指数型', tenureReturn: 10.68 },
@@ -23,6 +19,10 @@
     ] },
     { id: 'f', name: '汪孟海', company: '富国基金管理有限公司', type: '混合型', profileIndex: 2, products: [
       { code: '004585', name: '富国港股通量化精选股票A', type: '股票型', tenureReturn: -3.26 },
+    ] },
+    { id: 'c', name: '孟棋', company: '景顺长城基金管理有限公司', type: '偏股型', profileIndex: 2, products: [
+      { code: '002244', name: '景顺长城低碳科技主题灵活配置混合A', type: '混合型', tenureReturn: 15.75 },
+      { code: '000059', name: '景顺长城优信增利债券A', type: '债券型', tenureReturn: 6.32 },
     ] },
   ];
   let host;
@@ -34,9 +34,6 @@
   let nextOrder = 0;
   let charts = [];
   let riskView = 'chart';
-  let showDifferences = true;
-  let noticeUntil = 0;
-  let noticeTimer;
   const ranges = new Map();
   const subjects = { comprehensive: new Map(), representative: new Map() };
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -52,23 +49,24 @@
       if (!cache.has(manager.id)) cache.set(manager.id, {});
       const entity = cache.get(manager.id);
       const product = selectedProduct(manager);
-      Object.assign(entity, manager, mode === 'representative' ? product : {}, {
-        id: manager.id, color: manager.color, visible: manager.visible, profileIndex: manager.profileIndex,
-        representativeFund: { ...product }, managerName: manager.name,
+      const representative = mode === 'representative';
+      Object.assign(entity, manager, representative ? product : {}, {
+        profileIndex: representative ? (manager.profileIndex + manager.products.indexOf(product)) % colors.length : manager.profileIndex,
+        representativeFund: product, managerName: manager.name,
       });
       return entity;
     });
   }
 
   function options() {
-    return { managers, funds: entities(), mode, referenceId, showDifferences, view: riskView, ui };
+    return { managers, funds: entities(), mode, referenceId, view: riskView, ui };
   }
 
   function riskOptions(section = 'overview') {
     const defaults = {
       overview: { start: '2024-01-01' },
-      forecast: { period: '近3年', holdingMonths: 3 },
-      rolling: { period: '近1年' },
+      forecast: { period: '近3年', start: '2023-11-06', commonStart: '2025-12-09', holdingMonths: 3 },
+      rolling: { period: '近1年', start: '2025-11-06', commonStart: '2025-12-09' },
       metrics: { benchmark: '上证综指', frequency: '原始频率' },
     };
     return { ...options(), ...range(`risk-${section}`, defaults[section]) };
@@ -82,8 +80,8 @@
     const key = `${mode}:${scope}`;
     if (!ranges.has(key)) {
       const value = { start: '2025-12-09', end: '2026-11-06', period: '共同时段', unit: '月', holdingMonths: 3, ...initial };
-      value.commonStart = value.start;
-      value.commonEnd = value.end;
+      value.commonStart ??= value.start;
+      value.commonEnd ??= value.end;
       ranges.set(key, value);
     }
     return ranges.get(key);
@@ -140,13 +138,49 @@
 
   function exportTable(section, filename) {
     const rows = [...section.querySelectorAll('table tr')].filter(row => !row.closest('[hidden]'));
+    if (!rows.length) return;
     const csv = rows.map(row => [...row.cells].map(cell => `"${cell.textContent.trim().replaceAll('"', '""')}"`).join(',')).join('\r\n');
     download(`${filename}.csv`, '\ufeff' + csv, 'text/csv;charset=utf-8');
   }
 
+  function exportTableImage(section, filename) {
+    const table = section.querySelector('table');
+    if (!table) return;
+    const tableBox = table.getBoundingClientRect();
+    const titleHeight = 48;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(tableBox.width * 2);
+    canvas.height = Math.ceil((titleHeight + tableBox.height) * 2);
+    const context = canvas.getContext('2d');
+    context.scale(2, 2);
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, tableBox.width, canvas.height / 2);
+    context.fillStyle = '#333';
+    context.font = '600 16px sans-serif';
+    context.fillText(filename, 12, 30);
+    table.querySelectorAll('th, td').forEach(cell => {
+      const box = cell.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const style = getComputedStyle(cell);
+      const x = box.left - tableBox.left;
+      const y = box.top - tableBox.top + titleHeight;
+      context.fillStyle = style.backgroundColor;
+      context.fillRect(x, y, box.width, box.height);
+      context.strokeStyle = '#eaeaea';
+      context.strokeRect(x, y, box.width, box.height);
+      context.fillStyle = style.color;
+      context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      context.textAlign = style.textAlign === 'right' ? 'right' : 'left';
+      context.textBaseline = 'middle';
+      const padding = Math.min(12, box.width / 5);
+      context.fillText(cell.innerText.trim().replace(/\s+/g, ' '), context.textAlign === 'right' ? x + box.width - padding : x + padding, y + box.height / 2, box.width - 2 * padding);
+    });
+    canvas.toBlob(blob => { if (blob) download(`${filename}.png`, blob, 'image/png'); });
+  }
+
   function exportImage(section, filename) {
     const sectionCharts = charts.filter(chart => section.contains(chart.getDom()));
-    if (!sectionCharts.length) return;
+    if (!sectionCharts.length) { exportTableImage(section, filename); return; }
     const images = sectionCharts.map(chart => chart.renderToCanvas({ pixelRatio: 2, backgroundColor: '#fff' }));
     const canvas = document.createElement('canvas');
     canvas.width = images.reduce((width, image) => width + image.width, 0);
@@ -201,33 +235,56 @@
         const section = button.closest('section');
         const title = section.querySelector('h2')?.childNodes[0]?.textContent || '经理对比';
         const hasChart = charts.some(chart => section.contains(chart.getDom()));
-        if (button.dataset.analysisDownload === 'image' || (hasChart && !section.querySelector('table'))) exportImage(section, title);
+        const format = button.dataset.analysisDownload || button.dataset.riskDownload;
+        if (format === 'image' || (format !== 'table' && hasChart && !section.querySelector('table'))) exportImage(section, title);
         else exportTable(section, title);
       };
     });
     root.querySelectorAll('[data-analysis-refresh], [data-risk-refresh]').forEach(button => {
-      button.onclick = () => { button.setAttribute('aria-busy', 'true'); setTimeout(render, 250); };
+      button.onclick = () => {
+        const section = button.closest('section');
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        section.setAttribute('aria-busy', 'true');
+        setTimeout(() => { if (section.isConnected) render(); }, 300);
+      };
     });
   }
   const ui = { range, timeControls, setting, bind: bindUi };
 
   function productPicker(manager) {
     const product = selectedProduct(manager);
-    return `<details class="manager-product"><summary aria-label="${manager.name}的代表基金"><span class="manager-product-title">${escape(product.name)}<img src="${assets}down.svg" width="20" height="20" alt=""></span><span class="manager-product-meta"><span>${product.code}　${product.type}</span><span>任期回报 <b class="${product.tenureReturn < 0 ? 'negative' : 'positive'}">${product.tenureReturn.toFixed(2)}%</b></span></span></summary><div class="manager-product-options" role="listbox" aria-label="${manager.name}的代表基金选项">${manager.products.map(item => `<button type="button" role="option" aria-selected="${item.code === product.code}" data-manager-product="${manager.id}" data-product-code="${item.code}"><span>${escape(item.name)}</span><small>${item.code}　${item.type}<b class="${item.tenureReturn < 0 ? 'negative' : 'positive'}">${item.tenureReturn.toFixed(2)}%</b></small></button>`).join('')}</div></details>`;
+    const meta = item => `<span class="manager-product-meta"><span>${item.code}　${item.type}</span><span>任期回报 <b class="${item.tenureReturn < 0 ? 'negative' : 'positive'}">${item.tenureReturn.toFixed(2)}%</b></span></span>`;
+    const choices = manager.products.map(item =>
+      `<button type="button" role="option" aria-selected="${item.code === product.code}" data-manager-product="${manager.id}" data-product-code="${item.code}"><span>${escape(item.name)}</span>${meta(item)}</button>`
+    ).join('');
+    return `<details class="manager-product" data-manager-product-card="${manager.id}"><summary aria-label="${manager.name}的代表基金"><span class="manager-product-title"><span title="${escape(product.name)}">${escape(product.name)}</span><img src="${assets}down.svg" width="20" height="20" alt=""></span>${meta(product)}</summary><div class="manager-product-options" role="listbox" aria-label="${manager.name}的代表基金选项">${choices}</div></details>`;
+  }
+
+  function managerCard(manager) {
+    const pinned = referenceId === manager.id;
+    const product = mode === 'representative' ? selectedProduct(manager) : null;
+    const pin = pinned
+      ? `<button type="button" class="zc-reference-badge" data-manager-pin="${manager.id}" aria-label="取消参照 ${manager.name}">${img('reference-pin')}<span>参照</span></button>`
+      : `<button type="button" data-manager-pin="${manager.id}" aria-label="钉住参照 ${manager.name}"><img src="./assets/compare-figma/47-50726_imgProperty3.svg" width="14" height="14" alt=""></button>`;
+    return `<article class="zc-fund manager-slot ${manager.visible ? '' : 'is-hidden'} ${pinned ? 'is-reference' : ''}" style="--series:${manager.color}">
+      <div class="zc-card-tools"><div>${pin}${pinned ? '' : `<button type="button" data-manager-eye="${manager.id}" aria-label="${manager.visible ? '隐藏' : '显示'} ${manager.name}" aria-pressed="${manager.visible}">${img(`eye-${manager.visible ? 'visible' : 'hidden'}`)}</button>`}</div><button type="button" data-manager-remove="${manager.id}" aria-label="移除 ${manager.name}"><img src="./assets/compare-figma/47-50726_imgFrame2036082637.svg" width="14" height="14" alt=""></button></div>
+      <div class="manager-identity"><i aria-hidden="true"></i><strong class="manager-name">${escape(manager.name)}</strong>${product ? `<strong class="manager-compact-product" title="${escape(product.name)}">${escape(product.name)}</strong>` : ''}<span>${manager.type}</span></div>
+      ${product ? productPicker(manager) : ''}
+    </article>`;
   }
 
   function cards() {
-    return `<div class="zc-fund-row"><div class="manager-pk"><img class="manager-pk-background" src="${assets}background.svg" alt=""><span>经理<img src="${assets}pk.svg" width="33" height="17.314" alt="PK"></span></div><div class="zc-fund-slots">${Array.from({ length: 4 }, (_, index) => {
+    return `<div class="zc-fund-row"><div class="manager-pk" role="img" aria-label="经理 PK"><img class="manager-pk-logo" src="${assets}manager-pk-logo.png" width="72" height="25" alt=""></div><div class="zc-fund-slots">${Array.from({ length: 4 }, (_, index) => {
       const manager = managers[index];
-      if (!manager) return `<article class="zc-fund zc-search-slot manager-slot"><label class="zc-search"><input type="text" data-manager-search="${index}" placeholder="输入基金经理姓名" aria-label="搜索基金经理" autocomplete="off" role="combobox" aria-expanded="false"><span class="zc-search-icon">${img('search-focus', 20)}</span></label><div class="manager-search-results" id="manager-results-${index}" role="listbox" hidden></div></article>`;
-      const pinned = referenceId === manager.id;
-      return `<article class="zc-fund manager-slot ${manager.visible ? '' : 'is-hidden'} ${pinned ? 'is-reference' : ''}" style="--series:${manager.color}">${pinned ? `<button type="button" class="zc-reference-badge" data-manager-pin="${manager.id}" aria-label="取消参照 ${manager.name}">${img('reference-pin')}<span>参照</span></button>` : ''}<div class="zc-card-tools"><div>${pinned ? '' : `<button type="button" data-manager-pin="${manager.id}" aria-label="钉住参照 ${manager.name}"><img src="./assets/compare-figma/47-50726_imgProperty3.svg" width="14" height="14" alt=""></button><button type="button" data-manager-eye="${manager.id}" aria-label="${manager.visible ? '隐藏' : '显示'} ${manager.name}" aria-pressed="${manager.visible}">${img(`eye-${manager.visible ? 'visible' : 'hidden'}`)}</button>`}</div><button type="button" data-manager-remove="${manager.id}" aria-label="移除 ${manager.name}"><img src="./assets/compare-figma/47-50726_imgFrame2036082637.svg" width="14" height="14" alt=""></button></div><div class="manager-identity"><i aria-hidden="true"></i><strong>${escape(manager.name)}</strong><span>${manager.type}</span></div>${mode === 'representative' ? productPicker(manager) : ''}</article>`;
+      if (!manager) return `<article class="zc-fund zc-search-slot manager-slot"><label class="zc-search"><input type="text" data-manager-search="${index}" placeholder="输入基金经理姓名" aria-label="搜索基金经理" autocomplete="off" role="combobox" aria-expanded="false"><span class="zc-search-icon"><img src="./assets/compare-figma/47-50726_imgFrame.svg" width="20" height="20" alt=""><img class="is-focus" src="./assets/compare-controls/search-focus.svg" width="20" height="20" alt=""></span></label><div class="manager-search-results" id="manager-results-${index}" role="listbox" hidden></div></article>`;
+      return managerCard(manager);
     }).join('')}</div></div>`;
   }
 
   function navigation() {
     const labels = mode === 'comprehensive' ? ['人物概览比较', '收益与风险比较', '资产配置比较'] : ['产品概览比较', '收益与风险比较', '资产配置比较', '收益归因比较'];
-    return `<div class="zc-controls manager-controls"><div class="zc-tabs" role="tablist" aria-label="经理比较模式">${[['comprehensive', '综合比较'], ['representative', '代表产品比较']].map(([key, label]) => `<button type="button" role="tab" data-manager-mode="${key}" aria-selected="${mode === key}" class="${mode === key ? 'active' : ''}">${label}</button>`).join('')}</div><div class="manager-subtabs" role="tablist" aria-label="比较维度">${labels.map((label, index) => `<button type="button" role="tab" data-manager-tab="${index}" aria-selected="${tabs[mode] === index}" class="${tabs[mode] === index ? 'selected' : ''}">${label}</button>`).join('')}</div>${mode === 'representative' && tabs[mode] === 3 ? `<button class="zc-reference-toggle ${showDifferences ? 'is-on' : ''}" type="button" role="switch" data-manager-differences aria-label="参照差值" aria-checked="${showDifferences}">${img('reference-toggle', 22)}参照差值</button>` : ''}</div>`;
+    return `<div class="zc-controls manager-controls"><div class="zc-tabs" role="tablist" aria-label="经理比较模式">${[['comprehensive', '综合比较'], ['representative', '代表产品比较']].map(([key, label]) => `<button type="button" role="tab" data-manager-mode="${key}" aria-selected="${mode === key}" class="${mode === key ? 'active' : ''}">${label}</button>`).join('')}</div><div class="manager-subtabs" role="tablist" aria-label="比较维度">${labels.map((label, index) => `<button type="button" role="tab" data-manager-tab="${index}" aria-selected="${tabs[mode] === index}" class="${tabs[mode] === index ? 'selected' : ''}">${label}</button>`).join('')}</div></div>`;
   }
 
   function empty() {
@@ -244,7 +301,8 @@
     if (!host || !document.body.classList.contains('zc-manager-mode')) return;
     charts.forEach(chart => { if (!chart.isDisposed()) chart.dispose(); });
     charts = [];
-    const selector = `<section class="zc-selector">${cards()}<div class="zc-actions"><button type="button" class="zc-primary" data-manager-start ${managers.length < 2 ? 'disabled' : ''}>开始比较</button><button type="button" class="zc-secondary" data-manager-clear>清空</button><button type="button" class="zc-secondary" data-manager-export ${compared ? '' : 'disabled'}>导出对比</button></div></section>`;
+    const ready = managers.length >= 2;
+    const selector = `<section class="zc-selector">${cards()}<div class="zc-actions"><button type="button" class="zc-primary" data-manager-start ${ready ? '' : 'disabled'}>开始比较</button><button type="button" class="zc-secondary" data-manager-clear>清空</button>${ready ? `<button type="button" class="zc-secondary" data-manager-export ${compared ? '' : 'disabled'}>导出对比</button>` : ''}</div></section>`;
     const view = moduleView();
     const params = options();
     let content = '';
@@ -266,24 +324,11 @@
       view.bind?.(host, params);
       ui.bind(host);
     }
-    showNotice();
   }
 
   function focusAfterRender(selector) {
     render();
     host.querySelector(selector)?.focus({ preventScroll: true });
-  }
-
-  function showNotice() {
-    clearTimeout(noticeTimer);
-    if (noticeUntil <= Date.now()) return;
-    const notice = document.createElement('div');
-    notice.className = 'zc-type-notice manager-type-notice';
-    notice.setAttribute('role', 'status');
-    notice.innerHTML = `<span class="zc-warning">!</span><span>主管基金类型不一致的经理不适合放在一起比较</span><button type="button" aria-label="关闭提示"><img src="./assets/compare-figma/47-50726_imgFrame2036082637.svg" width="14" height="14" alt=""></button>`;
-    host.querySelector('.zc-selector').before(notice);
-    notice.querySelector('button').onclick = () => { noticeUntil = 0; notice.remove(); };
-    noticeTimer = setTimeout(() => { noticeUntil = 0; notice.remove(); }, noticeUntil - Date.now());
   }
 
   function closeSearch() {
@@ -298,24 +343,26 @@
       const update = () => {
         closeSearch();
         const query = input.value.trim();
-        const matches = catalog.filter(manager => !managers.some(item => item.id === manager.id) && `${manager.name}${manager.company}${manager.type}`.includes(query));
+        const matches = catalog.filter(manager => !managers.some(item => item.id === manager.id) && manager.name.includes(query));
         panel.hidden = false;
         input.setAttribute('aria-expanded', 'true');
-        const highlight = value => escape(value).replaceAll(escape(query), query ? `<strong>${escape(query)}</strong>` : '');
-        panel.innerHTML = matches.length ? matches.map(manager => `<button type="button" role="option" data-manager-add="${manager.id}"><span>${highlight(manager.name)}</span><span>${highlight(manager.company)}</span><small>${manager.type}</small></button>`).join('') : '<div class="zc-search-no-results">暂无匹配经理</div>';
+        const highlight = value => query
+          ? value.split(query).map(escape).join(`<strong>${escape(query)}</strong>`)
+          : escape(value);
+        panel.innerHTML = matches.length ? matches.map(manager => `<button type="button" role="option" data-manager-add="${manager.id}"><span>${highlight(manager.name)}</span><span>${escape(manager.company.replace(/管理有限公司$/, ''))}</span><small>${manager.type}</small></button>`).join('') : '<div class="zc-search-no-results">暂无匹配经理</div>';
         panel.querySelectorAll('[data-manager-add]').forEach(button => {
           button.onclick = event => {
             event.stopPropagation();
             const manager = catalog.find(item => item.id === button.dataset.managerAdd);
             const color = colors.find(value => !managers.some(item => item.color === value));
             managers.push({ ...manager, visible: true, color, order: nextOrder++, productCode: manager.products[0].code });
-            if (new Set(managers.map(item => item.type)).size > 1) noticeUntil = Date.now() + 3000;
             focusAfterRender('[data-manager-search]');
             closeSearch();
           };
         });
       };
       input.onfocus = update;
+      input.onclick = () => { if (panel.hidden) update(); };
       input.oninput = update;
       input.onkeydown = event => {
         if (event.isComposing) return;
@@ -342,12 +389,29 @@
     host.querySelectorAll('[data-manager-mode]').forEach(button => { button.onclick = () => { mode = button.dataset.managerMode; focusAfterRender(`[data-manager-mode="${mode}"]`); }; });
     host.querySelectorAll('[data-manager-tab]').forEach(button => { button.onclick = () => { tabs[mode] = Number(button.dataset.managerTab); focusAfterRender(`[data-manager-tab="${tabs[mode]}"]`); }; });
     host.querySelector('[data-manager-start]').onclick = () => { compared = managers.length >= 2; focusAfterRender(`[data-manager-tab="${tabs[mode]}"]`); };
-    host.querySelector('[data-manager-clear]').onclick = () => { managers = []; compared = false; referenceId = null; noticeUntil = 0; Object.values(subjects).forEach(cache => cache.clear()); focusAfterRender('[data-manager-search]'); closeSearch(); };
-    host.querySelector('[data-manager-export]').onclick = () => exportTable(host.querySelector('.zc-content'), '经理对比');
+    host.querySelector('[data-manager-clear]').onclick = () => {
+      managers = [];
+      compared = false;
+      referenceId = null;
+      nextOrder = 0;
+      tabs.comprehensive = 0;
+      tabs.representative = 0;
+      Object.values(subjects).forEach(cache => cache.clear());
+      focusAfterRender('[data-manager-clear]');
+    };
+    host.querySelector('[data-manager-export]')?.addEventListener('click', () => {
+      const content = host.querySelector('.zc-content');
+      if (content.querySelector('table')) exportTable(content, '经理对比');
+      else exportImage(content, '经理对比');
+    });
     host.querySelectorAll('[data-manager-remove]').forEach(button => { button.onclick = () => {
       managers = managers.filter(manager => manager.id !== button.dataset.managerRemove);
       if (referenceId === button.dataset.managerRemove) { referenceId = null; managers.sort((a, b) => a.order - b.order); }
-      if (managers.length < 2) compared = false;
+      if (managers.length < 2) {
+        compared = false;
+        tabs.comprehensive = 0;
+        tabs.representative = 0;
+      }
       focusAfterRender('[data-manager-search]');
       closeSearch();
     }; });
@@ -355,7 +419,10 @@
       referenceId = referenceId === button.dataset.managerPin ? null : button.dataset.managerPin;
       managers.sort((a, b) => a.order - b.order);
       const index = managers.findIndex(manager => manager.id === referenceId);
-      if (index >= 0) managers.unshift(...managers.splice(index, 1));
+      if (index >= 0) {
+        managers[index].visible = true;
+        managers.unshift(...managers.splice(index, 1));
+      }
       focusAfterRender(`[data-manager-pin="${button.dataset.managerPin}"]`);
     }; });
     host.querySelectorAll('[data-manager-eye]').forEach(button => { button.onclick = () => {
@@ -368,10 +435,9 @@
     host.querySelectorAll('[data-manager-product]').forEach(button => { button.onclick = () => {
       const manager = managers.find(item => item.id === button.dataset.managerProduct);
       manager.productCode = button.dataset.productCode;
-      render();
+      focusAfterRender(`[data-manager-product-card="${manager.id}"] summary`);
     }; });
     host.querySelectorAll('[data-risk-view]').forEach(button => { button.onclick = () => { riskView = button.dataset.riskView; render(); }; });
-    host.querySelector('[data-manager-differences]')?.addEventListener('click', () => { showDifferences = !showDifferences; render(); });
   }
 
   document.addEventListener('click', event => {
@@ -386,7 +452,6 @@
     dispose() {
       charts.forEach(chart => { if (!chart.isDisposed()) chart.dispose(); });
       charts = [];
-      clearTimeout(noticeTimer);
     },
   };
 })();

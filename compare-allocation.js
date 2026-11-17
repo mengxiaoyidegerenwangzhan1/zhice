@@ -70,7 +70,12 @@
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
   const icon = name => `<img src="${assets}${name}.svg" alt="">`;
   const slots = funds => Array.from({ length: 4 }, (_, index) => funds[index]);
-  const hasData = fund => fund && fund.id !== 'c';
+  const isRepresentative = options => options.mode === 'representative';
+  const hasData = (fund, options, key) => Boolean(fund && (isRepresentative(options)
+    ? !/QDII/.test(fund.type) && (!['stock', 'holdings'].includes(key) || !/债券/.test(fund.type))
+    : fund.id !== 'c'));
+  const productProfile = fund => window.CompareRiskCharts?.sampleProfile(fund);
+  const profileColumn = (fund, options) => isRepresentative(options) ? (productProfile(fund)?.index || 0) % 2 : Number(fund.id === 'b');
   const scopeFor = key => `allocation-${key}`;
   const numeric = value => `<span class="zc-allocation-number${value < 0 ? ' is-negative' : ''}">${value.toFixed(2)}%</span>`;
   const missing = '<span class="zc-allocation-dash">--</span>';
@@ -98,10 +103,14 @@
     })).sort((first, second) => (second.values[0] ?? 0) - (first.values[0] ?? 0));
   }
 
-  function amount(row, fund, key) {
-    if (!hasData(fund)) return null;
-    const value = row.values[fund.id === 'b' ? 1 : 0];
-    return Number.isFinite(value) ? value * (1 - changeForReport(key)) : null;
+  function amount(row, fund, key, options) {
+    if (!hasData(fund, options, key)) return null;
+    const isBondFund = isRepresentative(options) && /债券/.test(fund.type);
+    const bondFundAssets = { 银行存款: 1.73, 固定收益: 95.71, 可转换债券: 1.22, 其他资产: 1.34 };
+    const value = isBondFund && key === 'asset' ? bondFundAssets[row.name] : row.values[profileColumn(fund, options)];
+    const profile = isRepresentative(options) ? productProfile(fund) : null;
+    const variation = profile ? Math.sin(row.name.charCodeAt(0) + profile.phase) * (profile.scale - 1) : 0;
+    return Number.isFinite(value) ? Math.min(100, value * (1 - changeForReport(key) + variation * .4)) : null;
   }
 
   function dropdown(key, property, label, options, width) {
@@ -117,13 +126,14 @@
     </div>`;
   }
 
-  function heading(definition) {
+  function heading(definition, options) {
     const { key, title, help } = definition;
     const distribution = key === 'stock' ? dropdown(key, 'distribution', '分布', stockDistributions, 252) : key === 'bond' ? dropdown(key, 'distribution', '分布', ['债券种类'], 176) : '';
+    const downloadType = isRepresentative(options) ? key.includes('holdings') ? 'table' : 'image' : scopeFor(key);
     return `<div class="zc-section-head zc-allocation-head">
       <div class="zc-allocation-heading"><h2>${title}</h2>${help ? `<span class="zc-allocation-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-${scopeFor(key)}-help">${icon('help')}</button><span id="zc-${scopeFor(key)}-help" role="tooltip">${help}</span></span>` : ''}</div>
       <div class="zc-allocation-actions">${distribution}${dropdown(key, 'report', '报告期', reportDates, 192)}
-        <div class="zc-allocation-action-buttons"><button class="zc-text" type="button" data-analysis-download="${scopeFor(key)}" aria-label="下载${title}">${icon('download')}下载</button><button class="zc-text" type="button" data-analysis-refresh="${scopeFor(key)}" aria-label="刷新${title}">${icon('refresh')}刷新</button></div>
+        <div class="zc-allocation-action-buttons"><button class="zc-text" type="button" data-analysis-download="${downloadType}" aria-label="下载${title}">${icon('download')}下载</button><button class="zc-text" type="button" data-analysis-refresh="${scopeFor(key)}" aria-label="刷新${title}">${icon('refresh')}刷新</button></div>
       </div>
     </div>`;
   }
@@ -136,19 +146,19 @@
     const { funds } = options;
     const labels = { asset: '大类资产类型<br>/<br>占总资产比', stock: state.stock.distribution === '板块分布' ? '板块分布<br>/<br>占净资产比' : '行业分布<br>/<br>占净资产比', bond: '债券类型 /<br>占净资产比' };
     return `<table class="zc-allocation-table zc-allocation-chart-table" aria-label="${definitions.find(item => item.key === key).title}图表">${columns()}<tbody><tr>
-      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}><div class="zc-allocation-chart-slot">${fund?.visible ? hasData(fund) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</div></td>`).join('')}
+      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}><div class="zc-allocation-chart-slot">${fund?.visible ? hasData(fund, options, key) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</div></td>`).join('')}
     </tr></tbody></table>`;
   }
 
   function valueCells(row, options, key) {
     const reference = referenceFund(options);
-    const baseline = amount(row, reference, key);
+    const baseline = amount(row, reference, key, options);
     return slots(options.funds).map(fund => {
-      const value = amount(row, fund, key);
+      const value = amount(row, fund, key, options);
       let content = '';
       if (fund?.visible) {
         content = Number.isFinite(value) ? numeric(value) : missing;
-        if (reference && fund.id !== reference.id && Number.isFinite(value)) {
+        if (reference && !isRepresentative(options) && fund.id !== reference.id && Number.isFinite(value)) {
           const difference = Number.isFinite(baseline) ? value - baseline : null;
           const delta = difference === null ? '--' : `${difference >= 0 ? '+' : ''}${difference.toFixed(2)}pp`;
           content = `<span class="zc-allocation-value-pair">${content}<span class="zc-allocation-difference${difference < 0 ? ' is-negative' : ''}">${delta}</span></span>`;
@@ -160,34 +170,37 @@
 
   function distributionTable(key, options) {
     const rows = dataRows(key);
-    return `<div class="zc-allocation-table-frame">${chartRow(key, options)}
+    const showChart = key === 'stock' || !isRepresentative(options);
+    return `<div class="zc-allocation-table-frame">${showChart ? chartRow(key, options) : ''}
       <div class="zc-allocation-data-scroll${rows.length > 10 ? ' is-long' : ''}"${rows.length > 10 ? ' tabindex="0" role="region" aria-label="股票资产分布明细，可滚动"' : ''}>
-        <table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}明细">${columns()}<tbody>${rows.map((row, index) => `<tr data-allocation-row="${index}" data-allocation-label="${escape(row.name)}"><th scope="row"><span class="zc-allocation-row-label"><i style="--category:${row.color}" aria-hidden="true"></i><span>${escape(row.name)}</span></span></th>${valueCells(row, options, key)}</tr>`).join('')}</tbody></table>
+        <table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}明细">${columns()}<tbody>${rows.map((row, index) => `<tr data-allocation-row="${index}" data-allocation-label="${escape(row.name)}"><th scope="row"><span class="zc-allocation-row-label">${showChart ? `<i style="--category:${row.color}" aria-hidden="true"></i>` : ''}<span>${escape(row.name)}</span></span></th>${valueCells(row, options, key)}</tr>`).join('')}</tbody></table>
       </div>
     </div>`;
   }
 
-  function holdingRows(key, fund) {
-    if (!hasData(fund)) return [];
-    return (key === 'holdings' ? stockHoldings : bondHoldings)[fund.id === 'b' ? 1 : 0];
+  function holdingRows(key, fund, options) {
+    if (!hasData(fund, options, key)) return [];
+    const rows = (key === 'holdings' ? stockHoldings : bondHoldings)[profileColumn(fund, options)];
+    const variation = isRepresentative(options) ? productProfile(fund)?.offset || 0 : 0;
+    return variation ? rows.map(([name, value]) => [name, value * (1 + variation * .4)]) : rows;
   }
 
   function holdingMatches(key, options) {
     const reference = referenceFund(options);
     if (!reference) return new Map();
-    const names = new Set(options.funds.filter(fund => fund.id !== reference.id).flatMap(fund => holdingRows(key, fund).map(row => row[0])));
-    return new Map(holdingRows(key, reference).filter(row => names.has(row[0])).map(([name], index) => [name, securityColors[name] || matchingColors[index % matchingColors.length]]));
+    const names = new Set(options.funds.filter(fund => fund.id !== reference.id).flatMap(fund => holdingRows(key, fund, options).map(row => row[0])));
+    return new Map(holdingRows(key, reference, options).filter(row => names.has(row[0])).map(([name], index) => [name, securityColors[name] || matchingColors[index % matchingColors.length]]));
   }
 
   function holdingTable(key, options) {
     const { funds } = options;
-    const hasReference = Boolean(referenceFund(options));
-    const matches = holdingMatches(key, options);
+    const hasReference = !isRepresentative(options) && Boolean(referenceFund(options));
+    const matches = hasReference ? holdingMatches(key, options) : new Map();
     const rowCount = key === 'holdings' ? 10 : 5;
-    const summaries = key === 'holdings' ? ['前十大合计', '集中度'] : ['前五大合计'];
+    const summaries = isRepresentative(options) ? ['合计'] : key === 'holdings' ? ['前十大合计', '集中度'] : ['前五大合计'];
     return `<div class="zc-allocation-table-frame"><table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}">${columns()}<tbody>
       ${Array.from({ length: rowCount }, (_, index) => `<tr><th scope="row"><span class="zc-allocation-number">${index + 1}</span></th>${slots(funds).map(fund => {
-        const row = holdingRows(key, fund)[index];
+        const row = holdingRows(key, fund, options)[index];
         let content = '';
         if (fund?.visible) {
           content = missing;
@@ -201,7 +214,7 @@
         return `<td${referenceClass(fund, options)}>${content}</td>`;
       }).join('')}</tr>`).join('')}
       ${summaries.map(name => `<tr class="zc-allocation-summary"><th scope="row">${name}</th>${slots(funds).map(fund => {
-        const rows = holdingRows(key, fund);
+        const rows = holdingRows(key, fund, options);
         const value = rows.reduce((sum, row) => sum + row[1], 0) * (1 - changeForReport(key));
         const content = fund?.visible ? rows.length && name !== '集中度' ? numeric(value) : missing : '';
         return `<td${referenceClass(fund, options)}>${content}</td>`;
@@ -211,11 +224,11 @@
 
   function section(definition, options) {
     const { key } = definition;
-    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
+    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition, options)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
   }
 
   function render(options) {
-    return `<div class="zc-allocation-view">${definitions.map(definition => section(definition, options)).join('')}</div>`;
+    return `<div class="zc-allocation-view${isRepresentative(options) ? ' zc-representative-allocation' : ''}">${definitions.map(definition => section(definition, options)).join('')}</div>`;
   }
 
   function mount(root, options) {
@@ -226,7 +239,7 @@
         const key = element.dataset.allocationChart;
         const fund = options.funds.find(item => item.id === element.dataset.fundId);
         const rows = dataRows(key);
-        const seriesData = rows.map((row, rowIndex) => ({ name: row.name, rowIndex, value: amount(row, fund, key), itemStyle: { color: row.color } })).filter(row => Number.isFinite(row.value) && row.value > 0);
+        const seriesData = rows.map((row, rowIndex) => ({ name: row.name, rowIndex, value: amount(row, fund, key, options), itemStyle: { color: row.color } })).filter(row => Number.isFinite(row.value) && row.value > 0);
         if (!window.echarts || !seriesData.length) return;
         const chart = window.echarts.init(element);
         charts.push(chart);

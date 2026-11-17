@@ -1,11 +1,19 @@
-.zc-manager-allocation-view > section:nth-child(2) {
-  border-top: 0;
-  padding-top: 0;
+.zc-compare .zc-manager-allocation-view > section + section {
+  position: relative;
+  border-top-color: transparent;
+}
+
+.zc-manager-allocation-view > section + section::before {
+  content: '';
+  position: absolute;
+  inset: -1px -20px auto;
+  border-top: 1px solid #eaeaea;
 }
 
 .zc-manager-allocation-head,
 .zc-manager-allocation-heading,
-.zc-manager-allocation-actions {
+.zc-manager-allocation-actions,
+.zc-manager-allocation-controls {
   display: flex;
   align-items: center;
 }
@@ -18,13 +26,17 @@
 }
 
 .zc-manager-allocation-heading { gap: 4px; min-width: 0; }
-.zc-manager-allocation-heading h2 { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; color: #333; }
-.zc-manager-allocation-heading small { margin-left: 12px; color: #777; font-size: 14px; font-weight: 400; white-space: nowrap; }
-.zc-manager-allocation-heading small > span { margin-left: 4px; }
-.zc-manager-allocation-actions { gap: 20px; flex: none; }
-.zc-manager-allocation-actions.is-industry .zc-analysis-select { width: 252px; }
+.zc-manager-allocation-heading h2 { margin: 0; font-size: 16px; line-height: 22px; font-weight: 600; color: #333; white-space: nowrap; }
+.zc-manager-allocation-heading small { margin-left: 12px; color: #666; font: 400 14px/22px 'PingFang SC', 'Microsoft YaHei', sans-serif; white-space: nowrap; }
+.zc-manager-allocation-actions,
+.zc-manager-allocation-controls { gap: 20px; flex: none; }
+.zc-manager-allocation-controls > .zc-analysis-select { width: 200px; }
+[data-manager-allocation-section="assets"] .zc-analysis-select { width: 192px; }
+[data-manager-allocation-section="industries"] .zc-analysis-select { width: 252px; }
+[data-manager-allocation-section="bonds"] .zc-analysis-select:first-child { width: 180px; }
 
-.zc-manager-allocation-tools {
+.zc-manager-allocation-tools,
+.zc-manager-allocation-tools[data-shared-actions] {
   display: flex;
   flex: none;
   align-items: center;
@@ -33,7 +45,7 @@
   padding: 2px;
   border-radius: 99px;
   background: #fff;
-  box-shadow: 0 0 12px #00000014;
+  box-shadow: 0 0 6px #00000014;
 }
 
 .zc-manager-allocation-tools button {
@@ -47,24 +59,76 @@
   background: transparent;
 }
 .zc-manager-allocation-tools button:hover { background: #f2f3f5; }
-.zc-manager-allocation-tools img { display: block; flex: none; }
-.zc-manager-allocation-tools button.is-refreshing img { animation: zc-refresh-spin .7s linear infinite; }
-.zc-manager-allocation-scroll.is-industry { max-height: 380px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #c6c7ca #f7f8fa; }
-.zc-manager-allocation-scroll.is-industry::-webkit-scrollbar { width: 6px; }
-.zc-manager-allocation-scroll.is-industry::-webkit-scrollbar-thumb { background: #c6c7ca; border-radius: 3px; }
-.zc-manager-allocation-view .zc-allocation-chart-table th { color: #777; }
-.zc-manager-allocation-view .zc-allocation-table th { font-weight: 400; }
-.zc-manager-allocation-view .zc-allocation-table .zc-allocation-summary > * { font-weight: 500; }
+.zc-manager-allocation-tools img { display: block; }
+.zc-manager-allocation-tools button[aria-busy="true"] img { animation: zc-refresh-spin .7s linear infinite; }
 
-@media (max-width: 1150px) {
-  .zc-manager-allocation-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 0 12px; }
-  .zc-manager-allocation-heading { grid-column: 1; grid-row: 1; min-height: 32px; flex-wrap: wrap; }
+.zc-manager-allocation-view .zc-allocation-help > button { position: relative; }
+.zc-manager-allocation-help-active { position: absolute; inset: 0; opacity: 0; }
+.zc-manager-allocation-view .zc-allocation-help:hover .zc-manager-allocation-help-active,
+.zc-manager-allocation-view .zc-allocation-help:focus-within .zc-manager-allocation-help-active { opacity: 1; }
+.zc-manager-allocation-view .zc-allocation-help > [role="tooltip"] {
+  top: -8px;
+  left: calc(100% + 8px);
+  width: min(240px, calc(100vw - 180px));
+  background: rgba(255, 255, 255, 0.96);
+  color: #333;
+  font: 400 14px/22px 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+.zc-manager-allocation-view .zc-allocation-help [role="tooltip"] > span {
+  display: block;
+  padding-left: 12px;
+  background: url('../assets/manager-allocation/help-bullet.svg') left top / 8px 22px no-repeat;
+}
+.zc-manager-allocation-view .zc-allocation-help [role="tooltip"] > span + span { margin-top: 8px; }
+
+.zc-manager-allocation-view .zc-allocation-table-frame { border: 0; }
+.zc-manager-allocation-view .zc-allocation-table { min-width: 0; }
+.zc-manager-allocation-view .zc-allocation-table col:first-child { width: clamp(90px, 8.34vw, 120px) !important; }
+.zc-manager-allocation-view .zc-allocation-table tr > * {
+  padding: 10px;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 1px solid rgba(234, 234, 234, .85);
+  color: #333;
+  font-weight: 400;
+}
+.zc-manager-allocation-view .zc-allocation-table th { background: white; }
+.zc-manager-allocation-view .zc-allocation-table td { text-align: center; }
+.zc-manager-allocation-view .zc-allocation-table th > .zc-allocation-number { text-align: left; }
+.zc-manager-allocation-view .zc-allocation-table .zc-allocation-summary > * { font-weight: 600; background: white; }
+.zc-manager-allocation-view .zc-allocation-holding { text-align: right; }
+.zc-manager-allocation-view .zc-allocation-chart-table th { color: #666; }
+.zc-manager-allocation-view .zc-allocation-chart-table td { padding: 24px 12px; }
+.zc-manager-allocation-view .zc-allocation-chart-slot { max-width: 192px; }
+.zc-manager-allocation-view .zc-allocation-empty { color: #666; }
+.zc-manager-allocation-scroll {
+  max-height: 382px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #c6c7ca #f7f8fa;
+}
+.zc-manager-allocation-scroll::-webkit-scrollbar { width: 6px; }
+.zc-manager-allocation-scroll::-webkit-scrollbar-thumb { background: #c6c7ca; border-radius: 3px; }
+
+@media (max-width: 900px) {
+  .zc-manager-allocation-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 12px; }
+  .zc-manager-allocation-heading { grid-column: 1; grid-row: 1; min-height: 32px; flex-wrap: wrap; gap: 0 4px; }
   .zc-manager-allocation-actions { display: contents; }
   .zc-manager-allocation-tools { grid-column: 2; grid-row: 1; justify-self: end; }
-  .zc-manager-allocation-actions > .zc-analysis-select { grid-column: 1 / -1; margin-top: 20px; max-width: 100%; }
-  .zc-manager-allocation-heading small { margin-left: 0; white-space: normal; }
+  .zc-manager-allocation-controls { grid-column: 1 / -1; flex-wrap: wrap; gap: 12px 20px; }
+  .zc-manager-allocation-controls > .zc-analysis-select { max-width: 100%; }
+  .zc-manager-allocation-heading small { margin-left: 0; }
+}
+
+@media (max-width: 560px) {
+  .zc-manager-allocation-view > section + section::before { inset-inline: -16px; }
+  .zc-manager-allocation-view .zc-allocation-table col:first-child { width: 84px !important; }
+  .zc-manager-allocation-view .zc-allocation-table tr > * { padding-inline: 6px; font-size: 12px; }
+  .zc-manager-allocation-view .zc-allocation-chart-table td { padding: 12px; }
+  .zc-manager-allocation-view .zc-allocation-holding { flex-wrap: wrap; }
+  .zc-manager-allocation-view .zc-allocation-holding-name { flex: 0 0 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .zc-manager-allocation-tools button.is-refreshing img { animation: none; }
+  .zc-manager-allocation-tools button[aria-busy="true"] img { animation: none; }
 }

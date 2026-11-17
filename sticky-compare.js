@@ -45,7 +45,7 @@
       needsMeasurement = false;
     }
 
-    const searching = page.querySelector('.zc-search-slot:focus-within, .zc-search-results:not([hidden])');
+    const searching = page.querySelector('.zc-search-slot:focus-within, .zc-search-results:not([hidden]), .manager-search-results:not([hidden])');
     if (y < collapseAfter || delta < -0.5 || searching) compact = false;
     else if (delta > 0.5) compact = true;
     page.classList.toggle('is-sticky-compact', compact);

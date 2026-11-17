@@ -176,6 +176,47 @@
 .zc-allocation-table td.is-reference { background: #f8f7fc; }
 .zc-allocation-table tr.is-chart-hovered > td.is-reference { background: #f0edf9; }
 
+.zc-representative-allocation .zc-allocation-table tr > * {
+  border-inline: 0;
+}
+
+.zc-representative-allocation .zc-allocation-table th,
+.zc-representative-allocation .zc-allocation-table td {
+  background: #fff;
+}
+
+.zc-representative-allocation .zc-allocation-table td {
+  text-align: center;
+}
+
+.zc-representative-allocation .zc-allocation-table th > .zc-allocation-number {
+  text-align: left;
+}
+
+.zc-representative-allocation .zc-allocation-table .is-reference {
+  background: #f8f7fc;
+}
+
+.zc-representative-allocation .zc-allocation-table .is-chart-hovered > * {
+  background: #f4f4fc;
+}
+
+.zc-representative-allocation .zc-allocation-chart-table td {
+  padding: 24px 12px;
+}
+
+.zc-representative-allocation .zc-allocation-chart-slot {
+  max-width: 192px;
+}
+
+.zc-representative-allocation .zc-allocation-data-scroll.is-long {
+  max-height: 382px;
+}
+
+.zc-representative-allocation .zc-allocation-action-buttons[data-shared-actions] {
+  gap: 2px;
+}
+
 @media (max-width: 1050px) {
   .zc-allocation-head { flex-wrap: wrap; }
   .zc-allocation-head .zc-allocation-actions { flex-wrap: wrap; margin-left: auto; gap: 20px; }

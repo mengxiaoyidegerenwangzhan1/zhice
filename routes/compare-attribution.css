@@ -75,6 +75,7 @@
 .zc-attr-expand:hover { color: #6865a7; }
 .zc-attr-factor-table .zc-attr-level-2 .zc-attr-expand { margin-left: 0; width: 100%; }
 .zc-attr-factor-label { display: block; }
+.zc-representative-attribution .zc-attr-actions[data-shared-actions] { gap: 2px; }
 @media (max-width: 1380px) {
   .zc-attribution-view .zc-attr-head { flex-wrap: wrap; }
   .zc-attr-toolbar { flex-wrap: wrap; justify-content: flex-start; row-gap: 20px; }

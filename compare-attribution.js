@@ -1,6 +1,7 @@
 (() => {
   const assets = './assets/compare-attribution/';
   const defaultRange = { start: '2026-11-05', end: '2026-11-06', period: '近1年', disabled: true };
+  const representativeRange = { ...defaultRange, start: '2025-11-06' };
   const industries = [
     { name: '电子', stock: [[23.45, 18.64], [27.68, 17.42]], brinson: [[.42, 1.24, 1.66], [.55, .97, 1.52]], ranks: [1, 2] },
     { name: '公用事业', stock: [[10.80, 6.28], [8.35, 7.86]], brinson: [[.18, .26, .44], [.10, .41, .51]], ranks: [5, 5], stockRanks: [5, null] },
@@ -33,9 +34,12 @@
   const icon = name => `<img src="${assets}${name}.svg" alt="">`;
   const slots = funds => Array.from({ length: 4 }, (_, i) => funds[i]);
   const scopeFor = key => `attribution-${key}`;
+  const isRepresentative = options => options.mode === 'representative';
+  const initialRange = options => isRepresentative(options) ? representativeRange : defaultRange;
 
   function periodScale(key, options) {
-    const range = options.ui?.range?.(scopeFor(key)) || defaultRange;
+    const initial = initialRange(options);
+    const range = options.ui?.range?.(scopeFor(key), initial) || initial;
     const periods = { '近1月': .16, '近3月': .36, '近6月': .62, '近1年': 1, '近3年': 1.7, '今年以来': .88, '共同时段': 1.15 };
     if (range.period !== '自定义') return periods[range.period] || 1;
     return Math.max(.01, Math.min(3, (Date.parse(range.end) - Date.parse(range.start) + 86400000) / (365 * 86400000)));
@@ -45,9 +49,23 @@
     return options.funds.find(fund => fund?.id === options.referenceId);
   }
 
-  function profileValues(values, fund) {
-    if (!fund || fund.id === 'c') return values[0].map(() => null);
-    return values[fund.id === 'b' ? 1 : 0];
+  function hasData(fund, options) {
+    return fund && (isRepresentative(options) ? !/债券|QDII/.test(fund.type) : fund.id !== 'c');
+  }
+
+  function productProfile(fund, options) {
+    return isRepresentative(options) && fund ? window.CompareRiskCharts?.sampleProfile(fund) : null;
+  }
+
+  function profileColumn(fund, options) {
+    return (productProfile(fund, options)?.index ?? Number(fund?.id === 'b')) % 2;
+  }
+
+  function profileValues(values, fund, options) {
+    if (!hasData(fund, options)) return values[0].map(() => null);
+    const sample = values[profileColumn(fund, options)];
+    const scale = productProfile(fund, options)?.scale ?? 1;
+    return sample.map(value => Number.isFinite(value) ? value * scale : null);
   }
 
   function comparisonCell(fund, value, referenceValue, options, settings = {}) {
@@ -91,7 +109,7 @@
     const filters = key === 'stock' ? select('stockIndustry', '行业', industryOptions)
       : key === 'brinson' ? select('brinsonBenchmark', '基准', benchmarkOptions) + select('brinsonIndustry', '行业', industryOptions)
       : select('factorBenchmark', '基准', benchmarkOptions);
-    return `<div class="zc-section-head zc-attr-head"><h2>${title}<span class="zc-attr-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-attr-help-${key}">${icon('help')}</button><span role="tooltip" id="zc-attr-help-${key}">${descriptions[key]}</span></span></h2><div class="zc-attr-toolbar">${filters}${options.ui?.timeControls?.(scopeFor(key), defaultRange) || ''}<div class="zc-attr-actions"><button type="button" class="zc-text" data-analysis-download="${scopeFor(key)}" aria-label="下载${title}"><span class="zc-action-icon zc-download-icon" aria-hidden="true"></span>下载</button><button type="button" class="zc-text" data-analysis-refresh="${scopeFor(key)}" aria-label="刷新${title}"><span class="zc-action-icon zc-refresh-icon" aria-hidden="true"></span>刷新</button></div></div></div>`;
+    return `<div class="zc-section-head zc-attr-head"><h2>${title}<span class="zc-attr-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-attr-help-${key}">${icon('help')}</button><span role="tooltip" id="zc-attr-help-${key}">${descriptions[key]}</span></span></h2><div class="zc-attr-toolbar">${filters}${options.ui?.timeControls?.(scopeFor(key), initialRange(options)) || ''}<div class="zc-attr-actions"><button type="button" class="zc-text" data-analysis-download="${scopeFor(key)}" aria-label="下载表格，${title}"><span class="zc-action-icon zc-download-icon" aria-hidden="true"></span>下载</button><button type="button" class="zc-text" data-analysis-refresh="${scopeFor(key)}" aria-label="刷新${title}"><span class="zc-action-icon zc-refresh-icon" aria-hidden="true"></span>刷新</button></div></div></div>`;
   }
 
   function industryNames(key) {
@@ -101,8 +119,8 @@
     return industries.map(row => row.name);
   }
 
-  function rowValues(row, fund, key, scale) {
-    const values = profileValues(row[key], fund);
+  function rowValues(row, fund, key, scale, options) {
+    const values = profileValues(row[key], fund, options);
     const benchmark = key === 'brinson' ? 1 + benchmarkOptions.indexOf(state.brinsonBenchmark) * .08 : 1;
     return values.map((value, i) => Number.isFinite(value) ? value * benchmark * (key === 'stock' && i === 0 ? 1 : scale) : null);
   }
@@ -119,15 +137,15 @@
     return state.sort[key];
   }
 
-  function sortedRows(key, funds, scale) {
+  function sortedRows(key, funds, scale, options) {
     const names = industryNames(key);
     const rows = industries.map((row, i) => ({ ...row, label: names[i], index: i }));
     const sort = sortState(key, funds);
     if (!sort) return rows;
     const fund = funds.find(item => item?.id === sort.fundId);
     return rows.sort((a, b) => {
-      const left = rowValues(a, fund, key, scale)[sort.metric];
-      const right = rowValues(b, fund, key, scale)[sort.metric];
+      const left = rowValues(a, fund, key, scale, options)[sort.metric];
+      const right = rowValues(b, fund, key, scale, options)[sort.metric];
       return (sort.direction === 'asc' ? left - right : right - left) || a.index - b.index;
     });
   }
@@ -140,7 +158,7 @@
     return slots(funds).map((fund, fundIndex) => labels.map((label, metric) => {
       const active = sort?.fundId === fund?.id && sort?.metric === metric;
       const order = active ? `${sort.direction === 'asc' ? '升序' : '降序'}排列` : '未排序';
-      return `<th scope="col" class="${reference && reference.id === fund?.id ? 'is-reference' : ''}" aria-sort="${active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}"><button type="button" class="zc-attr-sort ${active ? `is-${sort.direction}` : ''}" data-attr-sort="${key}" data-attr-fund="${escape(fund?.id || '')}" data-attr-metric="${metric}" aria-label="${escape(fund?.name || `基金${fundIndex + 1}`)} ${label} ${order}" ${fund?.visible && fund.id !== 'c' ? '' : 'disabled'}><span>${label}</span>${icon(active ? 'sort-desc' : 'sort')}</button></th>`;
+      return `<th scope="col" class="${reference && reference.id === fund?.id ? 'is-reference' : ''}" aria-sort="${active ? (sort.direction === 'asc' ? 'ascending' : 'descending') : 'none'}"><button type="button" class="zc-attr-sort ${active ? `is-${sort.direction}` : ''}" data-attr-sort="${key}" data-attr-fund="${escape(fund?.id || '')}" data-attr-metric="${metric}" aria-label="${escape(fund?.name || `基金${fundIndex + 1}`)} ${label} ${order}" ${fund?.visible && hasData(fund, options) ? '' : 'disabled'}><span>${label}</span>${icon(active ? 'sort-desc' : 'sort')}</button></th>`;
     }).join('')).join('');
   }
 
@@ -149,16 +167,16 @@
     const metricCount = key === 'stock' ? 2 : 3;
     const funds = slots(options.funds);
     const reference = referenceFund(options);
-    const rows = sortedRows(key, funds, scale).map(row => {
-      const referenceValues = rowValues(row, reference, key, scale);
+    const rows = sortedRows(key, funds, scale, options).map(row => {
+      const referenceValues = rowValues(row, reference, key, scale, options);
       return `<tr><th scope="row">${escape(row.label)}</th>${funds.map(fund => {
-        const profile = fund?.id === 'b' ? 1 : 0;
+        const profile = profileColumn(fund, options);
         const ranks = key === 'stock' ? row.stockRanks || row.ranks : row.ranks;
-        return fundCells(fund, rowValues(row, fund, key, scale), referenceValues, options, { rankIndex: metricCount - 1, rank: ranks?.[profile] });
+        return fundCells(fund, rowValues(row, fund, key, scale, options), referenceValues, options, { rankIndex: metricCount - 1, rank: ranks?.[profile] });
       }).join('')}</tr>`;
     }).join('');
     const summaryValues = [[1.02, 2.49, 3.51], [1.14, 2.95, 4.09]];
-    const scaledSummary = fund => profileValues(summaryValues, fund).map(value => Number.isFinite(value) ? value * scale * (1 + benchmarkOptions.indexOf(state.brinsonBenchmark) * .08) : null);
+    const scaledSummary = fund => profileValues(summaryValues, fund, options).map(value => Number.isFinite(value) ? value * scale * (1 + benchmarkOptions.indexOf(state.brinsonBenchmark) * .08) : null);
     const summary = key === 'brinson' ? `<tr class="zc-attr-summary"><th scope="row">合计</th>${funds.map(fund => fundCells(fund, scaledSummary(fund), scaledSummary(reference), options, { summary: true })).join('')}</tr>` : '';
     return `<div class="zc-attr-scroll" tabindex="0" role="region" aria-label="${key === 'stock' ? '股票资产收益贡献' : 'Brinson归因'}表格，可纵向滚动"><table class="zc-attr-table zc-attr-${key}-table" data-attr-table="${key}"><colgroup><col class="zc-attr-label-col">${'<col>'.repeat(4 * metricCount)}</colgroup><thead><tr><th scope="col">行业</th>${metricHeaders(key, options)}</tr>${summary}</thead><tbody>${rows}</tbody></table></div>`;
   }
@@ -187,7 +205,7 @@
     const scale = periodScale('factor', options) * (1 + benchmarkOptions.indexOf(state.factorBenchmark) * .08);
     const reference = referenceFund(options);
     const scaledValue = (row, fund) => {
-      const value = profileValues(row.values.map(value => [value]), fund)[0];
+      const value = profileValues(row.values.map(value => [value]), fund, options)[0];
       return Number.isFinite(value) ? value * scale : null;
     };
     function renderRows(rows) {
@@ -207,7 +225,7 @@
   }
 
   function render(options) {
-    return `<div class="zc-attribution-view${referenceFund(options) ? ' has-reference' : ''}${options.showDifferences === false ? ' hide-differences' : ''}">${['stock', 'brinson', 'factor'].map(key => section(key, options)).join('')}</div>`;
+    return `<div class="zc-attribution-view${isRepresentative(options) ? ' zc-representative-attribution' : ''}${referenceFund(options) ? ' has-reference' : ''}${options.showDifferences === false ? ' hide-differences' : ''}">${['stock', 'brinson', 'factor'].map(key => section(key, options)).join('')}</div>`;
   }
 
   function replaceSection(key, root, options) {

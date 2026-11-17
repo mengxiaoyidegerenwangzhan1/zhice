@@ -2,13 +2,12 @@
   const assets = './assets/manager-overview/';
   const scope = 'manager-overview-performance';
   const defaultRange = { start: '2025-12-09', end: '2026-11-06', period: '共同时段', benchmark: '上证综指' };
-  const benchmarks = ['上证综指', '沪深300', '中证500', '中证800', '中证1000'];
   const managerProfiles = {
-    a: { rating: 3, scale: '1.46亿', years: 7, awards: '--', representativeFund: '尚正竞争优势混合A', fundRating: 3, annualizedReturn: 2.26, company: '尚正基金管理有限公司' },
-    b: { rating: 1, scale: '324.99亿', years: 17, awards: '英华奖 (1次)', representativeFund: '国联安中证100指数(LOF)', fundRating: 2, annualizedReturn: 2.91, company: '国联安基金管理有限公司' },
-    c: { rating: 1, scale: '12.07亿', years: 7, awards: '--', representativeFund: '景顺长城低碳科技主题灵活配置混合', fundRating: 2, annualizedReturn: 12.69, company: '景顺长城基金管理有限公司' },
+    a: { rating: 2, scale: '1.46亿', years: 7, awards: '--', representativeFund: '尚正竞争优势混合A', fundRating: 2, annualizedReturn: 2.26, company: '尚正基金管理有限公司' },
+    b: { rating: 1, scale: '324.99亿', years: 17, awards: '英华奖 (1次)', representativeFund: '国联安中证100指数(LOF)', fundRating: 1, annualizedReturn: 2.91, company: '国联安基金管理有限公司' },
+    c: { rating: 1, scale: '12.07亿', years: 7, awards: '--', representativeFund: '景顺长城低碳科技主题灵活配置混合', fundRating: 1, annualizedReturn: 12.69, company: '景顺长城基金管理有限公司' },
   };
-  const intervalLabels = ['今年以来', '近1月', '近3月', '近6月', '近1年', '近2年', '近3年', '近5年', '共同时段'];
+  const intervalLabels = ['今年以来', '近1月', '近3月', '近6月', '近1年', '近2年', '近3年', '近5年', '成立以来'];
   const intervalData = {
     a: [[-6.82, 526, 941], [2.38, 186, 1082], [-3.76, 438, 1036], [5.42, 267, 997], null, null, null, null, [-4.95, 412, 941]],
     b: [[2.46, 128, 623], [.21, 286, 658], [.74, 203, 646], [1.56, 156, 635], null, null, null, null, [2.81, 119, 623]],
@@ -31,7 +30,9 @@
   const slots = subjects => Array.from({ length: 4 }, (_, index) => subjects[index]);
   const representativeMode = options => options.mode === 'representative';
   const subjectsFor = options => representativeMode(options) ? options.funds || [] : options.managers || [];
-  const curveKey = (subject, kind, options) => `${representativeMode(options) ? 'fund' : 'manager'}:${subject.id}:${kind}`;
+  const curveKey = (subject, kind, options) => representativeMode(options)
+    ? `fund:${subject.id}:${subject.code}:${kind}`
+    : `manager:${subject.id}:${kind}`;
   const curveVisible = (subject, kind, options) => visible(subject) && curveVisibility.get(curveKey(subject, kind, options)) !== false;
   const percentage = value => `${Number(value).toFixed(2)}%`;
 
@@ -83,7 +84,7 @@
       { label: '管理年限', cell: manager => numberText(profile(manager).years == null ? '--' : `${profile(manager).years}年`) },
       { label: '获奖情况', cell: manager => numberText(profile(manager).awards) },
       { label: '代表基金', cell: manager => {
-        const fund = profile(manager).representativeFund;
+        const fund = managerProfiles[manager.id]?.representativeFund || manager.representativeFund || manager.products?.[0];
         const name = typeof fund === 'object' ? fund?.name : fund;
         const href = typeof fund === 'object' ? fund.href || (fund.code ? `#/fund/${fund.code}` : '') : '';
         return link(name || '--', href);
@@ -151,12 +152,13 @@
     return dataTable(rows, options, { interval: true });
   }
 
-  function heading(title, key, options, { controls = false, download = false, help = '' } = {}) {
-    const rangeDefaults = { ...defaultRange, commonLabel: representativeMode(options) ? '共同时段' : '共同任期' };
+  function heading(title, key, options, { controls = false, download = false, refresh = true, help = '' } = {}) {
+    const representative = representativeMode(options);
+    const rangeDefaults = { ...defaultRange, commonLabel: representative ? '共同时段' : '共同任期' };
     const time = controls ? options.ui?.timeControls?.(scope, rangeDefaults) || '' : '';
-    const labelTime = representativeMode(options) ? time : time.replace(/>共同时段</g, '>共同任期<');
-    const setting = controls ? options.ui?.setting?.(scope, 'benchmark', '基准', benchmarks, defaultRange.benchmark) || '' : '';
-    return `<div class="zc-mo-head"><h2>${title}${help ? `<span class="zc-mo-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-mo-help"><img src="./assets/compare-controls/help.svg" width="16" height="16" alt=""></button><span id="zc-mo-help" role="tooltip">${help}</span></span>` : ''}</h2><div class="zc-mo-toolbar">${setting}${labelTime}<div class="zc-mo-actions">${download ? `<button type="button" data-analysis-download="${key}" aria-label="下载${title}" title="下载图片"><img src="${assets}picture-download.svg" width="18" height="18" alt=""></button>` : ''}<button type="button" data-analysis-refresh="${key}" aria-label="刷新${title}" title="刷新"><img src="${assets}refresh.svg" width="18" height="18" alt=""></button></div></div></div>`;
+    const setting = controls && !representative ? window.ManagerRiskView.benchmarkControl(options, scope) : '';
+    const actions = `<div class="zc-mo-actions">${download ? `<button type="button" data-analysis-download="image" aria-label="下载${title}" title="下载图片"><img src="${assets}picture-download.svg" width="18" height="18" alt=""></button>` : ''}${refresh ? `<button type="button" data-analysis-refresh="${key}" aria-label="刷新${title}" title="刷新"><img src="${assets}refresh.svg" width="18" height="18" alt=""></button>` : ''}</div>`;
+    return `<div class="zc-mo-head"><h2>${title}${help ? `<span class="zc-mo-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-mo-help"><img src="./assets/compare-controls/help.svg" width="16" height="16" alt=""></button><span id="zc-mo-help" role="tooltip">${help}</span></span>` : ''}</h2>${controls || download || refresh ? `<div class="zc-mo-toolbar">${setting}${time}${actions}</div>` : ''}</div>`;
   }
 
   function legend(kind, options) {
@@ -167,7 +169,9 @@
   }
 
   function render(options) {
-    return `<div class="zc-manager-overview"><section data-analysis-section="${scope}">${heading('业绩走势', scope, options, { controls: true, download: true, help: '展示所选经理在共同任期内的收益走势与动态回撤，可通过图例单独显示或隐藏曲线。' })}<div class="zc-mo-charts">${[['return', '收益走势'], ['drawdown', '动态回撤']].map(([kind, title]) => `<article><h3>${title}</h3><div class="zc-mo-chart" data-manager-chart="${kind}" role="img" aria-label="${title}折线图"></div>${legend(kind, options)}</article>`).join('')}</div></section><section data-analysis-section="manager-overview-interval">${heading('区间收益', 'manager-overview-interval', options)}${intervalTable(options)}</section><section data-analysis-section="manager-overview-basic">${heading('基本信息', 'manager-overview-basic', options)}${representativeMode(options) ? fundInformation(options) : managerInformation(options)}</section></div>`;
+    const representative = representativeMode(options);
+    const help = `展示所选${representative ? '代表基金' : '经理'}在分析时段内的收益走势与动态回撤，可通过图例单独显示或隐藏曲线。`;
+    return `<div class="zc-manager-overview${representative ? '' : ' is-comprehensive'}"><section data-analysis-section="${scope}">${heading('业绩走势', scope, options, { controls: true, download: true, help })}<div class="zc-mo-charts">${[['return', '收益走势'], ['drawdown', '动态回撤']].map(([kind, title]) => `<article><h3>${title}</h3><div class="zc-mo-chart" data-manager-chart="${kind}" role="img" aria-label="${title}折线图"></div>${legend(kind, options)}</article>`).join('')}</div></section><section data-analysis-section="manager-overview-interval">${heading('区间收益', 'manager-overview-interval', options)}${intervalTable(options)}</section><section data-analysis-section="manager-overview-basic">${heading('基本信息', 'manager-overview-basic', options, { refresh: representative })}${representative ? fundInformation(options) : managerInformation(options)}</section></div>`;
   }
 
   function trend(when, index) {
@@ -179,23 +183,28 @@
     return (first[1] + (last[1] - first[1]) * progress) * [1, .78, .60, .88][index] + Math.sin(day * .43 + index * .8) * .65 + Math.sin(day * .19 + index * .32) * .55 + Math.cos(day * .89 + index * .55) * .35;
   }
 
-  function chartData(options) {
-    const range = options.ui?.range?.(scope) || defaultRange;
+  function benchmarkData(day, benchmark) {
+    const profile = Math.max(0, window.ManagerRiskView.benchmarks.indexOf(benchmark));
+    return trend(day, profile % 4) * (.6 + profile * .04) + Math.sin(day / 86400000 * .07) * .4;
+  }
+
+  function chartData(options, range, daily = false) {
     const start = Date.parse(`${range.start}T12:00:00`), end = Date.parse(`${range.end}T12:00:00`);
     if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return { labels: [], byId: new Map() };
     const days = Math.round((end - start) / 86400000);
-    const count = Math.min(320, days + 1);
+    const count = daily ? days + 1 : Math.min(320, days + 1);
     const dates = Array.from({ length: count }, (_, i) => start + (count === 1 ? 0 : Math.round(days * i / (count - 1)) * 86400000));
-    const benchmark = Math.max(0, benchmarks.indexOf(range.benchmark)) * .14;
+    const benchmark = dates.map(day => benchmarkData(day, range.benchmark) - benchmarkData(start, range.benchmark));
+    const adjustment = daily || range.benchmark === defaultRange.benchmark ? 0 : .25;
     const byId = new Map(subjectsFor(options).map(subject => {
       const sample = sampleProfile(subject, options);
       const initial = trend(start, sample.index);
-      const values = dates.map((day, i) => +((trend(day, sample.index) - initial) * sample.multiplier + sample.drift * i / Math.max(1, count - 1) - Math.sin(i * .08) * benchmark).toFixed(2));
+      const values = dates.map((day, i) => +((trend(day, sample.index) - initial) * sample.multiplier + sample.drift * i / Math.max(1, count - 1) - adjustment * benchmark[i]).toFixed(2));
       let peak = 0;
       const drawdown = values.map(value => { peak = Math.max(peak, value); return +(value - peak).toFixed(2); });
       return [subject.id, { return: values, drawdown }];
     }));
-    return { labels: dates.map(day => new Date(day).toISOString().slice(0, 10)), byId };
+    return { labels: dates.map(day => new Date(day).toISOString().slice(0, 10)), byId, benchmark };
   }
 
   function tooltip(params, kind, options, data) {
@@ -222,14 +231,14 @@
       grid: { left: 42, right: 8, top: 8, bottom: 28 },
       tooltip: { trigger: 'axis', confine: true, padding: 0, backgroundColor: 'rgba(255,255,255,.96)', borderColor: '#ddd', extraCssText: 'border-radius:8px;box-shadow:0 4px 12px #00000014;', formatter: params => tooltip(params, kind, options, data), axisPointer: { type: 'line', lineStyle: { color: '#b9b8d8', type: 'solid' } } },
       xAxis: { type: 'category', boundaryGap: false, data: data.labels, axisLine: { lineStyle: { color: '#eaeaea' } }, axisTick: { show: false }, axisLabel: { color: '#666', fontSize: 12, hideOverlap: true, showMinLabel: true, showMaxLabel: true }, axisPointer: { label: { show: true, backgroundColor: '#fff', color: '#262626', fontWeight: 700, margin: 8, padding: [0, 2] } } },
-      yAxis: { type: 'value', min: minimum, max: maximum, interval: 5, axisLabel: { formatter: '{value}%', color: '#666', fontSize: 12 }, splitLine: { lineStyle: { color: '#eaeaea', type: drawdown ? 'solid' : 'dashed' } } },
+      yAxis: { type: 'value', min: minimum, max: maximum, interval: 5, axisLabel: { formatter: '{value}%', color: '#666', fontSize: 12 }, splitLine: { lineStyle: { color: '#eaeaea', width: 1, type: [4, 4], dashOffset: 0, cap: 'butt' } } },
       series: subjects.map(subject => ({ id: subject.id, name: subject.name, type: 'line', showSymbol: false, symbol: 'circle', symbolSize: 6, itemStyle: { color: subject.color }, lineStyle: { color: subject.color, width: 1.2 }, emphasis: { itemStyle: { color: '#fff', borderColor: subject.color, borderWidth: 1 } }, data: curveVisible(subject, kind, options) ? data.byId.get(subject.id)?.[kind] || [] : [] })),
     };
   }
 
   function mount(root, options) {
     const charts = [];
-    const data = chartData(options);
+    const data = chartData(options, options.ui?.range?.(scope) || defaultRange);
     const chartByKind = new Map();
     root.querySelectorAll('[data-manager-chart]').forEach(host => {
       if (!window.echarts) return;
@@ -261,10 +270,14 @@
   }
 
   function resetFundVisibility(id) {
-    for (const mode of ['manager', 'fund']) {
-      for (const kind of ['return', 'drawdown']) curveVisibility.delete(`${mode}:${id}:${kind}`);
+    for (const key of curveVisibility.keys()) {
+      if (key.startsWith(`manager:${id}:`) || key.startsWith(`fund:${id}:`)) curveVisibility.delete(key);
     }
   }
 
-  window.ManagerOverviewView = { render, mount, resetFundVisibility };
+  window.ManagerOverviewView = {
+    render, mount, resetFundVisibility,
+    bind: root => window.ManagerRiskView.bindBenchmark(root),
+    dailyHistory: (options, range) => chartData(options, range, true),
+  };
 })();

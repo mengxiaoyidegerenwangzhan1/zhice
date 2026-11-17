@@ -101,6 +101,95 @@
     return round(drawdown);
   }
 
+  const mean = values => values.reduce((sum, value) => sum + value, 0) / (values.length || 1);
+  const deviation = values => {
+    const average = mean(values);
+    return Math.sqrt(mean(values.map(value => (value - average) ** 2)));
+  };
+
+  function sampledDrawdown(first, last, fund) {
+    let peak = first;
+    let peakValue = nav(first, fund);
+    let high = first;
+    let low = first;
+    let maximum = 0;
+    for (let index = first + 1; index <= last; index++) {
+      const value = nav(index, fund);
+      if (value > peakValue) {
+        peak = index;
+        peakValue = value;
+      }
+      const drawdown = 1 - value / peakValue;
+      if (drawdown > maximum) {
+        high = peak;
+        low = index;
+        maximum = drawdown;
+      }
+    }
+    const target = nav(high, fund);
+    let recovery = low;
+    while (recovery <= last && nav(recovery, fund) < target) recovery++;
+    return { maximum, high, low, recovery: recovery <= last ? recovery : null };
+  }
+
+  function metricSamples(fund, range) {
+    const first = dayIndex(range.start);
+    const last = dayIndex(range.end);
+    if (!Number.isFinite(first) || !Number.isFinite(last) || last <= first) return {};
+    const step = { 日度: 1, 周度: 7, 月度: 30 }[range.frequency] || 1;
+    const benchmarkCode = { 上证综指: '000001', 沪深300: '000300', 中证500: '000905', 中证800: '000906' }[range.benchmark] || '000001';
+    const benchmark = { id: 'b', productCode: benchmarkCode };
+    const returns = [];
+    const benchmarkReturns = [];
+    let from = first;
+    while (from < last) {
+      const to = Math.min(last, from + step);
+      returns.push(nav(to, fund) / nav(from, fund) - 1);
+      benchmarkReturns.push(nav(to, benchmark) / nav(from, benchmark) - 1);
+      from = to;
+    }
+    const yearlyPeriods = 365 / step;
+    const annualized = (nav(last, fund) / nav(first, fund)) ** (365 / (last - first)) - 1;
+    const benchmarkAnnualized = (nav(last, benchmark) / nav(first, benchmark)) ** (365 / (last - first)) - 1;
+    const annualizedDeviation = deviation(returns) * Math.sqrt(yearlyPeriods);
+    const active = returns.map((value, index) => value - benchmarkReturns[index]);
+    const trackingError = deviation(active) * Math.sqrt(yearlyPeriods);
+    const downside = Math.sqrt(mean(returns.map(value => Math.min(0, value) ** 2)) * yearlyPeriods);
+    const benchmarkVariance = deviation(benchmarkReturns) ** 2;
+    const average = mean(returns);
+    const benchmarkAverage = mean(benchmarkReturns);
+    const covariance = mean(returns.map((value, index) => (value - average) * (benchmarkReturns[index] - benchmarkAverage)));
+    const beta = benchmarkVariance > 0 ? covariance / benchmarkVariance : NaN;
+    const ordered = [...returns].sort((a, b) => a - b);
+    const worst = ordered.slice(0, Math.max(1, Math.ceil(ordered.length * .05)));
+    const alpha = annualized - beta * benchmarkAnnualized;
+    const drawdown = sampledDrawdown(first, last, fund);
+    const percent = value => Number.isFinite(value) ? `${(value * 100).toFixed(2)}%` : '—';
+    const decimal = value => Number.isFinite(value) ? value.toFixed(2) : '—';
+    return {
+      区间收益: percent(gain(first, last, fund) / 100),
+      年化收益: percent(annualized),
+      阿尔法: percent(alpha),
+      夏普比率: decimal(annualized / annualizedDeviation),
+      信息比率: decimal(mean(active) * yearlyPeriods / trackingError),
+      索提诺比率: decimal(annualized / downside),
+      特雷诺比率: decimal(annualized / beta),
+      詹森指数: percent(alpha),
+      M2: percent(annualized / annualizedDeviation * Math.sqrt(benchmarkVariance * yearlyPeriods)),
+      胜率: percent(active.filter(value => value > 0).length / active.length),
+      最大回撤: percent(drawdown.maximum),
+      最大回撤区间月份数: String(Math.round((drawdown.low - drawdown.high) / 30.44)),
+      最大回撤修复日期: drawdown.recovery === null ? '—' : dateLabel(drawdown.recovery),
+      最大回撤修复月份数: drawdown.recovery === null ? '—' : String(Math.round((drawdown.recovery - drawdown.low) / 30.44)),
+      年化标准差: percent(annualizedDeviation),
+      贝塔: decimal(beta),
+      下行风险: percent(downside),
+      跟踪误差: percent(trackingError),
+      历史VaR: percent(Math.max(0, -worst.at(-1))),
+      历史CVaR: percent(Math.max(0, -mean(worst))),
+    };
+  }
+
   function periods(first, last, months) {
     const buckets = [];
     for (let index = first; index <= last;) {
@@ -448,7 +537,7 @@
       yAxis: {
         type: 'value', min, max, splitNumber: 6,
         axisLabel: { formatter: '{value}%', color: '#555759', fontSize: 12, margin: 9 },
-        splitLine: { lineStyle: { color: '#e9eaec', width: 1, type: [3, 3], dashOffset: 0, cap: 'butt' } },
+        splitLine: { lineStyle: { color: '#e9eaec', width: 1, type: [4, 4], dashOffset: 0, cap: 'butt' } },
       },
       dataZoom: slider ? [{ id: returnZoomId, type: 'inside', xAxisIndex: 0, disabled: true }] : [],
       series: series.map(item => ({
@@ -530,5 +619,5 @@
     legendChoices.delete(fund);
   }
 
-  window.CompareRiskCharts = { data, mount, resetFundVisibility, sampleProfile };
+  window.CompareRiskCharts = { data, mount, resetFundVisibility, sampleProfile, metricSamples };
 })();

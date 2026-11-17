@@ -601,6 +601,25 @@
   font-size: 14px;
 }
 
+.zc-representative-risk .zc-risk-table-stack .zc-table-wrap,
+.zc-representative-risk .zc-risk-metric-block .zc-table-wrap {
+  border: 0;
+}
+
+.zc-risk-view.zc-representative-risk .zc-risk-tree-table tr > *,
+.zc-risk-view.zc-representative-risk .zc-risk-table tr > * {
+  border-inline: 0;
+  background: #fff;
+}
+
+.zc-representative-risk .zc-risk-tree-table thead th:not(:first-child) {
+  text-align: right;
+}
+
+.zc-representative-risk .zc-risk-actions-main[data-shared-actions] {
+  gap: 2px;
+}
+
 @media (max-width: 900px) {
   .zc-risk-pair {
     grid-template-columns: minmax(0, 1fr);

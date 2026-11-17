@@ -55,16 +55,17 @@
     </span>`;
   }
 
-  function heading(key, title, { view, description, note, controls = '', rangeNote = false } = {}) {
+  function heading(key, title, { view, description, note, controls = '' } = {}) {
+    const table = key === 'metrics' || view === 'table';
     return `<div class="zc-section-head zc-risk-head">
-      <div class="zc-risk-heading${rangeNote ? ' has-range-note' : ''}">
+      <div class="zc-risk-heading${note ? ' has-range-note' : ''}">
         <h2>${title}</h2>${description ? help(key, title, description) : ''}${note ? `<small>${note}</small>` : ''}
       </div>
       <div class="zc-risk-actions">
         ${controls}
         ${view ? viewToggle(view) : ''}
         <div class="zc-risk-actions-main">
-          <button class="zc-text" type="button" data-risk-download="${key}" aria-label="下载${title}"><span class="zc-action-icon zc-download-icon" aria-hidden="true"></span>下载</button>
+          <button class="zc-text" type="button" data-risk-download="${key}" aria-label="下载${table ? '表格' : '图片'}，${title}"><span class="zc-action-icon zc-download-icon" aria-hidden="true"></span>下载</button>
           <button class="zc-text" type="button" data-risk-refresh="${key}" aria-label="刷新${title}"><span class="zc-action-icon zc-refresh-icon" aria-hidden="true"></span>刷新</button>
         </div>
       </div>
@@ -231,7 +232,7 @@
           <article><h3>${title}分布</h3>${chart('distribution', `${title}分布`, funds, options.referenceId)}</article>
         </div>`;
     return `<section data-risk-section="overview">
-      ${heading('overview', '收益与发布', { view, controls })}
+      ${heading('overview', '收益与分布', { view, controls })}
       ${body}
     </section>`;
   }
@@ -253,8 +254,10 @@
     return `<section data-risk-section="${key}">${heading(key, title, details)}${chart(key, title, funds, details.referenceId)}</section>`;
   }
 
-  function metricValue(values, fund) {
+  function metricValue(values, fund, label, samples) {
     if (!fund) return undefined;
+    const actual = samples.get(fund.id)?.[label];
+    if (actual !== undefined) return actual;
     const profile = window.CompareRiskCharts?.sampleProfile?.(fund);
     const index = profile?.extended ? profile.index : sampleFundIds.indexOf(fund.id);
     const value = values[index];
@@ -264,7 +267,7 @@
     return `${number.toFixed(2)}${value.endsWith('%') ? '%' : ''}`;
   }
 
-  function metricTable(title, metrics, funds, referenceId) {
+  function metricTable(title, metrics, funds, referenceId, samples) {
     const slots = Array.from({ length: 4 }, (_, i) => funds[i]);
     const referenceFund = funds.find(fund => fund.id === referenceId);
     const rows = metrics.map(([label, values, description]) => `<tr>
@@ -272,7 +275,7 @@
         <button type="button" class="zc-risk-metric-help" aria-label="${label}说明，${description}" title="${description}">${icon('metric-help')}</button>
       </span></th>
       ${slots.map(fund => {
-        return comparisonCell(fund, metricValue(values, fund), metricValue(values, referenceFund), referenceId);
+        return comparisonCell(fund, metricValue(values, fund, label, samples), metricValue(values, referenceFund, label, samples), referenceId);
       }).join('')}
     </tr>`).join('');
     return `<article class="zc-risk-metric-block"><h3>${title}</h3><div class="zc-table-wrap"><table class="zc-table zc-risk-table" aria-label="${title}">
@@ -284,31 +287,33 @@
 
   function render(options) {
     const { funds, referenceId } = options;
+    const representative = options.mode === 'representative';
     const intervalRange = rangeFor(options, 'interval');
     const forecastRange = rangeFor(options, 'forecast', { period: '近3年', holdingMonths: 3 });
     const rollingRange = rangeFor(options, 'rolling', { period: '近1年' });
     const drawdownRange = rangeFor(options, 'drawdown');
     const metricsRange = rangeFor(options, 'metrics', { benchmark: '上证综指', frequency: '原始频率' });
+    const metrics = new Map(representative ? funds.map(fund => [fund.id, window.CompareRiskCharts?.metricSamples?.(fund, metricsRange)]) : []);
     const holding = setting(options, 'forecast', 'holdingMonths', '持有周期', [
       { value: 1, label: '一个月' }, { value: 3, label: '三个月' }, { value: 6, label: '六个月' }, { value: 12, label: '一年' },
     ], forecastRange.holdingMonths);
     const benchmark = setting(options, 'metrics', 'benchmark', '基准', ['上证综指', '沪深300', '中证500', '中证800'], metricsRange.benchmark);
     const metricsFrequency = setting(options, 'metrics', 'frequency', '频率', ['原始频率', '日度', '周度', '月度'], metricsRange.frequency);
-    return `<div class="zc-risk-view">
-      ${overview(options)}
+    return `<div class="zc-risk-view${representative ? ' zc-representative-risk' : ''}">
+      ${overview(representative ? { ...options, referenceId: null } : options)}
       ${chartSection('interval', '区间收益', funds, { referenceId, note: `区间最小起始日期：2022-12-06　 截止日期：${escape(intervalRange.end)}` })}
       ${chartSection('forecast', '持有收益概率', funds, {
         referenceId,
         description: forecastHelp,
-        controls: timeControls(options, 'forecast', forecastRange, holding, options.view === 'table'),
+        controls: timeControls(options, 'forecast', forecastRange, holding, representative || options.view === 'table'),
       })}
       ${chartSection('rolling', '年化动态波动率', funds, { referenceId, description: rollingHelp, controls: timeControls(options, 'rolling', rollingRange) })}
-      ${chartSection('drawdown', '区间最大回撤', funds, { referenceId, note: `区间最小起始日期为：2022-11-06　 截止日期：${escape(drawdownRange.end)}` })}
+      ${chartSection('drawdown', '区间最大回撤', funds, { referenceId, note: `区间最小起始日期：2022-11-06　 截止日期：${escape(drawdownRange.end)}` })}
       <section class="zc-risk-metrics" data-risk-section="metrics">
-        ${heading('metrics', '年化动态波动率', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
+        ${heading('metrics', representative ? '收益风险指标' : '年化动态波动率', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
         <div class="zc-risk-metric-tables">
-          ${metricTable('收益指标', returnMetrics, funds, referenceId)}
-          ${metricTable('风险指标', riskMetrics, funds, referenceId)}
+          ${metricTable('收益指标', returnMetrics, funds, representative ? null : referenceId, metrics)}
+          ${metricTable('风险指标', riskMetrics, funds, representative ? null : referenceId, metrics)}
         </div>
       </section>
     </div>`;
