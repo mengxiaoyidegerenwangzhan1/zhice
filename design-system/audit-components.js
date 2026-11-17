@@ -164,10 +164,11 @@ function installAuditedComponents() {
   const tables = document.querySelector('.table-spec .audit-table-examples');
   const tableSpec = spec([
     ['表面', '白底，无竖向分割线'],
-    ['表头', '高 53px，14px Medium，左对齐，长名称换行'],
-    ['汇总行', '高 45px，14px Medium，可展开一级明细'],
-    ['一级', '高 45px，14px Regular，可展开项左侧显示箭头'],
-    ['二级', '高 42px，12px Regular，文字 #666666'],
+    ['单元格内边距', '上、下各 12px，行高随内容自适应'],
+    ['表头', '14px Medium，文字 #333333，左对齐，长名称换行'],
+    ['汇总行', '14px Medium，可展开一级明细'],
+    ['一级', '14px Regular，可展开项左侧显示箭头'],
+    ['二级', '12px Regular，文字 #666666'],
     ['列宽', '首列 120px，基金列等宽'],
     ['缩进', '汇总 10px / 一级 28px / 二级 46px'],
     ['数值', 'Roboto 等宽数字，右对齐，缺失值显示 --'],
