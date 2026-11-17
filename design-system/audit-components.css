@@ -38,6 +38,18 @@
 .audit-table button:hover{color:#6865a7}
 .audit-table button:focus-visible,.audit-table-scroll:focus-visible{outline:2px solid #6865a7;outline-offset:-2px}
 .audit-table-examples{width:100%;min-width:0}
+.audit-table-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:24px;margin-bottom:24px}
+#visual-panel-components .audit-table-pair > .individual-component + .individual-component{margin-top:0;padding-top:0;border-top:0}
+#visual-panel-components .audit-table-pair .individual-component-heading{flex-wrap:wrap;gap:8px 16px}
+#visual-panel-components .audit-table-pair .actions{flex-wrap:wrap;margin-left:0}
+#visual-panel-components .audit-table-pair + .individual-component{border-top:1px solid #eaeaea;padding-top:24px}
+.audit-table-flat-preview{padding:0}
+.audit-table-flat{min-width:300px}
+.audit-table-grouped{min-width:500px}
+.audit-table-flat .audit-table-header th:first-child,.audit-table-flat .audit-total th{padding-inline:12px}
+.audit-table-flat .audit-number{text-align:left}
+.audit-table-flat .audit-value-text{text-align:right}
+.audit-table-flat tbody tr:not(:last-child),.audit-table-flat .audit-table-group-heading{border-bottom:1px solid rgba(234,234,234,.85)}
 .audit-range{width:100%;min-width:320px;height:260px;padding:0 12px;box-sizing:border-box}
 .audit-range-track{height:100%;position:relative;background:#f7f8fa}
 .audit-range-track>img{width:100%;height:260px;display:block}

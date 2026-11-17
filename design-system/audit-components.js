@@ -48,6 +48,35 @@ function auditTableMarkup() {
   </div>`;
 }
 
+function auditFlatTableMarkup(name, columns, rows, groups = []) {
+  const columnHeader = label => `<th scope="col">${esc(label)}</th>`;
+  const colgroups = groups.length
+    ? `<colgroup><col></colgroup>${groups.map(group => `<colgroup span="${group.span}"></colgroup>`).join('')}`
+    : '';
+  const groupHeader = groups.length
+    ? `<tr class="audit-table-header audit-table-group-heading">
+        <th scope="col" rowspan="2">${esc(columns[0])}</th>
+        ${groups.map(group => `<th scope="colgroup" colspan="${group.span}">${esc(group.label)}</th>`).join('')}
+      </tr>`
+    : '';
+
+  return `<div class="audit-table-scroll audit-table-flat-preview" role="region" aria-label="${esc(name)}示例" tabindex="0">
+    <table class="audit-table audit-table-flat${groups.length ? ' audit-table-grouped' : ''}">
+      ${colgroups}
+      <thead>
+        ${groupHeader}
+        <tr class="audit-table-header">${columns.slice(groups.length ? 1 : 0).map(columnHeader).join('')}</tr>
+      </thead>
+      <tbody>
+        ${rows.map(({label, values, total}) => `<tr${total ? ' class="audit-total"' : ''}>
+          <th scope="row">${esc(label)}</th>
+          ${values.map(value => `<td class="${/^[+−-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?%?$/.test(value) ? 'audit-number' : 'audit-value-text'}">${esc(value)}</td>`).join('')}
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
 function auditRangeMarkup() {
   return '<div class="audit-range" data-start="0" data-end="100"><div class="audit-range-track"><img src="assets/audit/eec75.svg" alt="图表缩略趋势" width="640" height="260"><div class="audit-range-selection"><button type="button" class="audit-range-handle start" role="slider" aria-label="区间起点" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></button><button type="button" class="audit-range-handle end" role="slider" aria-label="区间终点" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><span></span></button></div></div></div>';
 }
@@ -154,7 +183,7 @@ function auditRuntime(root = document) {
 }
 
 function installAuditedComponents() {
-  const spec=(rows,note,node)=>'<dl class="component-rule-list">'+rows.map(row=>'<div><dt>'+row[0]+'</dt><dd>'+row[1]+'</dd></div>').join('')+'</dl><p class="component-rule-note">'+note+'</p><a target="_blank" rel="noreferrer" href="'+base+node+'">查看 Figma 源组件 ↗</a>';
+  const spec=(rows,note,node)=>'<dl class="component-rule-list">'+rows.map(row=>'<div><dt>'+row[0]+'</dt><dd>'+row[1]+'</dd></div>').join('')+'</dl><p class="component-rule-note">'+note+'</p>'+(node?'<a target="_blank" rel="noreferrer" href="'+base+node+'">查看 Figma 源组件 ↗</a>':'');
   function add(container,name,html,documentation) {
     const sample=document.createElement('div');sample.className='individual-component-sample';sample.innerHTML=html;container.append(sample);addIndividualActions(sample,name,documentation);
   }
@@ -162,6 +191,45 @@ function installAuditedComponents() {
   const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','普通154px起；级联188px起'],['内边距','左右12px'],['菜单','圆角8px / 内边距8px / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；重开恢复路径。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
   for(const cascade of [false,true])for(const position of ['', 'inside'])add(selectStack,(cascade?'级联选择器':'普通下拉')+(position==='inside'?' · 内置标题':position==='outside'?' · 前置标题':''),auditSelectMarkup(cascade,position),selectSpec);
   const tables = document.querySelector('.table-spec .audit-table-examples');
+  const pair = document.createElement('div');
+  pair.className = 'audit-table-pair';
+  tables.append(pair);
+
+  const flatRules = [
+    ['表头', '14px Medium，文字 #333333，左对齐'],
+    ['单元格内边距', '上、下各 12px，行高随内容自适应'],
+    ['对齐', '项目名称和纯数值左对齐，含文字的值右对齐'],
+    ['数值字体', 'Roboto 等宽数字']
+  ];
+
+  function addFlatTable(container, name, columns, rows, note, extraRules = [], groups = []) {
+    const markup = auditFlatTableMarkup(name, columns, rows, groups);
+    const documentation = spec([...flatRules, ...extraRules], note);
+    add(container, name, markup, documentation);
+  }
+
+  addFlatTable(pair, '数值汇总表', ['资产类别', '市值（万元）', '权重'], [
+    {label:'合计', values:['1,000.0', '100.00%'], total:true},
+    {label:'股票', values:['620.5', '62.05%']},
+    {label:'债券', values:['248.3', '24.83%']},
+    {label:'现金', values:['131.2', '13.12%']}
+  ], '示例为资产配置，汇总行在明细上方。', [['汇总行', '14px Medium，与明细共享列宽和对齐方式']]);
+
+  addFlatTable(pair, '文字与数字混合表', ['基金名称', '近1年收益', '持有时长'], [
+    {label:'华夏成长混合', values:['6.63%', '1 年 5 个月']},
+    {label:'宝盈中证A500指数增强 A', values:['3.46%', '8 个月']},
+    {label:'易方达蓝筹精选混合', values:['−2.18%', '未持有']}
+  ], '示例为持有明细，收益率是纯数值，持有时长包含文字。');
+
+  addFlatTable(tables, '分组表头', ['区间', '基金收益', '排名分位', '基准收益', '超额收益'], [
+    {label:'近 1 月', values:['1.28%', '28%', '0.90%', '0.38%']},
+    {label:'近 3 月', values:['3.46%', '32%', '2.64%', '0.82%']},
+    {label:'近 1 年', values:['6.63%', '21%', '4.52%', '2.11%']}
+  ], '示例为区间收益对比，每组表头下放置相关指标。', [['分组', '上层显示分组名称，下层显示指标名称']], [
+    {label:'基金表现', span:2},
+    {label:'基准对比', span:2}
+  ]);
+
   const tableSpec = spec([
     ['表面', '白底，无竖向分割线'],
     ['单元格内边距', '上、下各 12px，行高随内容自适应'],
