@@ -472,10 +472,30 @@ async function svgFor(element) {
       if (!node.textContent.trim()) return;
       const range = document.createRange();
       range.selectNodeContents(node);
-      const rectangle = range.getBoundingClientRect();
-      if (!rectangle.width) return;
       const style = getComputedStyle(node.parentElement);
-      parts.push('<text x="' + (rectangle.x - bounds.x) + '" y="' + (rectangle.y - bounds.y + rectangle.height * 0.8) + '" fill="' + style.color + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '" font-weight="' + style.fontWeight + '">' + esc(node.textContent.trim()) + '</text>');
+      const addText = (rectangle, value) => {
+        if (!rectangle.width || !value.trim()) return;
+        parts.push('<text x="' + (rectangle.x - bounds.x) + '" y="' + (rectangle.y - bounds.y + rectangle.height * 0.8) + '" fill="' + style.color + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '" font-weight="' + style.fontWeight + '">' + esc(value.trim()) + '</text>');
+      };
+      if (node.parentElement.closest('.audit-table th') && range.getClientRects().length > 1) {
+        // Group characters by their rendered line and keep its measured position.
+        let line = null;
+        for (let index = 0; index < node.length; index++) {
+          range.setStart(node, index);
+          range.setEnd(node, index + 1);
+          const rectangle = range.getBoundingClientRect();
+          if (!rectangle.width) continue;
+          if (line && line.rectangle.y === rectangle.y) {
+            line.end = index + 1;
+          } else {
+            if (line) addText(line.rectangle, node.data.slice(line.start, line.end));
+            line = { rectangle, start: index, end: index + 1 };
+          }
+        }
+        if (line) addText(line.rectangle, node.data.slice(line.start, line.end));
+      } else {
+        addText(range.getBoundingClientRect(), node.textContent);
+      }
       return;
     }
     if (node.nodeType !== Node.ELEMENT_NODE) return;
@@ -551,6 +571,10 @@ async function svgFor(element) {
       parts.push('<path d="M'+x+' '+(y+rectangle.height)+'v-1a2 2 0 0 1 2-2h'+Math.max(0,rectangle.width-4)+'a2 2 0 0 1 2 2v1z" fill="#6865a7"/>');
     }
     for (const child of node.childNodes) await walk(child);
+    if (node.matches('.audit-table tr')) {
+      const rule = parseFloat(style.borderBottomWidth);
+      if (rule) parts.push('<rect x="' + x + '" y="' + (y + rectangle.height - rule) + '" width="' + rectangle.width + '" height="' + rule + '" fill="' + style.borderBottomColor + '"/>');
+    }
     // The original select arrow is a CSS pseudo-element containing a vector.
     if (node.classList.contains('select-control')) {
       const pseudo = getComputedStyle(node, '::after');
@@ -565,7 +589,7 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261117-simple-table')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
   if (file.endsWith('.ttf')) {

@@ -11,35 +11,41 @@ function auditSelectMarkup(cascade = false, titlePosition = '') {
   return '<div class="audit-select-row">'+(titlePosition==='outside'?'<span class="audit-field-label">'+label+'</span>':'')+'<div class="audit-select" data-tree="'+esc(JSON.stringify(tree))+'" data-selection="'+(cascade?'0,0,0,0':'0')+'"><button type="button" class="audit-select-trigger" aria-haspopup="listbox" aria-expanded="false" style="width:'+(cascade?(titlePosition==='inside'?416:343):(titlePosition==='inside'?320:280))+'px">'+(titlePosition==='inside'?'<span class="audit-field-label">'+label+'</span>':'')+'<span class="audit-select-value">'+value+'</span><img src="assets/audit/20df2.svg" width="12" height="12" alt=""></button></div></div>';
 }
 
-function auditTableMarkup(levels) {
-  const value = values => values.map(v=>'<td class="audit-number'+(/^[−-]\d/.test(v)?' negative':'')+'">'+v+'</td>').join('');
-  const row = (label, values, options = {}) => {
-    const {id='',parent='',level=0,open=false,total=false}=options;
-    return '<tr class="audit-level-'+level+(total?' audit-total':'')+'"'+(parent?' data-parent="'+parent+'"':'')+(id?' data-node="'+id+'"':'')+'><td>'+(id?'<button type="button" data-row-toggle="'+id+'" aria-expanded="'+open+'"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">'+label+'</span></button>':label)+'</td>'+value(values)+'</tr>';
-  };
-  let rows = '';
-  if (levels === 2) {
-    rows += row('2026年 · 今年以来',['0.72%','0.72%','0.72%','0.72%'],{id:'year26',total:true});
-    rows += row('1月',['0.72%','0.72%','0.72%','0.72%'],{parent:'year26',level:1});
-    rows += row('2025年 · 年度收益',['0.72%','0.72%','0.72%','0.72%'],{id:'year25',total:true});
-    rows += row('12月',['…','…','…','…'],{parent:'year25',level:1});
-  } else {
-    rows += row('总收益',['6.63%','6.63%','--',''],{id:'total',open:true,total:true});
-    rows += row('全A因子',['5.07%','5.07%','--',''],{parent:'total',level:1});
-    rows += row('风格因子',['3.46%','3.46%','--',''],{id:'style',parent:'total',level:1,open:true});
-    [['贝塔','2.54%'],['动量','−0.55%'],['规模','2.64%'],['盈利','−0.82%'],['波动','−0.39%'],['成长','0.06%'],['价值','0.33%'],['杠杆','−0.02%'],['流动性','−0.38%'],['中盘','0.06%']].forEach(([label,v])=>{rows+=row(label,[v,v,'--',''],{parent:'style',level:2});});
-    rows += row('行业因子',['0.24%','0.24%','--',''],{id:'industry',parent:'total',level:1});
-    rows += row('行业明细',['…','…','--',''],{parent:'industry',level:2});
-    rows += row('个股选择',['−2.13%','−2.13%','--',''],{parent:'total',level:1});
-    rows += row('主动性收益',['6.26%','6.26%','--',''],{id:'active',open:true,total:true});
-    rows += row('全A因子',['0%','0%','--',''],{parent:'active',level:1});
-    rows += row('风格因子',['4.87%','4.87%','--',''],{id:'active-style',parent:'active',level:1});
-    rows += row('风格明细',['…','…','--',''],{parent:'active-style',level:2});
-    rows += row('行业因子',['1.52%','1.52%','--',''],{id:'active-industry',parent:'active',level:1});
-    rows += row('行业明细',['…','…','--',''],{parent:'active-industry',level:2});
-    rows += row('个股选择',['−0.12%','−0.12%','--',''],{parent:'active',level:1});
+function auditTableMarkup() {
+  function row(note, label, value, level, id = '', parent = '') {
+    const parentAttribute = parent ? ` data-parent="${parent}"` : '';
+    const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${label}</span></button>` : label;
+    return `<tr class="audit-table-caption"${parentAttribute}><td colspan="5">${note}</td></tr>
+      <tr class="${level}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
+        <th scope="row">${labelMarkup}</th>
+        <td class="audit-number">${value}</td>
+        <td class="audit-number">${value}</td>
+        <td class="audit-number">--</td>
+        <td></td>
+      </tr>`;
   }
-  return '<div class="audit-table-scroll"><table class="audit-table"><thead><tr><th>'+(levels===2?'时间':'收益因子')+'</th><th>嘉实中证1000指数增强A</th><th>嘉实养老目标日期2030三年持有期混合(FOF)A</th><th>基金三 · 完整名称示例</th><th>名称较长的基金四 · 自动折行完整展示示例</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+
+  return `<div class="audit-table-scroll" role="region" aria-label="简洁表格示例" tabindex="0">
+    <table class="audit-table">
+      <colgroup><col class="audit-label-column"><col span="4"></colgroup>
+      <thead>
+        <tr class="audit-table-caption"><td colspan="5">表头</td></tr>
+        <tr class="audit-table-header">
+          <th scope="col">收益 / 因子</th>
+          <th scope="col">宝盈中证A500指数增强 A</th>
+          <th scope="col">国寿安保安泽纯债39个月定期开放债券 A</th>
+          <th scope="col">易方达纳斯达克100ETF联接(QDII-LOF) A</th>
+          <th scope="col" aria-label="预留基金列"></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${row('汇总行', '总收益', '6.63%', 'audit-total', 'total')}
+        ${row('一级', '全A因子', '5.07%', 'audit-level-1', '', 'total')}
+        ${row('一级 · 可展开', '风格因子', '3.46%', 'audit-level-1', 'style', 'total')}
+        ${row('二级', '贝塔', '2.54%', 'audit-level-2', '', 'style')}
+      </tbody>
+    </table>
+  </div>`;
 }
 
 function auditRangeMarkup() {
@@ -155,25 +161,19 @@ function installAuditedComponents() {
   const selectStack=document.querySelector('.select-control-demo');selectStack.replaceChildren();
   const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','普通154px起；级联188px起'],['内边距','左右12px'],['菜单','圆角8px / 内边距8px / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；重开恢复路径。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
   for(const cascade of [false,true])for(const position of ['', 'inside'])add(selectStack,(cascade?'级联选择器':'普通下拉')+(position==='inside'?' · 内置标题':position==='outside'?' · 前置标题':''),auditSelectMarkup(cascade,position),selectSpec);
-  const tableSection=document.querySelector('.table-spec');
-  tableSection.replaceChildren();const heading=document.createElement('div');heading.className='original-spec-heading';heading.innerHTML='<h3>表格</h3>';tableSection.append(heading);
-  const tables=document.createElement('div');tables.className='audit-table-examples';tableSection.append(tables);
-  const tableSpec=spec([['首列宽度','120px'],['行高','最小45px，内容完整折行'],['内边距','左右12px / 上下10px / 内间距6px'],['字体','普通14px Regular；汇总14px Medium；三级12px Regular'],['缩进','一级12px / 二级32px / 三级52px'],['背景','首列及汇总 #F7F8FA；三级 #F4F4FC'],['对齐','文字左对齐 / 数值右对齐'],['数值','Roboto；负数 #36B397']],'点击汇总行展开或收起，各组独立；表头固定，表体最大420px滚动。示例数值沿用Figma；未提供的明细显示“…”。','285-10025');
-  const ordinary='<div class="audit-table-scroll"><table class="audit-table"><thead><tr><th>指标</th><th>本基金</th><th>同类平均</th><th>排名</th></tr></thead><tbody><tr><td>标准差</td><td class="audit-number">44.19%</td><td class="audit-number">30.67%</td><td class="audit-number">128 / 860</td></tr><tr><td>最大回撤</td><td class="audit-number negative">-27.00%</td><td class="audit-number negative">-19.88%</td><td class="audit-number">316 / 860</td></tr><tr><td>夏普比率</td><td class="audit-number">1.3371</td><td class="audit-number">1.1086</td><td class="audit-number">92 / 860</td></tr></tbody></table></div>';
-  add(tables,'普通表格',ordinary,tableSpec);
-  add(tables,'二级层级表格',auditTableMarkup(2),tableSpec);
-  add(tables,'三级层级表格',auditTableMarkup(3),tableSpec);
-  const distribution = '<div class="audit-table-scroll"><table class="audit-table"><thead><tr><th>统计项 / 收益率区间</th><th>嘉实中证1000指数增强A</th><th>嘉实养老目标日期2030三年持有期混合(FOF)A</th></tr></thead><tbody>' +
-    '<tr class="audit-total" data-node="positive"><td><button data-row-toggle="positive" aria-expanded="false"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">正收益期（&gt;0）</span></button></td><td class="audit-number">56.25%（27期）</td><td class="audit-number">52.08%（25期）</td></tr>' +
-    '<tr class="audit-level-1" data-parent="positive"><td>正收益区间明细…</td><td>…</td><td>…</td></tr>' +
-    '<tr class="audit-total" data-node="nonpositive"><td><button data-row-toggle="nonpositive" aria-expanded="false"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">非正收益期（≤0）</span></button></td><td class="audit-number">43.75%（21期）</td><td class="audit-number">47.92%（23期）</td></tr>' +
-    '<tr class="audit-level-1" data-parent="nonpositive"><td>−18% ～ −13%</td><td class="audit-number">6.25%（3期）</td><td class="audit-number">0.00%（0期）</td></tr>' +
-    '<tr class="audit-level-1" data-parent="nonpositive"><td>−13% ～ −8%</td><td class="audit-number">2.08%（1期）</td><td class="audit-number">2.08%（1期）</td></tr>' +
-    '<tr class="audit-level-1" data-parent="nonpositive"><td>其余非正收益区间…</td><td>…</td><td>…</td></tr>' +
-    '<tr><td>有效月度样本</td><td class="audit-number">48期</td><td class="audit-number">48期</td></tr></tbody></table></div>';
-  add(tables,'二级层级表格 · 收益分布',distribution,tableSpec);
-
-  add(tables,'合计行','<table class="audit-table"><tbody><tr class="audit-total"><td>合计</td><td class="audit-number">0.00%</td><td class="audit-number">0.00%</td><td class="audit-number">—</td><td></td></tr></tbody></table>',tableSpec);
+  const tables = document.querySelector('.table-spec .audit-table-examples');
+  const tableSpec = spec([
+    ['表面', '白底，无竖向分割线'],
+    ['表头', '高 53px，14px Medium，左对齐，长名称换行'],
+    ['汇总行', '高 45px，14px Medium，可展开一级明细'],
+    ['一级', '高 45px，14px Regular，可展开项左侧显示箭头'],
+    ['二级', '高 42px，12px Regular，文字 #666666'],
+    ['列宽', '首列 120px，基金列等宽'],
+    ['缩进', '汇总 10px / 一级 28px / 二级 46px'],
+    ['数值', 'Roboto 等宽数字，右对齐，缺失值显示 --'],
+    ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线']
+  ], '点击汇总行或可展开的一级行，显示或收起下一级明细。表头和行高可随内容换行增高，窄屏可横向滚动。', '564-55005');
+  add(tables, '简洁表格 · 层级规范', auditTableMarkup(), tableSpec);
   tables.querySelectorAll('th,td').forEach(cell => {
     if (cell.classList.contains('audit-number')) return;
     const walker=document.createTreeWalker(cell,NodeFilter.SHOW_TEXT);
