@@ -72,10 +72,6 @@
     return { ...options(), ...range(`risk-${section}`, defaults[section]) };
   }
 
-  function formatDate(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  }
-
   function range(scope, initial = {}) {
     const key = `${mode}:${scope}`;
     if (!ranges.has(key)) {
@@ -87,36 +83,14 @@
     return ranges.get(key);
   }
 
-  function setPeriod(scope, period) {
-    const value = range(scope);
-    value.period = period;
-    value.end = value.commonEnd;
-    if (period === '共同时段' || period === '共同任期') value.start = value.commonStart;
-    else if (period.includes('年度')) {
-      value.start = `${period.slice(0, 4)}-01-01`;
-      value.end = `${period.slice(0, 4)}-12-31`;
-    } else if (period === '今年以来') value.start = `${value.end.slice(0, 4)}-01-01`;
-    else {
-      const months = { '近3月': 3, '近6月': 6, '近1年': 12, '近3年': 36, '近5年': 60 }[period];
-      if (months) {
-        const date = new Date(`${value.commonEnd}T12:00:00`);
-        const day = date.getDate();
-        date.setDate(1);
-        date.setMonth(date.getMonth() - months);
-        date.setDate(Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()));
-        value.start = formatDate(date);
-      }
-    }
-  }
-
   function timeControls(scope, initial = {}) {
     const value = range(scope, initial);
-    const commonLabel = value.commonLabel || '共同时段';
-    const primary = [commonLabel, '近1年', '近3年'];
-    const isCommon = value.period === '共同时段' || value.period === '共同任期';
-    const moreSelected = !isCommon && !primary.includes(value.period);
-    const button = label => `<button type="button" data-manager-period="${label}" aria-pressed="${value.period === label || (label === commonLabel && isCommon)}" class="${value.period === label || (label === commonLabel && isCommon) ? 'selected' : ''}">${label}</button>`;
-    return `<div class="zc-analysis-time" data-manager-time="${scope}"><div class="zc-quick-wrap"><div class="zc-pill zc-analysis-quick">${primary.map(button).join('')}<button type="button" data-manager-more aria-expanded="false" aria-pressed="${moreSelected}" class="${moreSelected ? 'selected' : ''}">${moreSelected ? value.period : '更多'}<span class="zc-down">${img('more', 10)}</span></button></div><div class="zc-more-panel" hidden><div><small>区间</small>${['近3月', '近6月', '近5年'].map(button).join('')}</div><div><small>年度</small>${['今年以来', '2025年度', '2024年度', '2023年度'].map(button).join('')}</div></div></div>${initial.showDate === false ? '' : `<div class="zc-date-wrap"><button class="zc-date" type="button" disabled aria-label="当前日期范围 ${value.start} 至 ${value.end}"><span>${value.start}</span><small>至</small><span>${value.end}</span>${img('calendar-disabled', 12.6348, 12.1194)}</button></div>`}</div>`;
+    const inceptionDates = mode === 'representative' ? managers.map(manager => selectedProduct(manager).inceptionDate) : [];
+    const inception = inceptionDates.length && inceptionDates.every(Boolean) ? inceptionDates.sort().at(-1) : '';
+    return window.ZhiceComparisonTime.markup(scope, value, {
+      showDate: initial.showDate !== false,
+      inception,
+    });
   }
 
   function setting(scope, field, label, choices, initial) {
@@ -143,44 +117,9 @@
     download(`${filename}.csv`, '\ufeff' + csv, 'text/csv;charset=utf-8');
   }
 
-  function exportTableImage(section, filename) {
-    const table = section.querySelector('table');
-    if (!table) return;
-    const tableBox = table.getBoundingClientRect();
-    const titleHeight = 48;
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.ceil(tableBox.width * 2);
-    canvas.height = Math.ceil((titleHeight + tableBox.height) * 2);
-    const context = canvas.getContext('2d');
-    context.scale(2, 2);
-    context.fillStyle = '#fff';
-    context.fillRect(0, 0, tableBox.width, canvas.height / 2);
-    context.fillStyle = '#333';
-    context.font = '600 16px sans-serif';
-    context.fillText(filename, 12, 30);
-    table.querySelectorAll('th, td').forEach(cell => {
-      const box = cell.getBoundingClientRect();
-      if (!box.width || !box.height) return;
-      const style = getComputedStyle(cell);
-      const x = box.left - tableBox.left;
-      const y = box.top - tableBox.top + titleHeight;
-      context.fillStyle = style.backgroundColor;
-      context.fillRect(x, y, box.width, box.height);
-      context.strokeStyle = '#eaeaea';
-      context.strokeRect(x, y, box.width, box.height);
-      context.fillStyle = style.color;
-      context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      context.textAlign = style.textAlign === 'right' ? 'right' : 'left';
-      context.textBaseline = 'middle';
-      const padding = Math.min(12, box.width / 5);
-      context.fillText(cell.innerText.trim().replace(/\s+/g, ' '), context.textAlign === 'right' ? x + box.width - padding : x + padding, y + box.height / 2, box.width - 2 * padding);
-    });
-    canvas.toBlob(blob => { if (blob) download(`${filename}.png`, blob, 'image/png'); });
-  }
-
   function exportImage(section, filename) {
     const sectionCharts = charts.filter(chart => section.contains(chart.getDom()));
-    if (!sectionCharts.length) { exportTableImage(section, filename); return; }
+    if (!sectionCharts.length) { window.CompareAllocationView.exportTableImage(section, filename, download); return; }
     const images = sectionCharts.map(chart => chart.renderToCanvas({ pixelRatio: 2, backgroundColor: '#fff' }));
     const canvas = document.createElement('canvas');
     canvas.width = images.reduce((width, image) => width + image.width, 0);
@@ -214,19 +153,11 @@
   }
 
   function bindUi(root) {
-    root.querySelectorAll('[data-manager-time]').forEach(toolbar => {
-      toolbar.querySelectorAll('[data-manager-period]').forEach(button => {
-        button.onclick = () => { setPeriod(toolbar.dataset.managerTime, button.dataset.managerPeriod); render(); };
-      });
-      const more = toolbar.querySelector('[data-manager-more]');
-      const panel = toolbar.querySelector('.zc-more-panel');
-      const open = () => { panel.hidden = false; more.setAttribute('aria-expanded', 'true'); };
-      const close = () => { panel.hidden = true; more.setAttribute('aria-expanded', 'false'); };
-      more.onclick = () => panel.hidden ? open() : close();
-      more.onmouseenter = open;
-      toolbar.querySelector('.zc-quick-wrap').onmouseleave = close;
-      toolbar.onkeydown = event => { if (event.key === 'Escape') { close(); more.focus(); } };
+    const tenures = managers.map(manager => {
+      const dates = mode === 'representative' ? selectedProduct(manager) : manager;
+      return { name: manager.name, start: dates.tenureStart, end: dates.tenureEnd };
     });
+    window.ZhiceComparisonTime.bind(root, range, render, { tenures });
     root.querySelectorAll('[data-manager-field]').forEach(button => {
       button.onclick = () => { range(button.dataset.managerScope)[button.dataset.managerField] = button.dataset.managerValue; render(); };
     });
@@ -275,7 +206,7 @@
   }
 
   function cards() {
-    return `<div class="zc-fund-row"><div class="manager-pk" role="img" aria-label="经理 PK"><img class="manager-pk-logo" src="${assets}manager-pk-logo.png" width="72" height="25" alt=""></div><div class="zc-fund-slots">${Array.from({ length: 4 }, (_, index) => {
+    return `<div class="zc-fund-row"><div class="manager-pk" role="img" aria-label="经理 PK"><img class="manager-pk-logo" src="${assets}manager-pk-logo.png?v=2" width="72" height="25" alt=""></div><div class="zc-fund-slots">${Array.from({ length: 4 }, (_, index) => {
       const manager = managers[index];
       if (!manager) return `<article class="zc-fund zc-search-slot manager-slot"><label class="zc-search"><input type="text" data-manager-search="${index}" placeholder="输入基金经理姓名" aria-label="搜索基金经理" autocomplete="off" role="combobox" aria-expanded="false"><span class="zc-search-icon"><img src="./assets/compare-figma/47-50726_imgFrame.svg" width="20" height="20" alt=""><img class="is-focus" src="./assets/compare-controls/search-focus.svg" width="20" height="20" alt=""></span></label><div class="manager-search-results" id="manager-results-${index}" role="listbox" hidden></div></article>`;
       return managerCard(manager);
@@ -444,7 +375,6 @@
     if (!document.body.classList.contains('zc-manager-mode')) return;
     if (!event.target.closest('.zc-search-slot')) closeSearch();
     host.querySelectorAll('details[open]').forEach(menu => { if (!menu.contains(event.target)) menu.open = false; });
-    host.querySelectorAll('[data-manager-time]').forEach(toolbar => { if (!toolbar.contains(event.target)) { toolbar.querySelector('.zc-more-panel').hidden = true; toolbar.querySelector('[data-manager-more]').setAttribute('aria-expanded', 'false'); } });
   });
   window.addEventListener('resize', () => charts.forEach(chart => { if (!chart.isDisposed()) chart.resize(); }));
   window.ManagerCompareView = {

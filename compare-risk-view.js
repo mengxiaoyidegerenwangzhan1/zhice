@@ -77,9 +77,9 @@
     return options.ui?.range(`risk-${key}`, initial) || initial;
   }
 
-  function timeControls(options, key, range, setting = '', showDate = true) {
+  function timeControls(options, key, range, setting = '') {
     if (!options.ui) return '';
-    return `<div class="zc-risk-toolbar">${setting}${options.ui.timeControls(`risk-${key}`, { ...range, showDate })}</div>`;
+    return `<div class="zc-risk-toolbar">${setting}${options.ui.timeControls(`risk-${key}`, range)}</div>`;
   }
 
   function setting(options, key, field, label, choices, initial) {
@@ -109,9 +109,12 @@
     return '<colgroup><col class="zc-risk-tree-label-col"><col><col><col><col></colgroup>';
   }
 
-  function disclosure(key, label, expanded) {
+  function disclosure(key, label, expanded, representative) {
+    const calendar = key.startsWith('calendar-');
+    const closed = !representative && calendar ? `${assets}calendar-collapsed.svg` : './assets/compare-attribution/tree-open.svg';
+    const opened = `${assets}${calendar ? 'calendar' : 'distribution'}-expanded.svg`;
     return `<button type="button" class="zc-risk-disclosure" data-risk-disclosure="${key}" aria-expanded="${expanded}" aria-controls="zc-risk-children-${key}">
-      <span class="zc-risk-disclosure-arrow" aria-hidden="true"><img src="./assets/compare-attribution/tree-open.svg" width="14" height="14" alt=""></span>
+      <span class="zc-risk-disclosure-arrow" aria-hidden="true"><img src="${closed}" width="14" height="14" alt="">${representative ? '' : `<img src="${opened}" width="14" height="14" alt="">`}</span>
       <span>${label}</span>
     </button>`;
   }
@@ -144,7 +147,7 @@
       Number.isFinite(referenceValue) ? percent(referenceValue) : null, referenceId);
   }
 
-  function calendarTable(title, data, funds, unit, referenceId) {
+  function calendarTable(title, data, funds, unit, referenceId, representative) {
     if (!data?.years.length) return '<div class="zc-risk-no-data">暂无可显示的数据</div>';
     const slots = Array.from({ length: 4 }, (_, i) => funds[i]);
     const unitKey = { 月: 'month', 季: 'quarter', 年: 'year' }[unit];
@@ -158,7 +161,7 @@
         ${slots.map(fund => returnCell(fund, values.get(fund?.id)?.values[index], reference?.values[index], referenceId)).join('')}
       </tr>`).join('');
       return `<tbody class="zc-risk-tree-summary"><tr>
-        <th scope="row">${disclosure(key, `<span class="zc-risk-number">${year.year}</span>`, expanded)}</th>
+        <th scope="row">${disclosure(key, `<span class="zc-risk-number">${year.year}</span>`, expanded, representative)}</th>
         ${slots.map(fund => returnCell(fund, values.get(fund?.id)?.total, reference?.total, referenceId)).join('')}
       </tr></tbody>
       <tbody id="zc-risk-children-${key}" data-risk-children="${key}"${expanded ? '' : ' hidden'}>${children}</tbody>`;
@@ -170,16 +173,20 @@
     </table></div>`;
   }
 
+  function quantityPair(count, ratio, divider) {
+    return `<span>${count}</span><span class="zc-risk-quantity-divider" aria-hidden="true">${icon(divider)}<span class="zc-risk-visually-hidden">｜</span></span><span>${ratio}</span>`;
+  }
+
   function quantityCell(fund, values, summary, referenceId) {
     const className = `zc-risk-number${referenceClass(fund, referenceId)}`;
     if (!fund?.visible) return `<td class="${className}"></td>`;
     if (!values) return `<td class="${className}">—</td>`;
     return `<td class="${className}"><span class="zc-risk-quantity" aria-label="${values.count}次，占比${percent(values.ratio)}">
-      <span>${values.count}</span><span class="zc-risk-quantity-divider" aria-hidden="true">${icon(summary ? 'table-divider-medium' : 'table-divider-regular')}<span class="zc-risk-visually-hidden">｜</span></span><span>${percent(values.ratio)}</span>
+      ${quantityPair(values.count, percent(values.ratio), summary ? 'table-divider-medium' : 'table-divider-regular')}
     </span></td>`;
   }
 
-  function distributionTable(title, data, funds, referenceId) {
+  function distributionTable(title, data, funds, referenceId, representative) {
     if (!data?.series.length) return '<div class="zc-risk-no-data">暂无可显示的数据</div>';
     const slots = Array.from({ length: 4 }, (_, i) => funds[i]);
     const values = new Map(data.series.map(series => [series.id, series]));
@@ -202,14 +209,14 @@
         }).join('')}
       </tr>`).join('');
       return `<tbody class="zc-risk-tree-summary"><tr>
-        <th scope="row">${disclosure(key, group.label, expanded)}</th>
+        <th scope="row">${disclosure(key, group.label, expanded, representative)}</th>
         ${slots.map(fund => quantityCell(fund, values.get(fund?.id)?.[group.key], true, referenceId)).join('')}
       </tr></tbody>
       <tbody id="zc-risk-children-${key}" data-risk-children="${key}"${expanded ? '' : ' hidden'}>${children}</tbody>`;
     }).join('');
     return `<div class="zc-table-wrap zc-risk-tree-wrap"><table class="zc-table zc-risk-tree-table" aria-label="${title}">
       ${tableColumns()}
-      <thead><tr><th scope="col">收益区间</th>${slots.map(fund => `<th scope="col"${fund?.visible ? ` aria-label="${escape(fund.name)}，数量及占比"` : ''}>${fund?.visible ? '数量｜占比' : ''}</th>`).join('')}</tr></thead>
+      <thead><tr><th scope="col">收益区间</th>${slots.map(fund => `<th scope="col"${fund?.visible ? ` aria-label="${escape(fund.name)}，数量及占比"` : ''}>${!fund?.visible ? '' : representative ? '数量｜占比' : `<span class="zc-risk-quantity">${quantityPair('数量', '占比', 'table-divider-heading')}</span>`}</th>`).join('')}</tr></thead>
       ${rows}
     </table></div>`;
   }
@@ -219,13 +226,14 @@
     const range = rangeFor(options, 'overview', { start: '2024-01-01', end: '2026-11-06' });
     const series = options.seriesBySection?.['risk-overview'] || options.series;
     const unit = range.unit;
+    const representative = options.mode === 'representative';
     const title = `${unit}度收益`;
     const frequency = setting(options, 'overview', 'unit', '频率', [{ value: '月', label: '月度' }, { value: '季', label: '季度' }, { value: '年', label: '年度' }], unit);
     const controls = timeControls(options, 'overview', range, frequency);
     const body = view === 'table'
       ? `<div class="zc-risk-table-stack">
-          <article><h3>${title}</h3>${calendarTable(title, series.calendar, funds, unit, options.referenceId)}</article>
-          <article><h3>${title}分布</h3>${distributionTable(`${title}分布`, series.distributionCounts, funds, options.referenceId)}</article>
+          <article><h3>${title}</h3>${calendarTable(title, series.calendar, funds, unit, options.referenceId, representative)}</article>
+          <article><h3>${title}分布</h3>${distributionTable(`${title}分布`, series.distributionCounts, funds, options.referenceId, representative)}</article>
         </div>`
       : `<div class="zc-risk-pair">
           <article><h3>${title}</h3>${chart('returns', title, funds, options.referenceId)}</article>
@@ -293,7 +301,12 @@
     const rollingRange = rangeFor(options, 'rolling', { period: '近1年' });
     const drawdownRange = rangeFor(options, 'drawdown');
     const metricsRange = rangeFor(options, 'metrics', { benchmark: '上证综指', frequency: '原始频率' });
-    const metrics = new Map(representative ? funds.map(fund => [fund.id, window.CompareRiskCharts?.metricSamples?.(fund, metricsRange)]) : []);
+    const adjustedMetrics = metricsRange.period !== '共同时段'
+      || metricsRange.benchmark !== '上证综指'
+      || metricsRange.frequency !== '原始频率';
+    const metrics = new Map(representative || adjustedMetrics
+      ? funds.map(fund => [fund.id, window.CompareRiskCharts?.metricSamples?.(fund, metricsRange)])
+      : []);
     const holding = setting(options, 'forecast', 'holdingMonths', '持有周期', [
       { value: 1, label: '一个月' }, { value: 3, label: '三个月' }, { value: 6, label: '六个月' }, { value: 12, label: '一年' },
     ], forecastRange.holdingMonths);
@@ -305,12 +318,12 @@
       ${chartSection('forecast', '持有收益概率', funds, {
         referenceId,
         description: forecastHelp,
-        controls: timeControls(options, 'forecast', forecastRange, holding, representative || options.view === 'table'),
+        controls: timeControls(options, 'forecast', forecastRange, holding),
       })}
       ${chartSection('rolling', '年化动态波动率', funds, { referenceId, description: rollingHelp, controls: timeControls(options, 'rolling', rollingRange) })}
       ${chartSection('drawdown', '区间最大回撤', funds, { referenceId, note: `区间最小起始日期：2022-11-06　 截止日期：${escape(drawdownRange.end)}` })}
       <section class="zc-risk-metrics" data-risk-section="metrics">
-        ${heading('metrics', representative ? '收益风险指标' : '年化动态波动率', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
+        ${heading('metrics', '收益风险指标', { controls: timeControls(options, 'metrics', metricsRange, benchmark + metricsFrequency) })}
         <div class="zc-risk-metric-tables">
           ${metricTable('收益指标', returnMetrics, funds, representative ? null : referenceId, metrics)}
           ${metricTable('风险指标', riskMetrics, funds, representative ? null : referenceId, metrics)}

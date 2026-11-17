@@ -44,7 +44,6 @@ body.zc-compare-mode .zc-compare.has-results {
   border-radius: 0 0 16px 16px;
 }
 
-/* The selector's four slots line up with the four result columns. */
 .zc-compare .zc-selector {
   padding: 0;
 }
@@ -61,13 +60,13 @@ body.zc-compare-mode .zc-compare.has-results {
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 139px;
+  width: 120px;
   height: auto;
   min-height: 134px;
   margin: 0;
   border: 0;
   border-radius: 16px 0 0 0;
-  background: url('../assets/compare-sticky/fund-pk-background-expanded.png') center / auto 100% no-repeat;
+  background: url('../assets/compare-sticky/fund-pk-background-expanded.png?v=2') center / cover no-repeat;
 }
 
 .zc-compare .zc-pk > .zc-pk-logo {
@@ -111,6 +110,7 @@ body.zc-compare-mode .zc-compare.has-results {
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
+  letter-spacing: .32px;
   height: auto;
   min-height: 48px;
   overflow: visible;
@@ -121,12 +121,19 @@ body.zc-compare-mode .zc-compare.has-results {
 
 .zc-compare .zc-fund-code {
   margin-top: auto;
+  padding-inline-start: 16px;
   padding-top: 8px;
+  color: #666;
 }
 
 .zc-compare .zc-fund-code span {
-  background: #f5f6f7;
+  background: #f7f8fa;
   white-space: nowrap;
+}
+
+.zc-compare:not(.zc-manager) .zc-fund.is-reference {
+  background: linear-gradient(#6865a71a, #6865a700);
+  box-shadow: inset 1px 0 #6865a714;
 }
 
 .zc-compare .zc-actions {
@@ -171,25 +178,51 @@ body.zc-compare-mode .zc-compare.has-results {
   border-radius: 16px 16px 0 0;
 }
 
-.zc-compare.is-sticky-compact .zc-fund-row {
-  min-height: 104px;
-}
-
 .zc-compare.is-sticky-compact .zc-pk {
-  min-height: 104px;
-  background-image: url('../assets/compare-sticky/fund-pk-background-compact.png');
+  min-height: 56px;
+  background-image: url('../assets/compare-sticky/fund-pk-background-compact.png?v=2');
 }
 
 .zc-compare.is-sticky-compact .zc-fund-slots {
   margin-top: 0;
 }
 
-.zc-compare.is-sticky-compact .zc-fund {
-  min-height: 104px;
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-fund {
+  flex-direction: row;
+  align-items: center;
+  min-height: 56px;
+  padding-block: 10px;
+}
+
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-fund::before {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-fund > strong {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-card-tools {
+  order: 1;
+  margin: 0 0 0 12px;
+}
+
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-reference-badge {
+  right: 0;
+  left: auto;
 }
 
 .zc-compare.is-sticky-compact .zc-fund-code,
-.zc-compare.is-sticky-compact .zc-actions {
+.zc-compare.is-sticky-compact .zc-actions,
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-fund:first-child .zc-card-tools,
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-fund.is-reference .zc-card-tools,
+.zc-compare.is-sticky-compact:not(.zc-manager) .zc-card-tools [data-remove] {
   display: none;
 }
 
@@ -262,6 +295,7 @@ body.zc-compare-mode .zc-compare.has-results {
 
   .zc-compare .zc-fund-code {
     gap: 6px;
+    padding-inline-start: 12px;
   }
 
   .zc-compare .zc-fund-code span {

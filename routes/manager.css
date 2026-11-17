@@ -2,11 +2,11 @@
 .zc-manager .manager-initial-panel { overflow: visible; border-radius: 16px; background: #fff; }
 .zc-manager .zc-selector { border-radius: 16px 16px 0 0; padding-bottom: 0; margin-bottom: 0; }
 .zc-manager .zc-fund-row { padding-right: 20px; }
-.zc-manager .manager-pk { position: relative; flex: none; width: 120px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 74px; border-radius: 16px 0 0 0; background: url('../assets/manager-select/comprehensive-expanded.png') center / cover no-repeat; }
+.zc-manager .manager-pk { position: relative; flex: none; width: 120px; overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 74px; border-radius: 16px 0 0 0; background: url('../assets/manager-select/comprehensive-expanded.png?v=2') center / cover no-repeat; }
 .zc-manager .manager-pk > .manager-pk-logo { display: block; flex: none; width: 72px; height: 25px; }
-.zc-manager.is-sticky-compact .manager-pk { background-image: url('../assets/manager-select/comprehensive-compact.png'); }
-.zc-manager.is-representative .manager-pk { background-image: url('../assets/manager-select/representative-expanded.png'); }
-.zc-manager.is-representative.is-sticky-compact .manager-pk { background-image: url('../assets/manager-select/representative-compact.png'); }
+.zc-manager.is-sticky-compact .manager-pk { background-image: url('../assets/manager-select/comprehensive-compact.png?v=2'); }
+.zc-manager.is-representative .manager-pk { background-image: url('../assets/manager-select/representative-expanded.png?v=2'); }
+.zc-manager.is-representative.is-sticky-compact .manager-pk { background-image: url('../assets/manager-select/representative-compact.png?v=2'); }
 .zc-manager .zc-fund-slots { margin-top: 0; }
 .zc-manager .manager-slot { position: relative; min-height: 74px; padding: 16px 16px 12px; box-shadow: inset 1px 0 #eaeaea; justify-content: flex-start; }
 .zc-manager .manager-slot::before { display: none; }
@@ -72,8 +72,7 @@
 .zc-manager.is-sticky-compact .manager-identity > strong { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .zc-manager.is-sticky-compact.is-representative .manager-identity > .manager-compact-product { display: block; }
 .zc-manager.is-sticky-compact .zc-card-tools { order: 1; margin: 0; }
-.zc-manager.is-sticky-compact .zc-card-tools .zc-reference-badge { left: auto; right: 0; width: 30px; border-radius: 0 0 0 8px; }
-.zc-manager.is-sticky-compact .zc-reference-badge > span,
+.zc-manager.is-sticky-compact .zc-card-tools .zc-reference-badge { left: auto; right: 0; width: 30px; height: 22px; }
 .zc-manager.is-sticky-compact .manager-slot:first-child:not(.is-reference) .zc-card-tools,
 .zc-manager.is-sticky-compact [data-manager-remove],
 .zc-manager.is-sticky-compact .manager-identity > span,
@@ -83,6 +82,11 @@
 .zc-manager .zc-risk-view { min-width: 0; }
 .zc-manager section[aria-busy="true"] > :not(.zc-section-head) { opacity: .45; pointer-events: none; }
 .zc-manager section[aria-busy="true"] { cursor: progress; }
+@media (hover: hover) {
+  .zc-manager .zc-content tbody > tr:hover > :is(th, td) {
+    background-image: linear-gradient(#6865a709, #6865a709);
+  }
+}
 @media (max-width: 900px) {
   .zc-manager .manager-controls { gap: 16px; padding-bottom: 12px; }
   .zc-manager .manager-subtabs { flex-wrap: wrap; border-radius: 16px; }

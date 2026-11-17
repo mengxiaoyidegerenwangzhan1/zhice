@@ -217,6 +217,56 @@
   gap: 2px;
 }
 
+.zc-fund-allocation > section + section { position: relative; border-top: 0; }
+.zc-fund-allocation > section + section::before {
+  content: '';
+  position: absolute;
+  inset: -1px -20px auto;
+  border-top: 1px solid #ddd;
+}
+.zc-fund-allocation .zc-allocation-head { margin-bottom: 12px; }
+.zc-fund-allocation .zc-allocation-table-frame { border: 0; }
+.zc-fund-allocation .zc-allocation-table tr > * {
+  border: 0;
+  border-bottom: 1px solid rgba(234,234,234,.85);
+  padding-block: 12px;
+  background: #fff;
+}
+.zc-fund-allocation .zc-allocation-table th { padding-inline: 10px; }
+.zc-fund-allocation .zc-allocation-table td { text-align: center; }
+.zc-fund-allocation .zc-allocation-table .is-reference { background: #f9f9ff; }
+.zc-fund-allocation .zc-allocation-table tr.is-chart-hovered > td.is-reference { background: #f5f4fb; }
+.zc-fund-allocation .zc-allocation-table tr.is-chart-hovered > :not(.is-reference) { background: #f7f8fa; }
+.zc-fund-allocation .zc-allocation-chart-table th { color: #666; }
+.zc-fund-allocation .zc-allocation-chart-table td { padding: 24px 12px; }
+.zc-fund-allocation .zc-allocation-chart-slot { max-width: 192px; }
+.zc-fund-allocation .zc-allocation-data-scroll.is-long {
+  max-height: 383px;
+  scrollbar-color: #c6c7ca #f7f8fa;
+}
+.zc-fund-allocation .zc-allocation-row-label { gap: 4px; }
+.zc-fund-allocation .zc-allocation-value-pair { justify-content: center; }
+.zc-fund-allocation .zc-allocation-value-pair > * { flex: 0 1 64px; }
+.zc-fund-allocation .zc-allocation-difference { color: #6865a7; }
+.zc-fund-allocation .zc-allocation-holding {
+  max-width: 215px;
+  margin-inline: auto;
+  justify-content: center;
+  color: var(--holding-color, #333);
+}
+.zc-fund-allocation .zc-allocation-holding .zc-allocation-number {
+  flex: 0 0 min(60px, 42%);
+  text-align: center;
+}
+.zc-fund-allocation .zc-allocation-table th > .zc-allocation-number { text-align: left; }
+.zc-fund-allocation .zc-allocation-summary .zc-allocation-number {
+  display: block;
+  width: min(60px, 42%);
+  margin-inline-start: auto;
+  margin-inline-end: max(0px, calc((100% - 215px) / 2));
+  text-align: center;
+}
+
 @media (max-width: 1050px) {
   .zc-allocation-head { flex-wrap: wrap; }
   .zc-allocation-head .zc-allocation-actions { flex-wrap: wrap; margin-left: auto; gap: 20px; }

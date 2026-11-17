@@ -22,6 +22,7 @@
     brinsonBenchmark: benchmarkOptions[0], factorBenchmark: benchmarkOptions[0],
     sort: { stock: null, brinson: null },
     expanded: new Set(['total']),
+    fundExpanded: new Set(['total', 'total-style']),
   };
   const styleFactors = [
     ['贝塔', [2.54, 2.32]], ['动量', [-.55, -.32]], ['规模', [2.64, 2.85]], ['盈利', [-.82, -.64]], ['波动', [-.39, -.26]],
@@ -77,7 +78,12 @@
     if (!Number.isFinite(value)) return `<td class="${classes}"><span class="zc-attr-missing">--</span></td>`;
     const roundedValue = Math.round(value * 100) / 100;
     const numberClass = `zc-attr-number${roundedValue < 0 ? ' is-negative' : ''}${settings.positive && roundedValue > 0 ? ' is-positive' : ''}`;
-    const rank = settings.rank ? `<img class="zc-attr-rank rank-${settings.rank}" src="${assets}rank-${settings.rank}.png" width="20" alt="排名第${settings.rank}">` : '';
+    const representative = isRepresentative(options);
+    const rank = settings.rank
+      ? representative
+        ? `<img class="zc-attr-rank rank-${settings.rank}" src="${assets}rank-${settings.rank}.png" width="20" alt="排名第${settings.rank}">`
+        : `<span class="zc-attr-inline-rank rank-${settings.rank}" role="img" aria-label="排名第${settings.rank}">${settings.rank}</span>`
+      : '';
     let difference = '';
     if (compared) {
       const delta = Number.isFinite(referenceValue) ? Math.round((value - referenceValue) * 100) / 100 : null;
@@ -85,7 +91,9 @@
       const shown = options.showDifferences !== false;
       difference = `<span class="zc-attr-difference" data-attr-difference="${delta ?? ''}" aria-hidden="${!shown}"${delta === null && shown ? ' title="参照基金暂无数据，无法计算差值"' : ''}>${shown ? text : ''}</span>`;
     }
-    return `<td class="${classes}">${rank}<span class="zc-attr-value-pair"><span class="${numberClass}" data-attr-value="${roundedValue}">${roundedValue.toFixed(2)}%</span>${difference}</span></td>`;
+    const valueText = `<span class="${numberClass}" data-attr-value="${roundedValue}">${roundedValue.toFixed(2)}%</span>`;
+    const valueLine = representative ? valueText : `<span class="zc-attr-value-line">${rank}${valueText}</span>`;
+    return `<td class="${classes}${rank && !representative ? ' has-inline-rank' : ''}">${representative ? rank : ''}<span class="zc-attr-value-pair">${valueLine}${difference}</span></td>`;
   }
 
   function fundCells(fund, values, referenceValues, options, settings = {}) {
@@ -204,16 +212,18 @@
     const funds = slots(options.funds);
     const scale = periodScale('factor', options) * (1 + benchmarkOptions.indexOf(state.factorBenchmark) * .08);
     const reference = referenceFund(options);
+    const representative = isRepresentative(options);
+    const expandedRows = representative ? state.expanded : state.fundExpanded;
     const scaledValue = (row, fund) => {
       const value = profileValues(row.values.map(value => [value]), fund, options)[0];
       return Number.isFinite(value) ? value * scale : null;
     };
     function renderRows(rows) {
       return rows.map(row => {
-        const expanded = state.expanded.has(row.id);
+        const expanded = expandedRows.has(row.id);
         const label = row.children ? `<button type="button" class="zc-attr-expand" data-attr-expand="${row.id}" aria-expanded="${expanded}" aria-label="${expanded ? '收起' : '展开'}${row.label}">${icon('tree-open')}<span>${row.label}</span></button>` : `<span class="zc-attr-factor-label">${row.label}</span>`;
         const referenceValue = scaledValue(row, reference);
-        return `<tr class="zc-attr-level-${row.level}" data-attr-row="${row.id}"${row.children ? ` data-attr-expand-row="${row.id}"` : ''}><th scope="row">${label}</th>${funds.map(fund => comparisonCell(fund, scaledValue(row, fund), referenceValue, options, { positive: true })).join('')}</tr>${row.children && expanded ? renderRows(row.children) : ''}`;
+        return `<tr class="zc-attr-level-${row.level}" data-attr-row="${row.id}"${row.children ? ` data-attr-expand-row="${row.id}"` : ''}><th scope="row">${label}</th>${funds.map(fund => comparisonCell(fund, scaledValue(row, fund), referenceValue, options, { positive: representative })).join('')}</tr>${row.children && expanded ? renderRows(row.children) : ''}`;
       }).join('');
     }
     return `<div class="zc-attr-factor-wrap"><table class="zc-attr-table zc-attr-factor-table" aria-label="股票组合的收益因子分解"><colgroup><col class="zc-attr-label-col">${'<col>'.repeat(4)}</colgroup><tbody>${renderRows(factorRows())}</tbody></table></div>`;
@@ -225,7 +235,7 @@
   }
 
   function render(options) {
-    return `<div class="zc-attribution-view${isRepresentative(options) ? ' zc-representative-attribution' : ''}${referenceFund(options) ? ' has-reference' : ''}${options.showDifferences === false ? ' hide-differences' : ''}">${['stock', 'brinson', 'factor'].map(key => section(key, options)).join('')}</div>`;
+    return `<div class="zc-attribution-view ${isRepresentative(options) ? 'zc-representative-attribution' : 'zc-fund-attribution'}${referenceFund(options) ? ' has-reference' : ''}${options.showDifferences === false ? ' hide-differences' : ''}">${['stock', 'brinson', 'factor'].map(key => section(key, options)).join('')}</div>`;
   }
 
   function replaceSection(key, root, options) {
@@ -282,7 +292,8 @@
       const expand = event.target.closest('[data-attr-expand], [data-attr-expand-row]');
       if (expand) {
         const id = expand.dataset.attrExpand || expand.dataset.attrExpandRow;
-        state.expanded.has(id) ? state.expanded.delete(id) : state.expanded.add(id);
+        const expandedRows = isRepresentative(options) ? state.expanded : state.fundExpanded;
+        expandedRows.has(id) ? expandedRows.delete(id) : expandedRows.add(id);
         replaceSection('factor', root, options);
         root.querySelector(`[data-attr-expand="${id}"]`)?.focus({ preventScroll: true });
       }

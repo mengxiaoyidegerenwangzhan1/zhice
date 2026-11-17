@@ -126,10 +126,10 @@
     </div>`;
   }
 
-  function heading(definition, options) {
+  function heading(definition) {
     const { key, title, help } = definition;
     const distribution = key === 'stock' ? dropdown(key, 'distribution', '分布', stockDistributions, 252) : key === 'bond' ? dropdown(key, 'distribution', '分布', ['债券种类'], 176) : '';
-    const downloadType = isRepresentative(options) ? key.includes('holdings') ? 'table' : 'image' : scopeFor(key);
+    const downloadType = key.includes('holdings') ? 'table' : 'image';
     return `<div class="zc-section-head zc-allocation-head">
       <div class="zc-allocation-heading"><h2>${title}</h2>${help ? `<span class="zc-allocation-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-${scopeFor(key)}-help">${icon('help')}</button><span id="zc-${scopeFor(key)}-help" role="tooltip">${help}</span></span>` : ''}</div>
       <div class="zc-allocation-actions">${distribution}${dropdown(key, 'report', '报告期', reportDates, 192)}
@@ -144,9 +144,9 @@
 
   function chartRow(key, options) {
     const { funds } = options;
-    const labels = { asset: '大类资产类型<br>/<br>占总资产比', stock: state.stock.distribution === '板块分布' ? '板块分布<br>/<br>占净资产比' : '行业分布<br>/<br>占净资产比', bond: '债券类型 /<br>占净资产比' };
+    const category = state.stock.distribution === '板块分布' ? '板块分布' : '行业分布';
     return `<table class="zc-allocation-table zc-allocation-chart-table" aria-label="${definitions.find(item => item.key === key).title}图表">${columns()}<tbody><tr>
-      <th scope="row">${labels[key]}</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}><div class="zc-allocation-chart-slot">${fund?.visible ? hasData(fund, options, key) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</div></td>`).join('')}
+      <th scope="row">${category}<br>/<br>占净资产比</th>${slots(funds).map(fund => `<td${referenceClass(fund, options)}><div class="zc-allocation-chart-slot">${fund?.visible ? hasData(fund, options, key) ? `<div class="zc-allocation-chart" data-allocation-chart="${key}" data-fund-id="${escape(fund.id)}" role="img" aria-label="${escape(fund.name)}${definitions.find(item => item.key === key).title}"></div>` : '<span class="zc-allocation-empty">暂无数据</span>' : ''}</div></td>`).join('')}
     </tr></tbody></table>`;
   }
 
@@ -170,7 +170,7 @@
 
   function distributionTable(key, options) {
     const rows = dataRows(key);
-    const showChart = key === 'stock' || !isRepresentative(options);
+    const showChart = key === 'stock';
     return `<div class="zc-allocation-table-frame">${showChart ? chartRow(key, options) : ''}
       <div class="zc-allocation-data-scroll${rows.length > 10 ? ' is-long' : ''}"${rows.length > 10 ? ' tabindex="0" role="region" aria-label="股票资产分布明细，可滚动"' : ''}>
         <table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}明细">${columns()}<tbody>${rows.map((row, index) => `<tr data-allocation-row="${index}" data-allocation-label="${escape(row.name)}"><th scope="row"><span class="zc-allocation-row-label">${showChart ? `<i style="--category:${row.color}" aria-hidden="true"></i>` : ''}<span>${escape(row.name)}</span></span></th>${valueCells(row, options, key)}</tr>`).join('')}</tbody></table>
@@ -197,7 +197,6 @@
     const hasReference = !isRepresentative(options) && Boolean(referenceFund(options));
     const matches = hasReference ? holdingMatches(key, options) : new Map();
     const rowCount = key === 'holdings' ? 10 : 5;
-    const summaries = isRepresentative(options) ? ['合计'] : key === 'holdings' ? ['前十大合计', '集中度'] : ['前五大合计'];
     return `<div class="zc-allocation-table-frame"><table class="zc-allocation-table" aria-label="${definitions.find(item => item.key === key).title}">${columns()}<tbody>
       ${Array.from({ length: rowCount }, (_, index) => `<tr><th scope="row"><span class="zc-allocation-number">${index + 1}</span></th>${slots(funds).map(fund => {
         const row = holdingRows(key, fund, options)[index];
@@ -207,28 +206,29 @@
           if (row) {
             const [name, value] = row;
             const color = matches.get(name);
-            const stripe = hasReference ? `<i class="zc-allocation-holding-stripe"${color ? ` style="--holding-color:${color}"` : ''} aria-hidden="true"></i>` : '';
-            content = `<span class="zc-allocation-holding">${stripe}<span class="zc-allocation-holding-name"${color ? ` style="color:${color}"` : ''}>${escape(name)}</span>${numeric(value * (1 - changeForReport(key)))}</span>`;
+            const stripe = hasReference ? '<i class="zc-allocation-holding-stripe" aria-hidden="true"></i>' : '';
+            content = `<span class="zc-allocation-holding"${color ? ` style="--holding-color:${color}"` : ''}>${stripe}<span class="zc-allocation-holding-name">${escape(name)}</span>${numeric(value * (1 - changeForReport(key)))}</span>`;
           }
         }
         return `<td${referenceClass(fund, options)}>${content}</td>`;
       }).join('')}</tr>`).join('')}
-      ${summaries.map(name => `<tr class="zc-allocation-summary"><th scope="row">${name}</th>${slots(funds).map(fund => {
+      <tr class="zc-allocation-summary"><th scope="row">合计</th>${slots(funds).map(fund => {
         const rows = holdingRows(key, fund, options);
         const value = rows.reduce((sum, row) => sum + row[1], 0) * (1 - changeForReport(key));
-        const content = fund?.visible ? rows.length && name !== '集中度' ? numeric(value) : missing : '';
+        const content = fund?.visible ? rows.length ? numeric(value) : missing : '';
         return `<td${referenceClass(fund, options)}>${content}</td>`;
-      }).join('')}</tr>`).join('')}
+      }).join('')}</tr>
     </tbody></table></div>`;
   }
 
   function section(definition, options) {
     const { key } = definition;
-    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition, options)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
+    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
   }
 
   function render(options) {
-    return `<div class="zc-allocation-view${isRepresentative(options) ? ' zc-representative-allocation' : ''}">${definitions.map(definition => section(definition, options)).join('')}</div>`;
+    const routeClass = isRepresentative(options) ? 'zc-representative-allocation' : 'zc-fund-allocation';
+    return `<div class="zc-allocation-view ${routeClass}">${definitions.map(definition => section(definition, options)).join('')}</div>`;
   }
 
   function mount(root, options) {
@@ -342,5 +342,48 @@
     return charts;
   }
 
-  window.CompareAllocationView = { render, mount };
+  function exportTableImage(section, filename, download) {
+    const table = section.querySelector('table');
+    if (!table) return;
+    const tableBox = table.getBoundingClientRect();
+    const titleHeight = 48;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(tableBox.width * 2);
+    canvas.height = Math.ceil((titleHeight + tableBox.height) * 2);
+    const context = canvas.getContext('2d');
+    context.scale(2, 2);
+    context.fillStyle = '#fff';
+    context.fillRect(0, 0, tableBox.width, canvas.height / 2);
+    context.fillStyle = '#333';
+    context.font = '600 16px sans-serif';
+    context.fillText(filename, 12, 30);
+    table.querySelectorAll('th, td').forEach(cell => {
+      const box = cell.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const style = getComputedStyle(cell);
+      const x = box.left - tableBox.left;
+      const y = box.top - tableBox.top + titleHeight;
+      context.fillStyle = style.backgroundColor;
+      context.fillRect(x, y, box.width, box.height);
+      if (parseFloat(style.borderBottomWidth)) {
+        context.fillStyle = style.borderBottomColor;
+        context.fillRect(x, y + box.height - 1, box.width, 1);
+      }
+      if (parseFloat(style.borderRightWidth)) {
+        context.fillStyle = style.borderRightColor;
+        context.fillRect(x + box.width - 1, y, 1, box.height);
+      }
+      context.fillStyle = style.color;
+      context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      const alignment = style.textAlign;
+      context.textAlign = alignment === 'center' || alignment === 'right' ? alignment : 'left';
+      context.textBaseline = 'middle';
+      const padding = Math.min(12, box.width / 5);
+      const textOffset = { left: padding, center: box.width / 2, right: box.width - padding };
+      context.fillText(cell.innerText.trim().replace(/\s+/g, ' '), x + textOffset[context.textAlign], y + box.height / 2, box.width - 2 * padding);
+    });
+    canvas.toBlob(blob => { if (blob) download(`${filename}.png`, blob, 'image/png'); }, 'image/png');
+  }
+
+  window.CompareAllocationView = { render, mount, exportTableImage };
 })();

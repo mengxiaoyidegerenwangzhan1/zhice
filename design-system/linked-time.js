@@ -37,16 +37,23 @@
     return '<div class="linked-time-widget" data-linked-time></div>';
   }
 
-  function runtime(root = document) {
+  function runtime(root = document, optionsFor = () => ({})) {
     const hosts = root.matches?.('[data-linked-time]') ? [root] : Array.from(root.querySelectorAll('[data-linked-time]'));
     hosts.forEach(host => {
       if (host.linkedTimeApi) return;
+      const options = optionsFor(host);
       const icon = (name, extra = '') => '<span aria-hidden="true" class="lt-icon lt-icon-' + name + ' ' + extra + '"></span>';
       const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(p => [p.type,p.value]));
       const today = parts.year + '-' + parts.month + '-' + parts.day;
-      const inception = host.dataset.inception || '2001-12-18';
-      const minimum = host.dataset.min || '1900-01-01';
-      const maximum = host.dataset.max || '2100-12-31';
+      const anchor = options.end || today;
+      const inception = options.inception || host.dataset.inception || '2001-12-18';
+      const allowInception = options.inception !== '';
+      const minimum = options.min || host.dataset.min || '1900-01-01';
+      const maximum = options.max || host.dataset.max || '2100-12-31';
+      const commonLabel = options.commonLabel || '共同任期';
+      const common = options.common || { start:'2025-08-25', end:today };
+      const firstShortcut = options.firstShortcut || { key:'inception', label:'成立以来' };
+      const escape = value => String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
       const parse = value => {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return null;
         const [year,month,day] = value.split('-').map(Number);
@@ -64,7 +71,7 @@
         const last = new Date(Date.UTC(Math.floor(target/12),target%12+1,0)).getUTCDate();
         return format(new Date(Date.UTC(Math.floor(target/12),target%12,Math.min(d.getUTCDate(),last))));
       };
-      const managers = [
+      const managers = options.managers || [
         {key:'sun',name:'孙悦萌',start:'2025-08-25',end:today,endLabel:'至今'},
         {key:'jiang',name:'姜华',start:'2024-06-07',end:'2025-08-25',endLabel:'2025-08-25'}
       ];
@@ -77,9 +84,9 @@
         selected:restored ? host.dataset.ltSelection || null : null,moreLabel:restored ? host.dataset.ltLabel || '更多' : '更多',moreOpen:false,managerOpen:false,calendarOpen:false,
         months:[monthValue(today),monthValue(today)+1],views:[null,null],active:'start',previewEnd:'',revision:0,error:''
       };
-      const buttons = ['成立以来','近1年','近3年'];
+      const shortcuts = [firstShortcut,{key:'year',label:'近1年'},{key:'three-years',label:'近3年'}];
       host.innerHTML = '<div class="lt-controls"><div class="lt-quick"><div class="lt-bar" role="group" aria-label="快捷时间范围">' +
-        buttons.map((label,i) => '<button type="button" data-lt-shortcut="' + ['inception','year','three-years'][i] + '">' + label + '</button>').join('') +
+        shortcuts.map(({key,label}) => '<button type="button" data-lt-shortcut="' + escape(key) + '">' + escape(label) + '</button>').join('') +
         '<button type="button" class="lt-more-toggle" data-lt-more aria-expanded="false"><span data-lt-more-label>更多</span>' + icon('caret') + '</button></div>' +
         '<div class="lt-more-panel" data-lt-more-panel hidden></div></div>' +
         '<div class="lt-date-wrap"><div class="lt-date-field" data-lt-date-field>' + icon('calendar') +
@@ -91,11 +98,12 @@
       const get = selector => host.querySelector(selector);
       const getAll = selector => host.querySelectorAll(selector);
       get('.lt-quick').hidden = !hasShortcuts;
+      get('.lt-date-wrap').hidden = options.showDate === false;
       const fields = {start:get('[data-lt-input="start"]'),end:get('[data-lt-input="end"]')};
 
       function emitChange(source) {
         state.revision += 1;
-        host.dispatchEvent(new CustomEvent('timerangechange',{bubbles:true,detail:{...state.committed,source,selection:state.selected,revision:state.revision}}));
+        host.dispatchEvent(new CustomEvent('timerangechange',{bubbles:true,detail:{...state.committed,source,selection:state.selected,label:state.moreLabel,revision:state.revision}}));
       }
       function renderSelection() {
         getAll('[data-lt-shortcut]').forEach(button => {
@@ -104,8 +112,10 @@
           button.setAttribute('aria-pressed',String(selected));
         });
         const more = get('[data-lt-more]');
-        more.classList.toggle('is-selected',Boolean(state.selected && !['inception','year','three-years'].includes(state.selected)));
+        const moreSelected = Boolean(state.selected && !shortcuts.some(({key})=>key===state.selected));
+        more.classList.toggle('is-selected',moreSelected);
         more.classList.toggle('is-open',state.moreOpen);
+        more.setAttribute('aria-pressed',String(moreSelected));
         more.setAttribute('aria-expanded',String(state.moreOpen));
         get('[data-lt-more-label]').textContent = state.moreLabel;
         get('[data-lt-more-panel]').hidden = !state.moreOpen;
@@ -167,14 +177,16 @@
         return commit('shortcut',selection,label);
       }
       function renderMore() {
-        const year = Number(parts.year);
+        const year = Number(anchor.slice(0,4));
         const selectedManager = managers.find(manager => state.selected === 'manager-' + manager.key);
-        const option = (key,label) => '<button type="button" data-lt-option="' + key + '" aria-pressed="' + (state.selected===key) + '" class="' + (state.selected===key?'is-selected':'') + '">' + label + '</button>';
-        const managerRows = managers.map(manager => '<button type="button" class="lt-manager-row ' + (state.selected==='manager-'+manager.key?'is-selected':'') + '" aria-pressed="' + (state.selected==='manager-'+manager.key) + '" data-lt-manager="' + manager.key + '">' +
-          icon('check') + '<span class="lt-manager-name">' + manager.name + '</span><span class="lt-manager-dates">' + manager.start + ' – ' + manager.endLabel + '</span></button>').join('');
+        const option = (key,label) => '<button type="button" data-lt-option="' + key + '" aria-pressed="' + (state.selected===key) + '" class="' + (state.selected===key?'is-selected':'') + '">' + escape(label) + '</button>';
+        const managerRows = managers.map(manager => '<button type="button" class="lt-manager-row ' + (state.selected==='manager-'+manager.key?'is-selected':'') + '" aria-pressed="' + (state.selected==='manager-'+manager.key) + '" data-lt-manager="' + escape(manager.key) + '">' +
+          icon('check') + '<span class="lt-manager-name">' + escape(manager.name) + '</span><span class="lt-manager-dates">' + escape(manager.start + ' – ' + (manager.endLabel || manager.end)) + '</span></button>').join('');
+        const managerUnavailable = managers.length ? '' : ' disabled title="暂无经理任期数据"';
         get('[data-lt-more-panel]').innerHTML = '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
-          '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '">' + (selectedManager?selectedManager.name+'任期':'经理任期') + icon('caret') + '</button>' +
-          option('common','共同任期') + '</div>' +
+          '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '"' + managerUnavailable + '>' + (selectedManager?escape(selectedManager.name)+'任期':'经理任期') + icon('caret') + '</button>' +
+          (firstShortcut.key==='common'?'':option('common',commonLabel)) +
+          (allowInception && firstShortcut.key!=='inception'?option('inception','成立以来'):'') + '</div>' +
           (state.managerOpen?'<div class="lt-manager-list" role="group" aria-label="经理任期列表">'+managerRows+'</div>':'') + '</div>' +
           '<div class="lt-menu-group"><span class="lt-menu-heading">区间</span><div class="lt-option-grid lt-intervals">' +
           [['month','近1月'],['three-months','近3月'],['six-months','近6月'],['five-years','近5年']].map(row=>option(...row)).join('') + '</div></div>' +
@@ -185,13 +197,13 @@
         const changedField = state.active !== active;
         if (!state.calendarOpen) {
           state.draft = {...state.committed};
-          const currentMonth = monthValue(today);
+          const currentMonth = monthValue(clamp(anchor));
           state.months = [state.committed.start?monthValue(state.committed.start):currentMonth,state.committed.end?monthValue(state.committed.end):currentMonth];
           state.views = [null,null];
         }
         if (changedField) {
-          const value = state.draft[active] || state.draft.start || today;
-          state.months[active==='start'?0:1] = monthValue(parse(value)?value:today);
+          const value = state.draft[active] || state.draft.start || anchor;
+          state.months[active==='start'?0:1] = monthValue(clamp(parse(value)?value:anchor));
         }
         state.active = active;
         state.previewEnd = '';
@@ -273,14 +285,14 @@
         })();
       }
       function selectOption(key) {
-        if (key==='inception') return applyRange(inception,today,key,'更多');
-        if (key==='year') return applyRange(subtractMonths(today,12),today,key,'更多');
-        if (key==='three-years') return applyRange(subtractMonths(today,36),today,key,'更多');
-        if (key==='common') return applyRange('2025-08-25',today,key,'共同任期');
+        if (key==='inception' && allowInception) return applyRange(inception,anchor,key,firstShortcut.key==='inception'?'更多':'成立以来');
+        if (key==='year') return applyRange(subtractMonths(anchor,12),anchor,key,'更多');
+        if (key==='three-years') return applyRange(subtractMonths(anchor,36),anchor,key,'更多');
+        if (key==='common') return applyRange(common.start,common.end,key,firstShortcut.key==='common'?'更多':commonLabel);
         const months = {'month':1,'three-months':3,'six-months':6,'five-years':60};
         const names = {'month':'近1月','three-months':'近3月','six-months':'近6月','five-years':'近5年'};
-        if (months[key]) return applyRange(subtractMonths(today,months[key]),today,key,names[key]);
-        if (key==='year-to-date') return applyRange(parts.year+'-01-01',today,key,'今年以来');
+        if (months[key]) return applyRange(subtractMonths(anchor,months[key]),anchor,key,names[key]);
+        if (key==='year-to-date') return applyRange(anchor.slice(0,4)+'-01-01',anchor,key,'今年以来');
         if (key.startsWith('annual-')) { const year=key.slice(7); return applyRange(year+'-01-01',year+'-12-31',key,year+'年度'); }
       }
       function renderPreview() {
@@ -310,6 +322,7 @@
         if (button?.hasAttribute('data-lt-manager-toggle')) {state.managerOpen=!state.managerOpen;renderMore();return;}
         if (button?.dataset.ltManager) {
           const manager=managers.find(value=>value.key===button.dataset.ltManager);
+          if (!manager) return;
           return applyRange(manager.start,manager.end,'manager-'+manager.key,manager.name+'任期');
         }
         if (button?.dataset.ltOption) return selectOption(button.dataset.ltOption);
@@ -383,7 +396,7 @@
       });
       host.linkedTimeApi={getState:()=>JSON.parse(JSON.stringify(state)),select:selectOption,clear:()=>get('[data-lt-clear]').click(),close:closePanels};
       renderMore();renderFields();syncCommittedState();
-      if (!restored && hasShortcuts && !selectOption(host.dataset.defaultShortcut || 'inception')) selectOption('inception');
+      if (!restored && hasShortcuts && !selectOption(host.dataset.defaultShortcut || firstShortcut.key)) selectOption(firstShortcut.key);
     });
     if (!document.linkedTimeOutsideListening) {
       document.linkedTimeOutsideListening = true;

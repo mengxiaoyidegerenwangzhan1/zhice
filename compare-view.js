@@ -1,7 +1,8 @@
 (()=>{
 const A='./assets/compare-figma/';const img=(n,w=14,h=w)=>`<img src="${A+n}.svg" width="${w}" height="${h}" alt="">`;
+const fundSampleInception='2025-12-09';
 const fundColors=['#9693cc','#93b9cc','#ccbd93','#bc93cc'];
-const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'023514',type:'债券型',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'023514',type:'QDII',abbr:'yfdnsdk100etfljqdii'},{id:'d',name:'鹏华养老目标日期2040五年持有期混合',code:'012784',type:'FOF',abbr:'phylmbrq2040wncyqhh'}];
+const seed=[{id:'a',name:'宝盈中证A500指数增强 A',code:'023514',type:'股票型',abbr:'byzza500zszqa'},{id:'b',name:'国寿安保安泽纯债39个月定期开放债券 A',code:'007970',type:'债券型',abbr:'gsabazcz39gydqkf zqa'},{id:'c',name:'易方达纳斯达克100ETF联接(QDII-LOF) A',code:'161130',type:'QDII',abbr:'yfdnsdk100etfljqdii'},{id:'d',name:'鹏华养老目标日期2040五年持有期混合',code:'012784',type:'FOF',abbr:'phylmbrq2040wncyqhh'}];
 let funds=[],compared=false,pinned=null,sequence=0,noticeTimer=null,noticeUntil=0,tab=0,period='共同时段',start='2025-11-07',end='2026-11-06',charts=[],container;
 function syncFundColors(){
   [...funds].sort((a,b)=>a.order-b.order).forEach((fund,index)=>{
@@ -83,7 +84,27 @@ function stars(index) {
     : ['filled', 'empty', 'empty', 'empty', 'empty'];
   return icons.map(icon => `<img src="./assets/compare-rating/star-${icon}.svg" width="14.8" height="14.8" alt="">`).join('');
 }
-function basic(){return table([['基金代码',i=>funds[i].code],['基金简称',i=>`<a href="#/fund/${funds[i].code}">${funds[i].name}</a>`],['基金类型',i=>funds[i].type==='股票型'?'股票型 | 增强指数股票型':funds[i].type],['基金星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金经理',i=>`<a href="#/fund/${funds[i].code}">${funds[i].id==='c'?'蔡丹':'蔡丹 | 阳之璇'}</a>`],['经理星级(综合)',i=>`<div class="zc-stars">${stars(seed.findIndex(f=>f.id===funds[i].id))}</div>`],['基金公司','宝盈基金管理有限公司','宝盈基金管理有限公司','易方达基金管理有限公司'],['成立日期','2025-12-09'],['最新单位净值','0.9019'],['最新规模','3864.22万','5528.64万','3864.22万'],['申购状态','可申购','终止','可申购'],['赎回状态','可赎回','终止','可赎回'],['管理费率','0.8%','--','0.8%'],['托管费率','0.15%','--','0.15%'],['业绩比较基准','中证A500指数收益率×95%+银行活期存款利率(税后)×5%']])}
+function basic(){
+  const entityName=value=>`<span class="zc-overview-entity-name">${value}</span>`;
+  const rating=index=>`<div class="zc-stars">${stars(seed.findIndex(fund=>fund.id===funds[index].id))}</div>`;
+  return table([
+    ['基金代码',index=>funds[index].code],
+    ['基金简称',index=>entityName(funds[index].name)],
+    ['基金类型',index=>funds[index].type==='股票型'?'股票型 | 增强指数股票型':funds[index].type],
+    ['基金星级(综合)',rating],
+    ['基金经理',index=>entityName(funds[index].id==='c'?'蔡丹':'蔡丹 | 阳之璇')],
+    ['经理星级(综合)',rating],
+    ['基金公司','宝盈基金管理有限公司','宝盈基金管理有限公司','易方达基金管理有限公司'],
+    ['成立日期','2025-12-09'],
+    ['最新单位净值','0.9019'],
+    ['最新规模','3864.22万','5528.64万','3864.22万'],
+    ['申购状态','可申购','终止','可申购'],
+    ['赎回状态','可赎回','终止','可赎回'],
+    ['管理费率','0.8%','--','0.8%'],
+    ['托管费率','0.15%','--','0.15%'],
+    ['业绩比较基准','中证A500指数收益率×95%+银行活期存款利率(税后)×5%'],
+  ]);
+}
 function content(){if(!funds.length)return `<div class="zc-empty"><strong>添加基金，开始比较</strong><p>通过上方搜索框选择最多 4 只基金</p></div>`;if(tab===0)return `<section>${performanceHeading()}<div class="zc-charts"><article><h3>收益走势</h3><div id="zc-return-chart" class="zc-chart"></div>${chartLegend('return')}</article><article><h3>动态回撤</h3><div id="zc-drawdown-chart" class="zc-chart"></div>${chartLegend('drawdown')}</article></div></section><section>${heading('区间收益')}${returnsTable()}</section><section class="zc-basic-info">${heading('基本信息')}${basic()}</section>`;if(tab===1)return riskContent();return (tab===2?CompareAllocationView:CompareAttributionView).render(analysisOptions());}
 function render(){
   setupHeader();
@@ -214,23 +235,10 @@ function analysisOptions() {
 
 function analysisTimeControls(scope, initial = {}) {
   const range = analysisRange(scope,initial);
-  const common = ['共同时段','近1年','近3年'];
-  const moreSelected = !common.includes(range.period);
-  const moreLabel = moreSelected ? range.period : '更多';
-  return `<div class="zc-analysis-time" data-analysis-time="${scope}">
-    <div class="zc-quick-wrap">
-      <div class="zc-pill zc-analysis-quick">${common.map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}
-        <button type="button" data-analysis-more class="${moreSelected?'selected':''}" aria-pressed="${moreSelected}" aria-expanded="false">${moreLabel}<span class="zc-down"><img src="./assets/compare-controls/more.svg" width="10" height="10" alt=""></span></button>
-      </div>
-      <div class="zc-more-panel" hidden>
-        <div><small>区间</small>${['近3月','近6月','近5年'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
-        <div><small>年度</small>${['今年以来','2025年度','2024年度','2023年度'].map(label=>`<button type="button" data-analysis-period="${label}" class="${range.period===label?'selected':''}" aria-pressed="${range.period===label}">${label}</button>`).join('')}</div>
-      </div>
-    </div>
-    ${initial.showDate===false?'':`<div class="zc-date-wrap"><button type="button" class="zc-date" data-analysis-date="${scope}" aria-label="当前日期范围 ${range.start} 至 ${range.end}" disabled>
-      <span>${range.start}</span><small>至</small><span>${range.end}</span><img src="./assets/compare-controls/calendar-disabled.svg" width="12.6348" height="12.1194" alt="">
-    </button></div>`}
-  </div>`;
+  return window.ZhiceComparisonTime.markup(scope, range, {
+    showDate: initial.showDate !== false,
+    inception: fundSampleInception,
+  });
 }
 
 function analysisSetting(scope, field, label, options, initial) {
@@ -243,26 +251,9 @@ function analysisSetting(scope, field, label, options, initial) {
   </details>`;
 }
 
-function selectAnalysisPeriod(scope, value) {
-  const range = analysisRange(scope);
-  range.period = value;
-  Object.assign(range,datesForPeriod(range,value));
-  render();
-  const toolbar = container.querySelector(`[data-analysis-time="${scope}"]`);
-  const selected = toolbar.querySelector('.zc-analysis-quick .selected');
-  selected?.focus({preventScroll:true});
-}
-
-function closeAnalysisMenu(toolbar) {
-  toolbar.querySelector('.zc-more-panel').hidden=true;
-  const more=toolbar.querySelector('[data-analysis-more]');
-  more.setAttribute('aria-expanded','false');
-  delete more.dataset.openByClick;
-}
-
 function performanceHeading() {
   return `<div class="zc-section-head zc-overview-head"><h2>业绩走势<span class="zc-overview-help"><button type="button" aria-label="业绩走势说明" aria-describedby="zc-overview-help"><img src="./assets/compare-controls/help.svg" width="16" height="16" alt=""></button><span role="tooltip" id="zc-overview-help">展示所选基金在选定时间段内的模拟收益与动态回撤。</span></span></h2><div class="zc-overview-actions">
-    ${analysisTimeControls('overview-performance')}
+    ${analysisTimeControls('overview-performance', { start: fundSampleInception })}
     <div class="zc-overview-buttons"><button class="zc-text" data-download><img src="./assets/compare-controls/download.svg" width="14" height="14" alt="">下载</button><button class="zc-text" data-refresh="业绩走势"><img src="./assets/compare-controls/refresh.svg" width="14" height="14" alt="">刷新</button></div>
   </div></div>`;
 }
@@ -272,9 +263,10 @@ function downloadAnalysisSection(button) {
   if (!section) return;
   const name = section.querySelector('h2')?.textContent.trim() || '基金比较';
   const tables = [...section.querySelectorAll('table')];
-  if (!tables.length) {
+  if (button.dataset.analysisDownload === 'image' || !tables.length) {
     const sectionCharts = charts.filter(chart => section.contains(chart.getDom()));
     if (sectionCharts.length) saveChartImage(name, sectionCharts);
+    else if (tables.length) CompareAllocationView.exportTableImage(section, name, download);
     return;
   }
   const csv = tables.map(table => [...table.rows].map(row => [...row.cells].map(cell => {
@@ -286,34 +278,8 @@ function downloadAnalysisSection(button) {
 }
 
 function bindAnalysisUi(scope) {
-  scope.querySelectorAll('[data-analysis-time]').forEach(toolbar=>{
-    const key = toolbar.dataset.analysisTime;
-    toolbar.querySelectorAll('[data-analysis-period]').forEach(button=>{
-      button.onclick = ()=>selectAnalysisPeriod(key,button.dataset.analysisPeriod);
-    });
-    const more = toolbar.querySelector('[data-analysis-more]');
-    const panel = toolbar.querySelector('.zc-more-panel');
-    const wrap = more.closest('.zc-quick-wrap');
-    const show = ()=>{panel.hidden=false;more.setAttribute('aria-expanded','true');};
-    more.onclick=()=>{
-      if(more.dataset.openByClick)closeAnalysisMenu(toolbar);
-      else {more.dataset.openByClick='true';show();}
-    };
-    more.onmouseenter=show;
-    wrap.onmouseleave=()=>{
-      if(!more.dataset.openByClick&&!wrap.contains(document.activeElement))closeAnalysisMenu(toolbar);
-    };
-    wrap.onfocusout=event=>{
-      if(!wrap.contains(event.relatedTarget))closeAnalysisMenu(toolbar);
-    };
-    wrap.onkeydown=event=>{
-      if(event.key==='Escape'){
-        event.preventDefault();
-        closeAnalysisMenu(toolbar);
-        more.focus({preventScroll:true});
-      }
-    };
-  });
+  const tenures = funds.flatMap(fund => fund.managerTenures || []);
+  window.ZhiceComparisonTime.bind(scope, analysisRange, render, { tenures });
   scope.querySelectorAll('[data-analysis-field]').forEach(control=>{
     const update = ()=>{
       const key=control.dataset.analysisScope;
@@ -406,7 +372,10 @@ function exportComparison(){
   funds.forEach(fund=>rows.push([fund.name,fund.code,fund.type,fund.visible?'显示':'隐藏']));
   container.querySelectorAll('.zc-content section').forEach(section=>{
     rows.push([], [section.querySelector('h2')?.childNodes[0]?.textContent.trim()||'']);
-    section.querySelectorAll('[data-analysis-date]').forEach(control=>rows.push(['日期范围',control.textContent.trim()]));
+    section.querySelectorAll('[data-comparison-time]').forEach(control=>{
+      const { start, end } = analysisRange(control.dataset.comparisonTime);
+      rows.push(['日期范围',`${start} 至 ${end}`]);
+    });
     section.querySelectorAll('table').forEach(table=>{
       [...table.rows].filter(row=>!row.closest('[hidden]')).forEach(row=>rows.push([...row.cells].map(cell=>cell.textContent.trim())));
     });
@@ -512,9 +481,6 @@ function syncControlsLayout(){const control=container?.querySelector('.zc-contro
 window.addEventListener('resize',()=>{setScale();requestAnimationFrame(syncControlsLayout);charts.forEach(c=>c.resize())});
 document.addEventListener('click',e=>{
   container?.querySelectorAll('.zc-analysis-select[open]').forEach(menu=>{if(!menu.contains(e.target))menu.open=false;});
-  container?.querySelectorAll('[data-analysis-time]').forEach(toolbar=>{
-    if(!toolbar.querySelector('.zc-quick-wrap').contains(e.target))closeAnalysisMenu(toolbar);
-  });
   if(!e.target.closest('.zc-search-slot'))closeSearchResults();
 });
 
