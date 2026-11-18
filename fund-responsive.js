@@ -29,7 +29,7 @@
     if (!element) return 0;
     if (element.classList.contains('fund-linked-time')) {
       const parts = [...element.querySelectorAll('.lt-controls > *')].filter(part => !part.hidden);
-      return parts.reduce((sum, part) => sum + part.scrollWidth, 0) + Math.max(0, parts.length - 1) * 12;
+      return parts.reduce((sum, part) => sum + part.scrollWidth, 0) + Math.max(0, parts.length - 1) * number(getComputedStyle(element.querySelector('.lt-controls')).columnGap);
     }
     return element.scrollWidth;
   }
@@ -47,6 +47,31 @@
     const gaps = utilityWidth ? 32 : 16;
     const wrapped = needed + titleWidth + utilityWidth + gaps > head.clientWidth + 1;
     if (head.classList.contains('is-responsive-wrapped') !== wrapped) head.classList.toggle('is-responsive-wrapped', wrapped);
+  }
+
+  function layoutIdentity(header) {
+    if (!header) return;
+    const title = header.querySelector('.fund-title-row h1');
+    const stars = header.querySelector('.fund-stars');
+    const actions = header.querySelector('.fund-identity-actions');
+    if (!title || !actions) return;
+    const label = document.createElement('span');
+    label.textContent = title.textContent;
+    label.style.cssText = 'position:fixed;left:-10000px;top:0;white-space:nowrap;visibility:hidden;pointer-events:none;';
+    label.style.font = getComputedStyle(title).font;
+    document.body.append(label);
+    const titleWidth = label.getBoundingClientRect().width;
+    label.remove();
+    const style = getComputedStyle(header);
+    const room = header.clientWidth - number(style.paddingLeft) - number(style.paddingRight);
+    const actionChildren = [...actions.children];
+    const actionGap = number(getComputedStyle(actions).columnGap);
+    const actionWidth = actionChildren.reduce((sum, child) => sum + child.offsetWidth, 0) + Math.max(0, actionChildren.length - 1) * actionGap;
+    const titleRow = header.querySelector('.fund-title-row');
+    const titleGap = number(getComputedStyle(titleRow).gap);
+    const starsWidth = stars?.scrollWidth || 0;
+    header.style.setProperty('--fund-identity-actions-width', actionWidth + 'px');
+    header.classList.toggle('is-actions-wrapped', titleWidth + starsWidth + titleGap + actionWidth + 24 > room);
   }
 
   function update() {
@@ -68,6 +93,7 @@
     page.style.setProperty('--fund-fixed-left', cardLeft / actualScale + 'px');
     page.style.setProperty('--fund-fixed-width', cardWidth / actualScale + 'px');
     page.style.setProperty('--fund-fixed-top', (navBottom + 16) / actualScale + 'px');
+    layoutIdentity(page.querySelector('.fund-identity-panel'));
     page.querySelectorAll('.fund-panel-head').forEach(layoutHeading);
     const chartWidth = Math.round(cardWidth * 10) / 10;
     if (chartWidth !== lastChartWidth) {

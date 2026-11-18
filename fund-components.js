@@ -302,7 +302,49 @@ function viewSwitchRuntime(root = document) {
     const dates=getCharts(panel).flatMap(instance=>(instance.getOption().xAxis || []).flatMap(axis=>(axis.data || []).map(value=>dateText(typeof value==='object'?value.value:value)).filter(Boolean))).sort();
     return dates.length?{start:dates[0],end:dates.at(-1)}:null;
   }
+  let periodCleanups = [];
+  function bindPeriodPresentation(host) {
+    let frame = 0;
+    const pruneUnavailableSpecial = () => {
+      // A single-fund analysis has no comparison overlap or manager selection.
+      // The canonical demo supplies a common-period fallback when common is null.
+      host.querySelector('[data-lt-option="common"]')?.remove();
+      host.querySelectorAll('.lt-menu-group').forEach(group => {
+        const specials = group.querySelector('.lt-special-options');
+        if (specials && !specials.children.length) group.remove();
+      });
+    };
+    const positionPanels = () => {
+      frame = 0;
+      pruneUnavailableSpecial();
+      host.querySelectorAll('.lt-more-panel,.lt-calendar').forEach(panel => {
+        if (panel.hidden || !panel.getClientRects().length) return;
+        panel.style.translate = 'none';
+        const rect = panel.getBoundingClientRect();
+        const viewport = document.documentElement.clientWidth;
+        const scale = panel.offsetWidth ? rect.width / panel.offsetWidth : 1;
+        const shift = rect.left < 8 ? 8 - rect.left : rect.right > viewport - 8 ? viewport - 8 - rect.right : 0;
+        if (shift) panel.style.translate = (shift / scale) + 'px 0';
+      });
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(positionPanels); };
+    const onClick = () => { pruneUnavailableSpecial(); schedule(); };
+    const observer = new MutationObserver(schedule);
+    pruneUnavailableSpecial();
+    observer.observe(host, {childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
+    host.addEventListener('click', onClick);
+    host.addEventListener('focusin', schedule);
+    window.addEventListener('resize', schedule, {passive:true});
+    window.addEventListener('scroll', schedule, {passive:true,capture:true});
+    periodCleanups.push(() => {
+      observer.disconnect();
+      host.removeEventListener('click',onClick);host.removeEventListener('focusin',schedule);
+      window.removeEventListener('resize',schedule);window.removeEventListener('scroll',schedule,true);
+      if (frame) cancelAnimationFrame(frame);
+    });
+  }
   function mountPeriods(root) {
+    periodCleanups.forEach(cleanup=>cleanup());periodCleanups=[];
     root.querySelectorAll('.fund-panel').forEach(panel=>{
       const period = [...panel.querySelectorAll('select')].find(input=>/^(?:成立以来|近[一二三五六十12356]+[年月周日]|今年以来|共同时段)$/.test(input.selectedOptions[0]?.textContent.trim()));
       const oldRange=panel.querySelector('.fund-date-range');
@@ -314,7 +356,8 @@ function viewSwitchRuntime(root = document) {
       const host=document.createElement('div');host.className='linked-time-widget fund-linked-time';host.dataset.linkedTime='';host.dataset.defaultShortcut=defaultKey;
       const target=period?.closest('label') || oldRange;
       target.replaceWith(host);oldRange?.remove();
-      window.ZhiceLinkedTime?.mount(host,()=>({inception:'2001-12-18',min:'2001-12-18',max:anchor,end:anchor,managers:[],common:null,firstShortcut:{key:'inception',label:'成立以来'}}));
+      window.ZhiceLinkedTime?.mount(host,()=>({inception:'2001-12-18',min:'2001-12-18',max:anchor,end:anchor,managers:[],common:{start:'2001-12-18',end:anchor},firstShortcut:{key:'inception',label:'成立以来'}}));
+      bindPeriodPresentation(host);
       const initial=host.linkedTimeApi?.getState().committed;
       if(initial?.start && initial?.end)window.FundChartUI?.applyRange?.(panel,initial.start,initial.end);
       host.addEventListener('timerangechange',event=>{

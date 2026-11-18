@@ -110,3 +110,20 @@ body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view].
 .fund-page.fund-analysis-page[data-fund-view] .fund-factor {max-width:100%;overflow-x:auto;}
 .fund-page.fund-analysis-page[data-fund-view] .fund-factor-head,
 .fund-page.fund-analysis-page[data-fund-view] .fund-factor-row {min-width:452px;}
+
+/* Align the identity actions to the title row; move the whole group only when it cannot fit. */
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-main {width:100%;padding-right:0;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-title-row {width:calc(100% - var(--fund-identity-actions-width, 180px) - 24px);max-width:100%;min-height:32px;flex-wrap:nowrap;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-title-row h1 {flex:none;white-space:nowrap;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-actions {position:absolute;top:24px;right:20px;display:flex;align-items:center;justify-content:flex-end;min-height:32px;margin:0;gap:16px;white-space:nowrap;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-actions button {display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:32px;}
+.fund-page.fund-analysis-page[data-fund-view].is-header-compact .fund-identity-actions {top:16px;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel.is-actions-wrapped .fund-title-row {width:100%;flex-wrap:wrap;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel.is-actions-wrapped .fund-title-row h1 {max-width:100%;white-space:normal;overflow-wrap:anywhere;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel.is-actions-wrapped .fund-identity-main {min-height:0;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel.is-actions-wrapped .fund-identity-actions {position:static;justify-content:flex-start;margin:12px 0 0;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel.is-actions-wrapped .fund-identity-metrics {position:static;width:100%;margin:16px 0;}
+@media(min-width:1201px){
+  .fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel:not(.is-actions-wrapped) .fund-identity-main>p,
+  .fund-page.fund-analysis-page[data-fund-view] .fund-identity-panel:not(.is-actions-wrapped) .fund-tags {max-width:calc(100% - 480px);}
+}

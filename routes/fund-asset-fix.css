@@ -1,0 +1,55 @@
+/* Nested distributions respond to their card, not just the browser width.
+   At 902px the outer comparison-style grid still has two cards, so each
+   distribution must stack its own chart and table before the 900px page break. */
+.fund-page.fund-analysis-page[data-fund-view] :is(.fund-overview-assets,.fund-overview-style),
+.fund-page.fund-analysis-page[data-fund-view] .fund-chart-block:has(> .fund-style-layout, > .fund-region-layout, > .fund-industry-layout, > .fund-bond-layout) {
+  container: fund-distribution / inline-size;
+  min-width: 0;
+}
+
+.fund-page.fund-analysis-page[data-fund-view] :is(.fund-asset-layout,.fund-style-layout,.fund-region-layout,.fund-industry-layout,.fund-bond-layout) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: auto;
+  max-height: none;
+}
+
+.fund-page.fund-analysis-page[data-fund-view] .fund-overview-assets .fund-asset-layout > .fund-chart {
+  width: 100%;
+  max-width: 272px;
+  min-width: 0;
+  height: 272px;
+  margin-inline: auto;
+}
+
+.fund-page.fund-analysis-page[data-fund-view] :is(.fund-asset-layout,.fund-style-layout,.fund-region-layout,.fund-industry-layout,.fund-bond-layout) > :is(.fund-table-wrap,.fund-canonical-scroll) {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+@container fund-distribution (max-width: 600px) {
+  .fund-page.fund-analysis-page[data-fund-view] :is(.fund-asset-layout,.fund-style-layout,.fund-region-layout,.fund-industry-layout,.fund-bond-layout) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+}
+
+/* Keep a safe layout in browsers without container-query support. */
+@supports not (container-type: inline-size) {
+  @media (min-width: 901px) and (max-width: 1200px) {
+    .fund-page.fund-analysis-page[data-fund-view] :is(.fund-overview-assets,.fund-overview-style) :is(.fund-asset-layout,.fund-style-layout) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+/* Remove the more-specific fixed heights left on the original overview rows. */
+.fund-page.fund-analysis-page[data-fund-view] .fund-content > .fund-two-panels,
+.fund-page.fund-analysis-page[data-fund-view] .fund-content > .fund-two-panels > .fund-panel {
+  height:auto;
+  min-height:0;
+  max-height:none;
+}
