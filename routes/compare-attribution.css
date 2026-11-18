@@ -138,6 +138,17 @@
   white-space: nowrap;
 }
 
+.zc-fund-attribution :is(.zc-attr-stock-table, .zc-attr-brinson-table) .zc-attr-value-line > .zc-attr-number {
+  flex: 0 0 52px;
+  width: 52px;
+  text-align: right;
+}
+
+.zc-fund-attribution .zc-attr-stock-table .zc-attr-difference {
+  flex: 0 0 62px;
+  width: 62px;
+}
+
 .zc-fund-attribution .zc-attr-stock-table .has-inline-rank.has-difference {
   padding-left: 2px;
 }

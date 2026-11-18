@@ -73,7 +73,10 @@
   const managers = options => options.managers || options.funds || [];
   const slots = options => Array.from({ length: 4 }, (_, index) => managers(options)[index]);
   const reference = options => managers(options).find(manager => manager.id === options.referenceId);
-  const referenceColors = ['#7268ab', '#4f83a6', '#9b8148', '#9a6ba4'];
+  const referenceColors = [
+    '#7268ab', '#4f83a6', '#9b8148', '#9a6ba4', '#4e8c91',
+    '#657b9e', '#a67a62', '#9c758a', '#8783b8', '#91905b',
+  ];
   const scope = key => `manager-allocation-${key}`;
   const profile = manager => manager?.profileIndex ?? ({ a: 0, b: 1, c: 2 }[manager?.id] ?? 3);
   const value = (options, key, field, fallback) => options.ui?.range?.(scope(key))?.[field] ?? fallback;
@@ -170,7 +173,7 @@
     const baseline = reference(options);
     const columns = slots(options).map(manager => ({ manager, rows: records[profile(manager)] || [] }));
     const otherNames = new Set(columns.filter(({ manager }) => manager?.visible && manager.id !== baseline?.id).flatMap(({ rows }) => rows.map(row => row[0])));
-    const matches = new Map((records[profile(baseline)] || []).filter(([name]) => otherNames.has(name)).map(([name], index) => [name, referenceColors[index % referenceColors.length]]));
+    const matches = new Map((records[profile(baseline)] || []).map(([name], index) => [name, referenceColors[index]]).filter(([name]) => otherNames.has(name)));
     const body = Array.from({ length: rowCount }, (_, index) => `<tr><th scope="row"><span class="zc-allocation-number">${index + 1}</span></th>${columns.map(({ manager, rows }) => {
       const row = rows[index];
       if (!row) return cell(manager, '', baseline);

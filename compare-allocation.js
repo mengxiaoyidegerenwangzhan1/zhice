@@ -38,7 +38,10 @@
     [['25国债05', 8.36], ['25国开03', 7.24], ['25农发06', 6.18], ['25进出04', 5.72], ['24国债13', 4.65]],
     [['25国开03', 9.12], ['25国债11', 7.46], ['24国债13', 6.83], ['25国债05', 5.29], ['25农发09', 4.17]],
   ];
-  const matchingColors = ['#7268ab', '#4f83a6', '#9b8148', '#9a6ba4'];
+  const matchingColors = [
+    '#7268ab', '#4f83a6', '#9b8148', '#9a6ba4', '#4e8c91',
+    '#657b9e', '#a67a62', '#9c758a', '#8783b8', '#91905b',
+  ];
   const securityColors = {
     '快克智能': '#7268ab', '移为通信': '#4f83a6', '山东赫达': '#9b8148', '纽威数控': '#9a6ba4',
     '25国债05': '#7268ab', '25国开03': '#4f83a6', '24国债13': '#9b8148',
@@ -189,7 +192,11 @@
     const reference = referenceFund(options);
     if (!reference) return new Map();
     const names = new Set(options.funds.filter(fund => fund.id !== reference.id).flatMap(fund => holdingRows(key, fund, options).map(row => row[0])));
-    return new Map(holdingRows(key, reference, options).filter(row => names.has(row[0])).map(([name], index) => [name, securityColors[name] || matchingColors[index % matchingColors.length]]));
+    const referenceNames = [...new Set(holdingRows(key, reference, options).map(([name]) => name))];
+    const colors = new Map();
+    const available = matchingColors.filter(color => !referenceNames.some(name => securityColors[name] === color));
+    referenceNames.forEach(name => colors.set(name, securityColors[name] || available.shift()));
+    return new Map([...colors].filter(([name]) => names.has(name)));
   }
 
   function holdingTable(key, options) {

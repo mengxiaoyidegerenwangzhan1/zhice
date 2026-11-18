@@ -17,6 +17,19 @@
   max-width: 100%;
 }
 
+.app-body .zc-comparison-time .lt-input:focus,
+.app-body .zc-comparison-time .lt-input:focus-visible {
+  border: 0;
+  outline: none;
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+.app-body .zc-comparison-time button:focus-visible {
+  outline: 2px solid var(--lt-primary);
+  outline-offset: 2px;
+}
+
 .zc-compare .zc-comparison-time .lt-calendar {
   right: 0;
   left: auto;

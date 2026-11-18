@@ -183,12 +183,15 @@
         const option = (key,label) => '<button type="button" data-lt-option="' + key + '" aria-pressed="' + (state.selected===key) + '" class="' + (state.selected===key?'is-selected':'') + '">' + escape(label) + '</button>';
         const managerRows = managers.map(manager => '<button type="button" class="lt-manager-row ' + (state.selected==='manager-'+manager.key?'is-selected':'') + '" aria-pressed="' + (state.selected==='manager-'+manager.key) + '" data-lt-manager="' + escape(manager.key) + '">' +
           icon('check') + '<span class="lt-manager-name">' + escape(manager.name) + '</span><span class="lt-manager-dates">' + escape(manager.start + ' – ' + (manager.endLabel || manager.end)) + '</span></button>').join('');
-        const managerUnavailable = managers.length ? '' : ' disabled title="暂无经理任期数据"';
-        get('[data-lt-more-panel]').innerHTML = '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
-          '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '"' + managerUnavailable + '>' + (selectedManager?escape(selectedManager.name)+'任期':'经理任期') + icon('caret') + '</button>' +
-          (firstShortcut.key==='common'?'':option('common',commonLabel)) +
-          (allowInception && firstShortcut.key!=='inception'?option('inception','成立以来'):'') + '</div>' +
-          (state.managerOpen?'<div class="lt-manager-list" role="group" aria-label="经理任期列表">'+managerRows+'</div>':'') + '</div>' +
+        const specialOptions = [
+          managers.length ? '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '">' + (selectedManager?escape(selectedManager.name)+'任期':'经理任期') + icon('caret') + '</button>' : '',
+          firstShortcut.key==='common'?'':option('common',commonLabel),
+          allowInception && firstShortcut.key!=='inception'?option('inception','成立以来'):''
+        ].join('');
+        const specialGroup = specialOptions ? '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
+          specialOptions + '</div>' +
+          (state.managerOpen && managers.length?'<div class="lt-manager-list" role="group" aria-label="经理任期列表">'+managerRows+'</div>':'') + '</div>' : '';
+        get('[data-lt-more-panel]').innerHTML = specialGroup +
           '<div class="lt-menu-group"><span class="lt-menu-heading">区间</span><div class="lt-option-grid lt-intervals">' +
           [['month','近1月'],['three-months','近3月'],['six-months','近6月'],['five-years','近5年']].map(row=>option(...row)).join('') + '</div></div>' +
           '<div class="lt-menu-group"><span class="lt-menu-heading">年度</span><div class="lt-option-grid lt-years">' + option('year-to-date','今年以来') +
