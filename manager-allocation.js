@@ -1,5 +1,6 @@
 (() => {
   const iconRoot = './assets/manager-allocation/';
+  const reportNote = '不同报告期内，基金经理管理的基金数量可能不同，汇总结果可能存在差异。';
   const latestReport = '2026-09-30';
   const reports = [latestReport, '2026-06-30', '2026-03-31', '2025-12-31', '2025-09-30', '2025-06-30', '2025-03-31'];
   const classifications = ['行业分布 - 申万行业分类', '行业分布 - 中信行业分类', '行业分布 - 中证行业分类', '行业分布 - 证监会行业分类', '板块分布'];
@@ -9,7 +10,6 @@
       key: 'assets', title: '大类资产分布', report: true,
       help: [
         '根据基金经理当期在管基金公布的季报统计得到基金经理每个季度所管基金的大类资产分布情况汇总。',
-        '不同报告期内，基金经理管理的基金数量可能不同，汇总结果可能存在差异。',
       ],
     },
     { key: 'industries', title: '股票资产分布', report: true, help: ['展示基金经理旗下基金的股票持仓分布，占比按所选行业或板块分类汇总。'] },
@@ -105,12 +105,13 @@
     const distribution = key === 'industries' ? classifications : key === 'bonds' ? ['债券种类'] : null;
     const category = distribution ? setting?.(scope(key), 'classification', '分布', distribution, distribution[0]) || '' : '';
     const period = report ? setting?.(scope(key), 'report', '报告期', reports, latestReport) || '' : '';
-    const tooltip = help ? `<span class="zc-allocation-help">
+    const helpLines = [...(help || []), ...(report ? [reportNote] : [])];
+    const tooltip = helpLines.length ? `<span class="zc-allocation-help">
       <button type="button" aria-label="${title}说明" aria-describedby="${scope(key)}-help">
         <img src="${iconRoot}help.svg" width="16" height="16" alt="">
         <img class="zc-manager-allocation-help-active" src="${iconRoot}help-active.svg" width="16" height="16" alt="">
       </button>
-      <span id="${scope(key)}-help" role="tooltip">${help.map(line => `<span>${line}</span>`).join('')}</span>
+      <span id="${scope(key)}-help" role="tooltip">${helpLines.map(line => `<span>${escape(line)}</span>`).join('')}</span>
     </span>` : '';
     const download = holdings ? `data-analysis-download="${scope(key)}"` : 'data-manager-allocation-image';
     return `<div class="zc-manager-allocation-head">

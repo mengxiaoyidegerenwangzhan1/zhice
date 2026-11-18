@@ -249,22 +249,19 @@
 .zc-fund-allocation .zc-allocation-value-pair > * { flex: 0 1 64px; }
 .zc-fund-allocation .zc-allocation-difference { color: #6865a7; }
 .zc-fund-allocation .zc-allocation-holding {
-  max-width: 215px;
-  margin-inline: auto;
-  justify-content: center;
+  width: 100%;
+  justify-content: space-between;
   color: var(--holding-color, #333);
 }
 .zc-fund-allocation .zc-allocation-holding .zc-allocation-number {
-  flex: 0 0 min(60px, 42%);
-  text-align: center;
+  flex: none;
+  text-align: right;
 }
 .zc-fund-allocation .zc-allocation-table th > .zc-allocation-number { text-align: left; }
+.zc-fund-allocation .zc-allocation-summary > td:has(> .zc-allocation-number) { text-align: right; }
 .zc-fund-allocation .zc-allocation-summary .zc-allocation-number {
-  display: block;
-  width: min(60px, 42%);
-  margin-inline-start: auto;
-  margin-inline-end: max(0px, calc((100% - 215px) / 2));
-  text-align: center;
+  display: inline-block;
+  text-align: right;
 }
 
 @media (max-width: 1050px) {

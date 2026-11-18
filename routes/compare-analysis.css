@@ -303,17 +303,30 @@
 
 .zc-compare {
   --zc-module-space: 28px;
+  --zc-content-gutter: 20px;
 }
 
 .zc-compare .zc-content > section + section,
-.zc-compare .zc-risk-view > section + section,
-.zc-compare .zc-allocation-view > section + section,
-.zc-compare .zc-attribution-view > section + section,
-.zc-compare .zc-manager-overview > section + section,
-.zc-compare .zc-manager-allocation-view > section + section {
+.zc-compare .zc-content > :is(.zc-risk-view, .zc-allocation-view, .zc-attribution-view, .zc-manager-overview) > section + section {
+  position: relative;
   margin-top: var(--zc-module-space);
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid transparent;
   padding-top: var(--zc-module-space);
+}
+
+.zc-compare .zc-content > section + section::before,
+.zc-compare .zc-content > :is(.zc-risk-view, .zc-allocation-view, .zc-attribution-view, .zc-manager-overview) > section + section::before {
+  content: '';
+  position: absolute;
+  inset: -1px calc(-1 * var(--zc-content-gutter)) auto;
+  height: 0;
+  border: 0;
+  border-top: 1px solid #eee;
+  pointer-events: none;
+}
+
+@media (max-width: 540px) {
+  .zc-compare { --zc-content-gutter: 16px; }
 }
 
 .zc-compare .zc-section-head,

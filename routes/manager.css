@@ -82,6 +82,12 @@
 .zc-manager .zc-risk-view { min-width: 0; }
 .zc-manager section[aria-busy="true"] > :not(.zc-section-head) { opacity: .45; pointer-events: none; }
 .zc-manager section[aria-busy="true"] { cursor: progress; }
+.zc-manager .zc-allocation-head .zc-allocation-help [role="tooltip"] > span {
+  display: block;
+  padding-left: 12px;
+  background: url('../assets/manager-allocation/help-bullet.svg') left top / 8px 22px no-repeat;
+}
+.zc-manager .zc-allocation-head .zc-allocation-help [role="tooltip"] > span + span { margin-top: 8px; }
 @media (hover: hover) {
   .zc-manager .zc-content tbody > tr:hover > :is(th, td) {
     background-image: linear-gradient(#6865a709, #6865a709);

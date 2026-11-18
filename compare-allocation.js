@@ -1,5 +1,6 @@
 (() => {
   const assets = './assets/compare-allocation/';
+  const managerReportNote = '不同报告期内，基金经理管理的基金数量可能不同，汇总结果可能存在差异。';
   const definitions = [
     { key: 'asset', title: '大类资产分布', report: '2025-03-31', help: '按报告期展示基金直接持有的各类资产占总资产比例。' },
     { key: 'stock', title: '股票资产分布', report: '2026-06-30', help: '按所选行业分类展示股票资产占基金净资产比例。' },
@@ -129,12 +130,13 @@
     </div>`;
   }
 
-  function heading(definition) {
+  function heading(definition, options) {
     const { key, title, help } = definition;
+    const helpLines = [...(help ? [help] : []), ...(isRepresentative(options) ? [managerReportNote] : [])];
     const distribution = key === 'stock' ? dropdown(key, 'distribution', '分布', stockDistributions, 252) : key === 'bond' ? dropdown(key, 'distribution', '分布', ['债券种类'], 176) : '';
     const downloadType = key.includes('holdings') ? 'table' : 'image';
     return `<div class="zc-section-head zc-allocation-head">
-      <div class="zc-allocation-heading"><h2>${title}</h2>${help ? `<span class="zc-allocation-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-${scopeFor(key)}-help">${icon('help')}</button><span id="zc-${scopeFor(key)}-help" role="tooltip">${help}</span></span>` : ''}</div>
+      <div class="zc-allocation-heading"><h2>${title}</h2>${helpLines.length ? `<span class="zc-allocation-help"><button type="button" aria-label="${title}说明" aria-describedby="zc-${scopeFor(key)}-help">${icon('help')}</button><span id="zc-${scopeFor(key)}-help" role="tooltip">${helpLines.map(line => `<span>${escape(line)}</span>`).join('')}</span></span>` : ''}</div>
       <div class="zc-allocation-actions">${distribution}${dropdown(key, 'report', '报告期', reportDates, 192)}
         <div class="zc-allocation-action-buttons"><button class="zc-text" type="button" data-analysis-download="${downloadType}" aria-label="下载${title}">${icon('download')}下载</button><button class="zc-text" type="button" data-analysis-refresh="${scopeFor(key)}" aria-label="刷新${title}">${icon('refresh')}刷新</button></div>
       </div>
@@ -230,7 +232,7 @@
 
   function section(definition, options) {
     const { key } = definition;
-    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
+    return `<section class="zc-allocation-section" data-allocation-section="${key}" data-analysis-section="${scopeFor(key)}">${heading(definition, options)}${key.includes('holdings') ? holdingTable(key, options) : distributionTable(key, options)}</section>`;
   }
 
   function render(options) {

@@ -97,6 +97,7 @@
 .zc-manager-allocation-view .zc-allocation-table td { text-align: center; }
 .zc-manager-allocation-view .zc-allocation-table th > .zc-allocation-number { text-align: left; }
 .zc-manager-allocation-view .zc-allocation-table .zc-allocation-summary > * { font-weight: 600; background: white; }
+.zc-manager-allocation-view .zc-allocation-table .zc-allocation-summary > td:has(> .zc-allocation-number) { text-align: right; }
 .zc-manager-allocation-view .zc-allocation-holding { text-align: right; }
 .zc-manager-allocation-view .zc-allocation-chart-table th { color: #666; }
 .zc-manager-allocation-view .zc-allocation-chart-table td { padding: 24px 12px; }
