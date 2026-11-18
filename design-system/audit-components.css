@@ -43,7 +43,8 @@
 .audit-table button:focus-visible,.audit-table-scroll:focus-visible{outline:2px solid #6865a7;outline-offset:-2px}
 .audit-table-examples{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;width:100%;max-width:100%;min-width:0}
 #visual-panel-components .audit-table-examples > .individual-component { min-width:0; max-width:100%; margin:0; box-sizing:border-box; }
-#visual-panel-components .audit-table-examples .individual-component-heading { flex-wrap:wrap; gap:8px 16px; }
+#visual-panel-components .audit-table-examples .individual-component-heading { flex-wrap:wrap; gap:8px 16px; margin-bottom:8px; }
+#visual-panel-components .audit-table-examples .audit-table-scroll { padding-top:8px; padding-bottom:0; }
 #visual-panel-components .audit-table-examples .actions { flex-wrap:wrap; max-width:100%; }
 .audit-table-examples .individual-component-sample { max-width:100%; min-width:0; }
 .audit-table-comprehensive .audit-label-column { width:260px; }
@@ -165,7 +166,7 @@
 .audit-table .audit-checkbox-cell { width:40px; padding:12px; text-align:left; }
 .audit-checkbox {
   appearance:none; display:block; position:relative; width:16px; height:16px;
-  margin:0; padding:0; border:1px solid #b9b8d8; border-radius:50%;
+  margin:0; padding:0; border:1px solid #999; border-radius:50%;
   background:#fff; cursor:pointer; flex:none; box-sizing:border-box;
 }
 .audit-checkbox:checked, .audit-checkbox:indeterminate { background:#6865a7; border-color:#6865a7; }
@@ -182,7 +183,7 @@
 .audit-checkbox:disabled:checked, .audit-checkbox:disabled:indeterminate { background:#cbcbcb; }
 .audit-table .audit-level-detail th { padding-left:64px; }
 .audit-table-combination, .audit-titled-examples { min-width:0; max-width:100%; }
-.audit-titled-examples { display:grid; gap:24px; margin-top:24px; border-top:1px solid #eee; padding-top:24px; }
+.audit-titled-examples { display:grid; gap:16px; margin-top:12px; }
 .audit-titled-example { min-width:0; max-width:100%; }
 .audit-table-variant-label { margin:0 0 8px; color:#666; font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif; }
 .audit-table-titled .audit-side-title-column { width:120px; }

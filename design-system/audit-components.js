@@ -54,7 +54,6 @@ function auditTableMarkup(numericColumns = false) {
     return `<div class="audit-titled-example"><p class="audit-table-variant-label">${note}</p>
       <div class="audit-table-scroll" role="region" aria-label="${note}示例" tabindex="0"><table class="audit-table audit-table-comprehensive audit-table-titled">
         <colgroup><col class="audit-side-title-column"><col class="audit-titled-field-column"><col span="2"></colgroup>
-        <thead><tr class="audit-table-header"><th scope="col">标题</th><th scope="col">指标</th><th scope="col">华夏成长混合</th><th scope="col">宝盈中证A500指数增强 A</th></tr></thead>
         <tbody><tr class="${secondLevel ? 'audit-level-2' : 'audit-level-1'}"><th scope="row" class="audit-side-title">${secondLevel ? '持有信息' : '产品信息'}</th><th scope="row">${secondLevel ? '持有时长' : '产品类型'}</th><td class="audit-value-text">${secondLevel ? '1 年 5 个月' : '混合型'}</td><td class="audit-value-text">${secondLevel ? '8 个月' : '指数型'}</td></tr></tbody>
       </table></div></div>`;
   }
@@ -213,7 +212,7 @@ function installAuditedComponents() {
     ['数值字体', 'Roboto 等宽数字，缺失值显示 --'],
     ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线'],
     ['折叠', '点击展开按钮或所在数据行收起 / 展开，重新展开保留内部折叠状态；多选框独立操作，不触发折叠'],
-    ['多选框', '16 × 16px，圆形；默认1px #B9B8D8；选中 / 半选 #6865A7；禁用 #CBCBCB'],
+    ['多选框', '16 × 16px，圆形；默认1px #999999；选中 / 半选 #6865A7；禁用 #CBCBCB'],
     ['选择规则', '每行独立选择；表头全选当前表全部数据行（含已收起的明细），部分选中时显示半选；折叠保留勾选'],
     ['窄屏', '表格在自身容器横向滚动，不撑宽整页']
   ];
@@ -223,8 +222,8 @@ function installAuditedComponents() {
     ['对齐', '所有表头、行标签与表体内容均居左，数字与文字一致'],
     ['列宽', '多选框列40px，行标签列260px，其余列等宽'],
     ['缩进', '一级28px / 二级46px；二级展开的内部明细沿用12px Regular，额外缩进18px'],
-    ['左侧带标题', '两组独立小表不带多选框，左标题与对应数据行垂直居中对齐']
-  ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例单独展示。', '564-55005');
+    ['左侧带标题', '两组独立小表不带多选框，不展示顶部表头；只保留左侧标题与对应内容，垂直居中对齐']
+  ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例与上方表格在同一组件区域内分项展示。', '564-55005');
   const numericTableSpec = spec([
     ...commonTableRules,
     ['状态覆盖', '表头、汇总、汇总可展开、一级、一级可展开、二级，全部带多选框；数字列使用收益因子数据'],
