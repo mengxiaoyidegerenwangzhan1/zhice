@@ -38,3 +38,4 @@
 }
 .fund-page.fund-analysis-page[data-fund-view] .fund-table-total {padding:12px;border-bottom:1px solid rgba(234,234,234,.85);font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;background:#fff;}
 .fund-page.fund-analysis-page[data-fund-view] .fund-table-total strong {font:500 14px/20px Roboto,"Helvetica Neue",Arial,sans-serif;}
+.fund-page.fund-analysis-page table.fund-canonical-table em {font-style:normal;}
