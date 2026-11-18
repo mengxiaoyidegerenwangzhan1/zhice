@@ -4,6 +4,18 @@
     cleanup();
     if (!page) return;
     const header = page.querySelector('.fund-identity-panel');
+    const summaryToggle = page.querySelector('.fund-summary-toggle');
+    const summaryContent = page.querySelector('#fund-summary-content');
+    if (summaryToggle && summaryContent) {
+      summaryToggle.addEventListener('click', () => {
+        const expanded = summaryToggle.getAttribute('aria-expanded') !== 'true';
+        summaryToggle.setAttribute('aria-expanded', String(expanded));
+        summaryContent.hidden = !expanded;
+        summaryToggle.querySelector('span').textContent = expanded ? '收起' : '展开';
+        requestAnimationFrame(() => window.FundChartUI?.charts(page).forEach(chart => chart.resize()));
+      });
+    }
+
     const tabs = page.querySelector('.fund-tabs');
     tabs?.addEventListener('keydown', event => {
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;

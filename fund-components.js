@@ -224,7 +224,7 @@ function viewSwitchRuntime(root = document) {
     const parsed=new Date(date);return Number.isFinite(parsed.valueOf()) && parsed.toISOString().slice(0,10) === date ? date : null;
   };
   const getCharts = root => window.FundChartUI?.charts(root) || [...root.querySelectorAll('.fund-chart[id],.fund-donut-chart[id]')].map(el=>window.echarts?.getInstanceByDom(el)).filter(Boolean);
-  const toolsMarkup = () => '<div class="zc-module-actions" role="group" aria-label="模块操作">' + [['image','下载图片','image-download'],['table','下载表格','table-download'],['refresh','刷新','refresh']].map(([action,label,file])=>`<button class="zc-module-icon" type="button" data-module-do="${action}" aria-label="${label}" title="${label}"><img src="${ASSETS}module-actions/${file}.png" width="28" height="28" alt=""></button>`).join('') + '</div>';
+  const toolsMarkup = (kind) => '<div class="zc-module-actions" role="group" aria-label="模块操作" style="width:62px">' + [[kind,kind==='table'?'下载表格':'下载图片',kind==='table'?'table-download':'image-download'],['refresh','刷新','refresh']].map(([action,label,file])=>`<button class="zc-module-icon" type="button" data-module-do="${action}" aria-label="${label}" title="${label}"><img src="${ASSETS}module-actions/${file}.png" width="28" height="28" alt=""></button>`).join('') + '</div>';
   const switchMarkup = () => '<div class="zc-view-switch" role="group" aria-label="图表和列表视图" data-view="chart">' + ['chart','list'].map(view=>`<button type="button" data-view-value="${view}" aria-label="${view==='chart'?'图表视图':'列表视图'}" title="${view==='chart'?'图表':'列表'}" aria-pressed="${view==='chart'}" tabindex="${view==='chart'?0:-1}"><img src="${ASSETS}view-switch/${view}-${view==='chart'?'selected':'default'}.png" data-default-src="${ASSETS}view-switch/${view}-default.png" data-selected-src="${ASSETS}view-switch/${view}-selected.png" width="28" height="28" alt=""></button>`).join('') + '</div>';
   const definitions = {
     '收益表现':'展示基金、同类平均与所选基准在选定区间内的累计收益变化。',
@@ -354,14 +354,84 @@ function viewSwitchRuntime(root = document) {
     const canvas=document.createElement('canvas'),context=canvas.getContext('2d');const columns=Math.max(...rows.map(row=>row.length));const width=Math.max(600,columns*180),height=80+rows.length*42;canvas.width=width*2;canvas.height=height*2;context.scale(2,2);context.fillStyle='#fff';context.fillRect(0,0,width,height);context.fillStyle='#333';context.font='600 16px "PingFang SC",sans-serif';context.fillText(panel.querySelector('h2')?.textContent.trim() || '基金分析',20,30);context.font='14px "PingFang SC",sans-serif';rows.forEach((row,y)=>{context.fillStyle='#eee';context.fillRect(20,65+y*42,width-40,1);context.fillStyle='#333';row.forEach((value,x)=>{context.fillText(value,20+x*(width-40)/columns,91+y*42,(width-56)/columns);});});
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(blob)download(blob,(panel.querySelector('h2')?.textContent.trim()||'基金分析')+'.png');return Boolean(blob);
   }
+  // Presence is copied from the eight original Sketch pages, not inferred
+  // from whether a rebuilt module happens to contain a chart or a table.
+  const originalActionModules = {
+    overview: [false,true,true,true,true,true,true,true,true,true,true],
+    returns: [true,true,true,true],
+    risk: [true,true,true,true],
+    holdings: [true,true,true,true,true,true,true,true,true,true,true,true,true],
+    attribution: [true,true,true,true,true,true],
+    manager: [true,true], company: [true,true,true],
+    basics: [false,false,false,true]
+  };
+  function displayed(node) {
+    return !node.closest('[hidden]') && node.getClientRects().length > 0 && getComputedStyle(node).display !== 'none';
+  }
+  function downloadKind(panel) {
+    if (panel.querySelector('.zc-view-switch')?.dataset.view === 'list') return 'table';
+    const graphic = [...panel.querySelectorAll('.fund-chart,.fund-donut-chart,.fund-rating-block,.fund-style-matrix,.fund-vbars,.fund-factor-range,[data-source-chart]')].some(displayed);
+    if (graphic) return 'image';
+    if ([...panel.querySelectorAll('table,.fund-awards')].some(displayed)) return 'table';
+    return 'image';
+  }
+  function updateDownloadKind(panel) {
+    const button = panel.querySelector(':scope > .fund-panel-head [data-module-do]:not([data-module-do="refresh"])');
+    if (!button) return;
+    const kind = downloadKind(panel), label = kind === 'table' ? '下载表格' : '下载图片';
+    button.dataset.moduleDo=kind;button.setAttribute('aria-label',label);button.title=label;
+    button.querySelector('img').src=ASSETS+'module-actions/'+(kind==='table'?'table-download':'image-download')+'.png';
+  }
+  function listCSV(panel) {
+    const list = panel.querySelector('.fund-awards');
+    if (!list) return false;
+    const rows=[['奖项','年份'],...[...list.children].map(row=>[row.firstElementChild?.textContent.trim() || '',row.lastElementChild?.textContent.trim() || ''])];
+    const cell = value => '"'+String(value).replace(/"/g,'""')+'"';
+    download(new Blob(['\uFEFF'+rows.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),(panel.querySelector('h2')?.textContent.trim()||'基金分析')+'.csv');return true;
+  }
+  async function panelImage(panel) {
+    // Non-ECharts visuals (ratings/style matrices) are real DOM. Export the
+    // rendered values and their computed styles, without inventing chart data.
+    const clone=panel.cloneNode(true), originals=[panel,...panel.querySelectorAll('*')],copies=[clone,...clone.querySelectorAll('*')];
+    originals.forEach((node,index)=>{
+      const copy=copies[index];if(!copy)return;
+      const style=getComputedStyle(node);
+      copy.setAttribute('style',[...style].map(key=>key+':'+style.getPropertyValue(key)).join(';'));
+      if(node.tagName==='CANVAS'){
+        const image=document.createElement('img');image.src=node.toDataURL('image/png');image.setAttribute('style',copy.getAttribute('style'));copy.replaceWith(image);
+      }
+    });
+    clone.querySelectorAll('.fund-panel-controls,.zc-title-help-trigger,.zc-title-help-panel,.fund-selection-empty,[hidden]').forEach(node=>node.remove());
+    const rect=panel.getBoundingClientRect(),width=Math.ceil(rect.width),height=Math.ceil(Math.max(rect.height,panel.scrollHeight));
+    clone.style.cssText+=';position:relative;inset:auto;margin:0;transform:none;width:'+width+'px;height:auto;min-height:'+height+'px;max-width:none;';
+    clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
+    await Promise.all([...clone.querySelectorAll('img')].map(async image=>{
+      if(!image.src||image.src.startsWith('data:'))return;
+      try{const blob=await (await fetch(image.src)).blob();image.src=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});}catch{image.remove();}
+    }));
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'"><foreignObject width="100%" height="100%">'+new XMLSerializer().serializeToString(clone)+'</foreignObject></svg>';
+    const blob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+    // SVG remains a complete image fallback if a browser disallows rasterizing
+    // foreignObject. All image resources above have already been embedded.
+    download(blob,(panel.querySelector('h2')?.textContent.trim()||'基金分析')+'.svg');return true;
+  }
   function mountTools(root) {
-    root.querySelectorAll('.fund-panel').forEach(panel=>{
+    const view=root.dataset.fundView, original=originalActionModules[view] || [];
+    root.querySelectorAll('.fund-panel').forEach((panel,index)=>{
       const head=panel.querySelector(':scope > .fund-panel-head');if(!head)return;
-      let controls=head.querySelector('.fund-panel-controls');if(!controls){controls=document.createElement('div');controls.className='fund-panel-controls';head.append(controls);}
-      controls.querySelectorAll('.fund-tool-btn,.fund-dot-pill,.zc-module-actions,.zc-view-switch').forEach(el=>el.remove());
-      if(getCharts(panel).length)controls.insertAdjacentHTML('beforeend',switchMarkup());
-      controls.insertAdjacentHTML('beforeend',toolsMarkup());
-      panel.addEventListener('viewchange',event=>{getCharts(panel).forEach(instance=>window.FundChartUI?.showTable(instance,event.detail.value==='list'));});
+      let controls=head.querySelector('.fund-panel-controls');
+      controls?.querySelectorAll('.fund-tool-btn,.fund-dot-pill,.zc-module-actions,.zc-view-switch').forEach(el=>el.remove());
+      if(!original[index]){
+        if(controls&&!controls.children.length)controls.remove();
+        return;
+      }
+      if(!controls){controls=document.createElement('div');controls.className='fund-panel-controls';head.append(controls);}
+      // Only the original stock-liquidity module exposes chart/list switching.
+      if(view==='holdings'&&index===8&&getCharts(panel).length)controls.insertAdjacentHTML('beforeend',switchMarkup());
+      controls.insertAdjacentHTML('beforeend',toolsMarkup(downloadKind(panel)));
+      panel.addEventListener('viewchange',event=>{getCharts(panel).forEach(instance=>window.FundChartUI?.showTable(instance,event.detail.value==='list'));updateDownloadKind(panel);});
+      panel.addEventListener('moduletabchange',()=>requestAnimationFrame(()=>updateDownloadKind(panel)));
+      panel.addEventListener('change',()=>requestAnimationFrame(()=>updateDownloadKind(panel)));
       controls.querySelector('.zc-module-actions').addEventListener('click',async event=>{
         const button=event.target.closest('[data-module-do]');if(!button||button.disabled)return;
         button.disabled=true;const action=button.dataset.moduleDo;
@@ -373,8 +443,8 @@ function viewSwitchRuntime(root = document) {
             if(controls.querySelector('.zc-view-switch')?.dataset.view==='list')getCharts(panel).forEach(instance=>window.FundChartUI?.showTable(instance,true));
             panel.dispatchEvent(new CustomEvent('modulerefresh',{bubbles:true}));
           } else if(action==='table') {
-            if(!window.FundChartUI?.exportCSV(panel))window.toast?.('当前模块暂无可导出的表格数据');
-          } else if(!(await window.FundChartUI?.exportImage(panel)))await tableImage(panel);
+            if(!window.FundChartUI?.exportCSV(panel)&&!listCSV(panel))window.toast?.('当前模块暂无可导出的表格数据');
+          } else if(!(await window.FundChartUI?.exportImage(panel)))await panelImage(panel);
         } finally {button.disabled=false;button.classList.remove('is-loading');panel.classList.remove('is-refreshing');panel.removeAttribute('aria-busy');}
       });
     });

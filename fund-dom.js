@@ -54,7 +54,7 @@
       ["基金经理", "基金经理一共1名。\n郑晓辉, 管理公募基金14.75年，目前在管基金4只，在管规模116.55亿元。\n近5年，该经理的综合指数年化收益率为0.87%，好于沪深300。最大回撤为-52.84%，差于沪深300。博取收益能力较同期同类型基金经理中等，控制风险能力较同期同类型基金经理弱。\n郑晓辉投资偏重股票，整体风格为大盘-成长型。\n股票行业偏好集中，主要为电子。重仓股票持有时间长。行业分布多变。\n债券投资中偏好的券种为金融债券、国债、政策性金融债券。"],
       ["基金经理", "华夏基金管理有限公司成立于1998年，当前管理规模为21111亿元，规模巨大。\n旗下管理基金一共577只，以权益类为主。\n旗下基金经理共138名，团队庞大。"]
     ];
-    return `<div class="fund-analysis-list">${cards.map(([title, body]) => `<article class="fund-analysis-card"><header>${title}</header><div class="fund-analysis-body">${body.split("\n").map(p => `<p>${p}</p>`).join("")}</div></article>`).join("")}<button class="fund-collapse-btn" type="button">收起 <i data-lucide="chevron-up"></i></button></div>`;
+    return `<div class="fund-analysis-list">${cards.map(([title, body]) => `<article class="fund-analysis-card"><header>${title}</header><div class="fund-analysis-body">${body.split("\n").map(p => `<p>${p}</p>`).join("")}</div></article>`).join("")}</div>`;
   }
 
   function quartileCell(rating) {
@@ -145,9 +145,9 @@
     const fundTable = `<table class="fund-table fund-table--compact"><thead><tr><th>基金名称</th><th>基金星级</th><th class="is-num">年化收益率</th><th class="is-num">年化波动率</th><th class="is-num">最大回撤</th><th>申赎状态</th></tr></thead><tbody>${fundRows.map(([n, s, r, v, d, st]) => `<tr><td><a class="fund-link" href="javascript:void(0)">${n}</a></td><td>${stars(s)}</td><td class="is-num"><span class="is-rise">${r}%</span></td><td class="is-num">${v}%</td><td class="is-num">${d}%</td><td>${st}</td></tr>`).join("")}</tbody></table>`;
 
     const dotPill = `<span class="fund-dot-pill"><i></i><i></i></span>`;
-    return `${panel("SUMMARY", "核心总结", `${summary}${analysisCards()}`, "", "fund-overview-summary")}
+    return `${panel("SUMMARY", "核心总结", `<div id="fund-summary-content" class="fund-summary-content" hidden>${summary}${analysisCards()}</div>`, `<button class="fund-summary-toggle" type="button" aria-expanded="false" aria-controls="fund-summary-content"><span>展开</span><i data-lucide="chevron-down"></i></button>`, "fund-overview-summary")}
       ${panel("", "收益与风险", `<div class="fund-two-charts">${chartBox("fund-overview-return", "收益表现", "is-lg")}${chartBox("fund-overview-risk", "风险表现", "is-lg")}</div>`, `${select("同类:偏股混合型", true)}${select("近1年")}${select("沪深300")}${select("申万一级行业", true)}${dotPill}`, "fund-overview-performance")}
-      ${panel("", "", `<div class="fund-split-content"><section><h3>前十大持仓股票</h3>${holdingsTable}</section><section><div class="fund-split-head"><h3>持仓盘中趋势</h3><span class="fund-trend-tag">趋势：向上</span></div><div id="fund-holding-trend" class="fund-chart" role="img" aria-label="持仓盘中趋势"></div></section></div>`, "", "fund-panel-plain fund-overview-holdings")}
+      ${panel("", "前十大持仓股票", `<div class="fund-split-content"><section>${holdingsTable}</section><section><div class="fund-split-head"><h3>持仓盘中趋势</h3><span class="fund-trend-tag">趋势：向上</span></div><div id="fund-holding-trend" class="fund-chart" role="img" aria-label="持仓盘中趋势"></div></section></div>`, "", "fund-panel-plain fund-overview-holdings")}
       <div class="fund-two-panels">
         ${panel("SUMMARY", "阶段涨幅", stageTable, `<span class="fund-text-toggle"><button type="button" class="is-on">比较</button><button type="button">指标</button></span>`, "fund-overview-stage")}
         ${panel("SUMMARY", "风险收益", riskReturn, "", "fund-overview-rating")}

@@ -6,6 +6,8 @@
   const peerColor = '#9D9DA7';
   const tableViews = new WeakMap();
   const sourceOptions = new WeakMap();
+  const legendViews = new WeakMap();
+  const hiddenSeries = new WeakMap();
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
   const array = value => Array.isArray(value) ? value : value == null ? [] : [value];
   const raw = value => value && typeof value === 'object' && !Array.isArray(value) ? value.value : value;
@@ -28,11 +30,11 @@
     if (series.type === 'pie') return true;
     return /overview-(return|risk)|cumulative-return|investor-gap|monthly-return|return-(distribution|forecast)|vol-drawdown|drawdown-bars|scenario|manager-performance|risk-return|risk-scatter|asset-history|board-history|region-history|industry-history|drift-(area|bars)|bond-(change|pure-history)|allocation-attribution|industry-attribution|stock-selection|trading-attribution|factor-attribution|manager-ranking/.test(chartId);
   }
-  function formatNumber(value, isPercent = false) {
+  function formatNumber(value, isPercent = false, signed = false) {
     if (missing(value)) return '--';
     if (!numeric(value)) return escape(value);
     const num = Number(value);
-    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}${isPercent ? '%' : ''}`;
+    return `${signed && num > 0 ? '+' : ''}${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: isPercent ? 2 : 4 })}${isPercent ? '%' : ''}`;
   }
   function primarySeries(series) {
     return /本基金|华夏成长|交银定期|易方达科汇/.test(series.name || '') && !/同类/.test(series.name || '');
@@ -59,14 +61,15 @@
         const y = axisFor(option, series, 'y');
         return `${escape(x.name || 'X')} ${formatNumber(value[0], /率|回报|收益|占比/.test(x.name || ''))}<br>${escape(y.name || 'Y')} ${formatNumber(value[value.length - 1], percent)}`;
       }
-      return formatNumber(value[value.length - 1], percent);
+      return formatNumber(value[value.length - 1], percent, percent);
     }
-    return formatNumber(value, percent);
+    return formatNumber(value, percent, percent);
   }
   function formatter(instance, params) {
     const option = instance.getOption();
-    let items = array(params).filter(item => item && !/更换|分红|预警/.test(item.seriesName || ''));
-    if (!items.length) items = array(params).filter(Boolean);
+    const hidden = hiddenSeries.get(instance) || new Set();
+    let items = array(params).filter(item => item && !hidden.has(item.seriesName) && !/更换|分红|预警/.test(item.seriesName || ''));
+    if (!items.length) items = array(params).filter(item => item && !hidden.has(item.seriesName));
     if (!items.length) return '';
     const id = instance.getDom().id;
     // Linked axes can provide both panels' series. Keep the visible panel's rows.
@@ -80,14 +83,77 @@
       seen.add(key); return true;
     });
     const heading = items[0].axisValueLabel ?? items[0].axisValue ?? items[0].name ?? '';
-    const width = Math.min(292, Math.max(180, instance.getDom().clientWidth - 18));
-    return `<div class="zc-return-line-tooltip fund-chart-tip" style="width:${width}px">${heading !== '' ? `<strong class="fund-chart-tip-date">${escape(heading)}</strong>` : ''}<ul class="fund-chart-tip-rows">${items.map(item => {
+    const width = Math.max(120, Math.min(292, instance.getDom().clientWidth - 18));
+    return `<div class="zc-tip fund-chart-tip" style="width:${width}px">${heading !== '' ? `<div class="zc-tip-date fund-chart-tip-date">${escape(heading)}</div>` : ''}<div class="zc-tip-rows fund-chart-tip-rows">${items.map(item => {
       const series = array(option.series)[item.seriesIndex] || {};
       const label = nameOf(series, item.seriesIndex);
       const group = graphicLabel(option, series);
       const color = colors(option, series, item.seriesIndex);
-      return `<li class="fund-chart-tip-row"><i style="background:${escape(color)}"></i><span class="zc-line-tip-name fund-chart-tip-name">${escape(label)}${group ? ` · ${escape(group)}` : ''}</span><b class="fund-chart-tip-value">${pointText(item, option, id)}</b></li>`;
-    }).join('')}</ul></div>`;
+      return `<div class="zc-tip-row fund-chart-tip-row"><i style="background:${escape(color)}"></i><span class="zc-tip-name fund-chart-tip-name">${escape(label)}${group ? ` · ${escape(group)}` : ''}</span><span class="zc-tip-value fund-chart-tip-value">${pointText(item, option, id)}</span></div>`;
+    }).join('')}</div></div>`;
+  }
+  function legend(instance, option) {
+    const series = array(option.series);
+    const hasLines = series.some(item => item.type === 'line');
+    if (!hasLines || !series.some(item => item.name)) return false;
+    const el = instance.getDom();
+    let view = legendViews.get(instance);
+    if (!view || !view.isConnected) {
+      view = document.createElement('div');
+      view.className = 'zc-chart-legend fund-unified-legend';
+      view.setAttribute('aria-label', `${el.getAttribute('aria-label') || '图表'}曲线显隐`);
+      view.addEventListener('click', event => {
+        const button = event.target.closest('[data-fund-series]');
+        if (!button) return;
+        const name = button.dataset.fundSeries;
+        const restoreFocus = document.activeElement === button;
+        const hidden = hiddenSeries.get(instance) || new Set();
+        hidden.has(name) ? hidden.delete(name) : hidden.add(name);
+        hiddenSeries.set(instance, hidden);
+        enhance(el);
+        if (restoreFocus) [...view.querySelectorAll('[data-fund-series]')].find(item => item.dataset.fundSeries === name)?.focus({ preventScroll: true });
+      });
+      el.insertAdjacentElement('afterend', view);
+      legendViews.set(instance, view);
+    }
+    const hidden = hiddenSeries.get(instance) || new Set();
+    const names = new Set();
+    view.innerHTML = series.map((item, index) => {
+      if (!item.name || names.has(item.name)) return '';
+      names.add(item.name);
+      const active = !hidden.has(item.name);
+      return `<button type="button" data-fund-series="${escape(item.name)}" aria-pressed="${active}" aria-label="${active ? '隐藏' : '显示'} ${escape(item.name)} 曲线"${active ? '' : ' class="is-hidden"'}><i style="background:${active ? escape(colors(option, item, index)) : '#999'}"></i><span>${escape(item.name)}</span></button>`;
+    }).join('');
+    view.hidden = el.hidden;
+    const block = el.closest('.fund-chart-block');
+    block?.querySelectorAll('.fund-chart-legend').forEach(old => {
+      if ([...names].some(name => old.textContent.includes(name))) old.hidden = true;
+    });
+    return true;
+  }
+  function axes(option, id) {
+    const series = array(option.series);
+    const isLine = series.some(item => item.type === 'line');
+    if (!isLine) return {};
+    const xAxis = array(option.xAxis).map(axis => ({
+      ...axis,
+      axisTick: { ...axis.axisTick, show: false },
+      axisLine: { ...axis.axisLine, lineStyle: { ...axis.axisLine?.lineStyle, color: '#eaeaea' } },
+      axisLabel: { ...axis.axisLabel, color: '#777', fontSize: 12, hideOverlap: true, showMinLabel: true, showMaxLabel: true },
+      axisPointer: { ...axis.axisPointer, label: { show: true, margin: 8, padding: [0, 2], backgroundColor: '#fff', color: '#262626', fontSize: 12, fontWeight: 700, shadowBlur: 0 } },
+    }));
+    const yAxis = array(option.yAxis).map((axis, index) => {
+      const line = series.find(item => (Number(item.yAxisIndex) || 0) === index);
+      return { ...axis,
+        axisTick: { ...axis.axisTick, show: false },
+        axisLine: { ...axis.axisLine, show: false },
+        axisLabel: { ...axis.axisLabel, color: '#777', fontSize: 12, ...(line && percentage(option, line, id) ? { formatter: '{value}%' } : {}) },
+        splitLine: { ...axis.splitLine, lineStyle: { ...axis.splitLine?.lineStyle, color: '#eaeaea', type: 'dashed' } },
+      };
+    });
+    const grid = array(option.grid).map(item => ({ ...item, left: 42, right: 42,
+      ...(array(option.grid).length === 1 && !array(option.dataZoom).length && !array(option.graphic).length ? { top: 9, bottom: 31 } : {}) }));
+    return { xAxis, yAxis, ...(grid.length ? { grid } : {}) };
   }
   function enhance(root = document) {
     root.querySelectorAll('.fund-source-chart svg path[stroke], .fund-source-chart svg polyline[stroke]').forEach(line => {
@@ -104,6 +170,8 @@
       const series = array(option.series);
       const hasFundSeries = series.some(primarySeries);
       const lineCount = series.filter(item => item.type === 'line').length;
+      const hidden = hiddenSeries.get(instance) || new Set();
+      const source = sourceOptions.get(instance);
       const updates = series.map((item, index) => {
         const update = { type: item.type };
         if (item.id) update.id = item.id;
@@ -118,17 +186,33 @@
             update.itemStyle = { ...item.itemStyle, color: item.lineStyle.color };
           }
         }
+        const original = array(source?.series)[index] || item;
+        const muted = hidden.has(item.name);
+        if (lineCount) {
+          update.silent = muted ? true : Boolean(original.silent);
+          update.itemStyle = { ...item.itemStyle, ...update.itemStyle, opacity: muted ? 0 : original.itemStyle?.opacity ?? 1 };
+          if (item.type === 'line') {
+            update.showSymbol = false;
+            update.symbol = 'circle';
+            update.symbolSize = 6;
+            update.lineStyle = { ...update.lineStyle, opacity: muted ? 0 : original.lineStyle?.opacity ?? 1 };
+            if (item.areaStyle) update.areaStyle = { ...item.areaStyle, opacity: muted ? 0 : original.areaStyle?.opacity ?? .7 };
+            const color = update.itemStyle?.color || colors(option, item, index);
+            update.emphasis = { ...item.emphasis, disabled: muted, itemStyle: { color: '#fff', borderColor: color, borderWidth: 1 } };
+          }
+        }
         return update;
       });
       const tooltip = {
         show: true, confine: true, renderMode: 'html', trigger: option.tooltip?.[0]?.trigger || 'axis',
-        backgroundColor: 'transparent', borderWidth: 0,
+        backgroundColor: 'rgba(255,255,255,.96)', borderColor: '#d9d9d9', borderWidth: 1,
         padding: 0, textStyle: { color: '#333', fontSize: 12, fontFamily: '"PingFang SC", "Microsoft YaHei", sans-serif' },
-        extraCssText: 'box-shadow:none;white-space:normal;',
+        extraCssText: 'border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.08);white-space:normal;',
         axisPointer: { type: 'line', lineStyle: { color: '#b9b8d8', type: 'solid', width: 1 } },
         formatter: params => formatter(instance, params),
       };
-      instance.setOption({ series: updates, tooltip }, { lazyUpdate: false });
+      const externalLegend = legend(instance, { ...option, series: series.map((item, index) => ({ ...item, ...updates[index] })) });
+      instance.setOption({ ...axes(option, instance.getDom().id), series: updates, tooltip, ...(externalLegend ? { legend: { show: false } } : {}) }, { lazyUpdate: false });
       instance.getDom().dataset.fundChartUnified = 'true';
     });
   }
@@ -170,6 +254,8 @@
   }
   function showTable(instance, show) {
     const el = instance.getDom();
+    const chartLegend = legendViews.get(instance);
+    if (chartLegend) chartLegend.hidden = Boolean(show);
     let table = tableViews.get(instance);
     if (show) {
       if (!table) {

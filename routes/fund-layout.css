@@ -90,3 +90,21 @@ body.fund-sketch-mode .site-back-to-top button:hover {background:#f2f3f5;}
 .fund-page.fund-analysis-page .fund-holdings-duo .fund-style-layout{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
 .fund-page.fund-analysis-page .fund-holdings-duo .fund-panel{min-width:0;width:auto;height:auto;}
 @media(max-width:1100px){.fund-page.fund-analysis-page .fund-holdings-duo{grid-template-columns:minmax(0,1fr);}}
+/* Module headings share the 32px control row, including narrow layouts. */
+.fund-page.fund-analysis-page .fund-panel-head {position:static;inset:auto;display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;min-height:32px;}
+.fund-page.fund-analysis-page .fund-panel-head>div:first-child {display:flex;align-items:center;min-height:32px;flex:0 0 auto;max-width:100%;}
+.fund-page.fund-analysis-page .fund-panel-head h2 {display:flex;align-items:center;min-height:32px;margin:0;white-space:nowrap;}
+.fund-page.fund-analysis-page .fund-panel-controls {display:flex;align-items:center;justify-content:flex-end;min-height:32px;max-width:100%;margin:0 0 0 auto;flex:0 1 auto;}
+.fund-page.fund-analysis-page .fund-summary-toggle {display:inline-flex;align-items:center;justify-content:center;gap:4px;height:32px;padding:0 8px;border:0;border-radius:16px;background:transparent;color:#6865a7;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;cursor:pointer;}
+.fund-page.fund-analysis-page .fund-summary-toggle:hover {background:#f2f3f5;}
+.fund-page.fund-analysis-page .fund-summary-toggle svg {width:14px;height:14px;transition:transform .15s;}
+.fund-page.fund-analysis-page .fund-summary-toggle[aria-expanded="true"] svg {transform:rotate(180deg);}
+.fund-page.fund-analysis-page .fund-summary-content[hidden] {display:none;}
+.fund-page.fund-analysis-page .fund-overview-summary:has(.fund-summary-content[hidden])>.fund-panel-head {margin-bottom:0;}
+.fund-page.fund-analysis-page .fund-overview-summary .fund-analysis-card,
+.fund-page.fund-analysis-page .fund-overview-summary .fund-analysis-body,
+.fund-page.fund-analysis-page .fund-overview-summary .fund-summary-grid,
+.fund-page.fund-analysis-page .fund-overview-summary .fund-summary-grid>div {height:auto;max-height:none;overflow:visible;}
+.fund-page.fund-analysis-page .fund-analysis-body p {display:block;-webkit-line-clamp:unset;overflow:visible;white-space:normal;overflow-wrap:anywhere;}
+.fund-page.fund-analysis-page .fund-overview-summary .fund-summary-grid {min-height:76px;}
+.fund-page.fund-analysis-page .fund-overview-summary .fund-analysis-list {margin-top:16px;}
