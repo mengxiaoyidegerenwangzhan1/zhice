@@ -176,9 +176,11 @@
         const update = { type: item.type };
         if (item.id) update.id = item.id;
         if (item.name) update.name = item.name;
+        const stableColor = colors(source, array(source?.series)[index] || item, index);
+        if (lineCount && typeof item.itemStyle?.color !== 'function') update.itemStyle = { ...item.itemStyle, color: stableColor };
         if (item.type === 'line') {
           const primary = primarySeries(item) || (!hasFundSeries && lineCount === 1);
-          update.lineStyle = { ...item.lineStyle, width: primary ? 2 : 1 };
+          update.lineStyle = { ...item.lineStyle, color: stableColor, width: primary ? 2 : 1 };
           if (/同类平均/.test(item.name || '')) {
             update.lineStyle = { ...update.lineStyle, color: peerColor, type: 'solid' };
             update.itemStyle = { ...item.itemStyle, color: peerColor, borderColor: peerColor };
