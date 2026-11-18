@@ -43,7 +43,7 @@
 .lt-manager-row:hover{background:var(--lt-canvas)}
 .lt-manager-name{width:40px;flex:none}
 .lt-manager-dates{flex:1;letter-spacing:-.15px}
-.lt-date-field{display:flex;align-items:center;gap:6px;width:294px;height:32px;border:1px solid #eaeaea;border-radius:20px;background:#fff;padding:0 12px;box-shadow:0 0 12px #00000014}
+.lt-date-field{display:flex;align-items:center;gap:6px;width:294px;height:32px;border:1px solid transparent;border-radius:20px;background:#fff;padding:0 12px;box-shadow:0 0 12px #00000014}
 .lt-date-field:hover,.lt-date-field.is-open,.lt-date-field:focus-within{border-color:var(--lt-line)}
 .lt-date-field:hover>.lt-icon-calendar,.lt-date-field.is-open>.lt-icon-calendar,.lt-date-field:focus-within>.lt-icon-calendar{color:var(--lt-primary)}
 .linked-time-widget .lt-input{flex:1;min-width:0;width:94px;height:24px;padding:0;border:0;outline:0;background:transparent;text-align:center;color:var(--lt-text);font-size:14px;border-radius:0;box-shadow:none}

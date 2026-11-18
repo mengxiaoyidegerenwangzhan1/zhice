@@ -20,6 +20,7 @@
     ['经理任期浮层', '与主面板内容区等宽，距入口下方6px，圆角8px，描边#B9B8D8；悬停底色铺满整行，左右无外间距；选中经理显示勾选和主色文字'],
     ['经理任期展开态', '入口无填充，主色文字；入口、经理浮层与更多面板的描边统一#B9B8D8'],
     ['日期输入框', '294 × 32px，圆角20px，日历图标默认#666，移入或展开使用#6865A7'],
+    ['日期框描边', '默认无描边；移入、聚焦或展开日历时显示1px #B9B8D8描边'],
     ['单日历', '314 × 324px，内边距16px，日期单元格40 × 32px，行间距6px；打开时定位当前字段对应月份'],
     ['当前字段', '开始或结束字段使用主色强调；首次开始选定后自动切换结束字段，已有完整范围时可单独修改任一端，另一端保留'],
     ['日期边界', '结束日历禁用开始日期之前的日期；开始日历禁用结束日期之后的日期，允许起止同一天；月份和年份导航遵循相同边界'],
@@ -411,7 +412,7 @@
   }
 
   async function exportCode(html) {
-    let css = await (await fetch('linked-time.css?v=20261116-full-row-hover')).text();
+    let css = await (await fetch('linked-time.css?v=20261118-date-border')).text();
     const assets = [...new Set(Array.from(css.matchAll(/assets\/time\/[\w-]+\.svg/g),match=>match[0]))];
     for (const asset of assets) {
       const response=await fetch(asset);
