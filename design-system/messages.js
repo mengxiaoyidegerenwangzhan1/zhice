@@ -33,7 +33,7 @@
   ];
 
   async function exportCode(item) {
-    const response = await fetch('messages.css?v=20261118-messages');
+    const response = await fetch('messages.css?v=20261118-message-titles');
     if (!response.ok) throw new Error('气泡样式读取失败');
     const css = await response.text();
     const iconResponse = await fetch('assets/messages/' + item.type + '.png');

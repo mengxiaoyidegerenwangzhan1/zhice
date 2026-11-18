@@ -1,0 +1,28 @@
+.zc-title-help-demo, .zc-title-help-demo * { box-sizing:border-box; }
+.zc-title-help-demo { min-width:0; max-width:100%; min-height:22px; font-family:"PingFang SC","Microsoft YaHei",sans-serif; }
+.zc-title-help { display:inline-flex; align-items:center; gap:4px; min-height:22px; max-width:100%; color:#333; }
+.zc-title-help-label { min-width:0; font-size:16px; font-weight:600; line-height:22px; }
+.zc-title-help-trigger {
+  appearance:none; display:grid; place-items:center; flex:0 0 16px;
+  width:16px; height:22px; margin:0; padding:0; border:0;
+  background:transparent; color:#999; cursor:help;
+}
+.zc-title-help-trigger svg { display:block; width:16px; height:16px; }
+.zc-title-help-trigger:hover, .zc-title-help-trigger[aria-expanded="true"] { color:#6865a7; }
+.zc-title-help-trigger:focus-visible { outline:2px solid #6865a7; outline-offset:3px; border-radius:50%; }
+.zc-title-help-panel {
+  position:fixed; z-index:80; width:240px; max-width:calc(100vw - 16px);
+  max-height:calc(100dvh - 16px); overflow-y:auto; margin:0; padding:8px 12px;
+  border:1px solid #b9b8d8; border-radius:8px;
+  background:rgba(255,255,255,.96); color:#333;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+  text-align:left; overflow-wrap:anywhere;
+}
+.zc-title-help-panel[hidden] { display:none; }
+.zc-title-help-panel p { margin:0; }
+.zc-title-help-panel ul { display:grid; gap:8px; list-style:none; margin:0; padding:0; font-size:14px; line-height:22px; }
+.zc-title-help-panel li { display:grid; grid-template-columns:8px minmax(0,1fr); gap:4px; align-items:start; }
+.zc-title-help-dot { display:block; width:6px; height:6px; margin-top:8px; border-radius:50%; background:#6865a7; }
+.zc-title-help-examples { display:grid; gap:24px; min-width:0; }
+#component-title-help .zc-title-help-example + .zc-title-help-example { margin:0; padding-top:24px; }

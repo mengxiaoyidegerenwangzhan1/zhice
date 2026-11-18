@@ -12,7 +12,7 @@
     return '<div class="zc-module-actions" role="group" aria-label="模块操作">' + ['image','table','refresh'].map(action => iconMarkup(action, sources)).join('') + '</div>';
   }
   function demoMarkup(sources = iconSources) {
-    return '<div class="zc-module-demo"><div class="zc-module-states"><div class="zc-module-state"><span class="zc-module-state-label">默认</span>' + groupMarkup(sources) + '</div><div class="zc-module-state"><span class="zc-module-state-label">移入</span>' + iconMarkup('image', sources, true) + '</div></div><div class="zc-module-data"><span class="zc-module-data-label">演示数据</span><span>近1年收益</span><strong data-module-value>6.63%</strong></div><p class="zc-module-feedback" role="status" aria-live="polite"></p></div>';
+    return '<div class="zc-module-demo"><div class="zc-module-states"><div class="zc-module-state"><span class="zc-module-state-label">默认</span>' + groupMarkup(sources) + '</div><div class="zc-module-state"><span class="zc-module-state-label">移入</span>' + iconMarkup('image', sources, true) + '</div></div><p class="zc-module-feedback" role="status" aria-live="polite"></p></div>';
   }
   function moduleActionsRuntime(root = document) {
     function download(blob, filename) {
@@ -39,7 +39,7 @@
       });
     }
     root.querySelectorAll('.zc-module-demo').forEach(host => {
-      const value = host.querySelector('[data-module-value]');
+      let value = '6.63%';
       const feedback = host.querySelector('.zc-module-feedback');
       let revision = 0;
       host.addEventListener('click', async event => {
@@ -53,18 +53,18 @@
           feedback.textContent = '正在刷新…';
           setTimeout(() => {
             revision++;
-            value.textContent = [6.63,6.71,6.68][revision % 3].toFixed(2) + '%';
+            value = [6.63,6.71,6.68][revision % 3].toFixed(2) + '%';
             button.disabled = false; button.classList.remove('is-loading');
             button.setAttribute('aria-label', '刷新');
             button.closest('.zc-module-actions')?.removeAttribute('aria-busy');
-            feedback.textContent = '已刷新：近1年收益 ' + value.textContent;
-            host.dispatchEvent(new CustomEvent('modulerefresh', {bubbles:true, detail:{metric:'近1年收益', value:value.textContent}}));
+            feedback.textContent = '刷新完成';
+            host.dispatchEvent(new CustomEvent('modulerefresh', {bubbles:true, detail:{metric:'近1年收益', value:value}}));
           }, 650);
           return;
         }
         button.disabled = true;
         try {
-          const currentValue = value.textContent;
+          const currentValue = value;
           if (action === 'image') {
             download(await imageBlob(currentValue), '近1年收益-演示.png');
             feedback.textContent = '已下载当前演示数据图片（PNG）';
@@ -80,7 +80,7 @@
     });
   }
   async function exportCode() {
-    const response = await fetch('module-actions.css?v=20261118-module-actions');
+    const response = await fetch('module-actions.css?v=20261118-actions-clean');
     if (!response.ok) throw new Error('组件样式读取失败');
     const css = await response.text();
     const embedded = {};
@@ -105,7 +105,7 @@
       if (action === 'spec') {
         const rules = [['组合尺寸', '92 × 32px；图片下载 → 表格下载 → 刷新'], ['外壳', '白底；圆角99px；内边距2px；选项间距2px'], ['单个按钮', '28 × 28px，圆角99px'], ['原始切图', '使用提供的56 × 56px透明PNG，以28 × 28px原比例显示；有效图形约18 × 18px'], ['移入', '当前按钮显示圆形 #F2F3F5 背景'], ['阴影', '0 0 12px rgba(0,0,0,.08)'], ['键盘', 'Tab聚焦按钮；Enter / 空格触发，聚焦显示主色轮廓'], ['刷新中', '旋转刷新图标并禁用当前刷新按钮，完成后恢复'], ['下载示例', '图片导出当前演示数据为PNG；表格导出当前演示数据为CSV']];
         document.getElementById('spec-dialog-title').textContent = '图片/表格下载、刷新 · 设计规范';
-        document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rules.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>三个按钮分别作用于当前模块，不改变其他模块。</li><li>下载图片或表格时使用当前已生效数据；刷新期间保留上次数据显示，完成后更新。</li><li>刷新中不可重复触发；完成和下载后给出轻量反馈。</li><li>此处为本地演示：PNG和CSV实际下载，刷新在三组示例值间轮换。独立HTML已内嵌PNG和交互，不需要外部依赖。</li></ol>';
+        document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rules.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>三个按钮分别作用于当前模块，不改变其他模块。</li><li>下载图片或表格时使用当前已生效数据；刷新期间保留原结果，完成后更新对应模块。</li><li>刷新中不可重复触发；完成和下载后给出轻量反馈。</li><li>此处仅展示操作按钮；PNG和CSV下载固定示例数据，刷新完成后显示反馈。独立HTML已内嵌PNG和交互，不需要外部依赖。</li></ol>';
         document.getElementById('spec-dialog').showModal();
       } else if (action === 'code') {
         codeValue = await exportCode();

@@ -40,7 +40,7 @@
 .zhice-message-close:focus-visible { outline: 2px solid #6865a7; outline-offset: 4px; border-radius: 50%; }
 #component-message .message-example + .message-example { margin-top: 32px; }
 #component-message .message-example .individual-component-heading { margin-bottom: 20px; }
-#component-message .message-example h4 { color: var(--message-title-color); font-size: 20px; font-weight: 500; line-height: 28px; }
+#component-message .message-example h4 { color: var(--message-title-color); font-size: 14px; font-weight: 500; line-height: 22px; }
 .message-preview { min-height: 35px; }
 .message-restore { min-height: 35px; padding: 6px 12px; border: 1px solid #eaeaea; border-radius: 18px; background: #fff; color: #666; font: 400 12px/17px "PingFang SC", sans-serif; cursor: pointer; }
 .message-restore:hover { color: #6865a7; background: #f4f4fc; }

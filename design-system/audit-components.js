@@ -17,35 +17,48 @@ function auditTableMarkup(numericColumns = false) {
   const columns = numericColumns
     ? ['收益 / 因子', '宝盈中证A500指数增强 A', '国寿安保安泽纯债39个月定期开放债券 A', '易方达纳斯达克100ETF联接(QDII-LOF) A']
     : ['产品 / 分类', '产品类型', '持有状态', '持有时长'];
-  function row(note, label, values, level, id = '', parent = '') {
+  function row(note, label, values, level, key, id = '', parent = '') {
     const parentAttribute = parent ? ` data-parent="${parent}"` : '';
     const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${esc(label)}</span></button>` : esc(label);
-    return `<tr class="audit-table-caption"${parentAttribute}><td colspan="4">${note}</td></tr>
-      <tr class="${level}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
+    return `<tr class="audit-table-caption"${parentAttribute}><td colspan="5">${note}</td></tr>
+      <tr class="${level}" data-audit-row="${key}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
+        <td class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-row-select="${key}" aria-label="选择${esc(label)}"></td>
         <th scope="row">${labelMarkup}</th>
         ${values.map(value => `<td class="${numericColumns ? 'audit-number' : 'audit-value-text'}">${esc(value)}</td>`).join('')}
       </tr>`;
   }
   const rows = numericColumns
-    ? row('汇总行 · 可展开', '总收益', ['6.63%', '6.63%', '--'], 'audit-total', 'numeric-total')
-      + row('一级', '全A因子', ['5.07%', '5.07%', '--'], 'audit-level-1', '', 'numeric-total')
-      + row('一级 · 可展开', '风格因子', ['3.46%', '3.46%', '--'], 'audit-level-1', 'numeric-style', 'numeric-total')
-      + row('二级', '贝塔', ['2.54%', '2.54%', '--'], 'audit-level-2', '', 'numeric-style')
-    : row('一级 · 可展开', '权益产品', ['混合型 / 指数型', '持有中', '1 年 5 个月'], 'audit-level-1', 'mixed-equity')
-      + row('二级', '华夏成长混合', ['混合型', '持有中', '1 年 5 个月'], 'audit-level-2', '', 'mixed-equity')
-      + row('二级', '宝盈中证A500指数增强 A', ['指数型', '持有中', '8 个月'], 'audit-level-2', '', 'mixed-equity')
-      + row('一级 · 可展开', '固收产品', ['债券型', '未持有', '--'], 'audit-level-1', 'mixed-bond')
-      + row('二级', '国寿安保安泽纯债39个月定期开放债券 A', ['债券型', '未持有', '--'], 'audit-level-2', '', 'mixed-bond');
-  return `<div class="audit-table-scroll" role="region" aria-label="${name}示例" tabindex="0">
-    <table class="audit-table ${numericColumns ? 'audit-table-numeric' : 'audit-table-comprehensive'}">
-      <colgroup><col class="audit-label-column"><col span="3"></colgroup>
+    ? row('汇总', '总收益', ['6.63%', '6.63%', '--'], 'audit-total', 'numeric-total-default')
+      + row('汇总可展开', '总收益', ['6.63%', '6.63%', '--'], 'audit-total', 'numeric-total-open', 'numeric-total')
+      + row('一级', '全A因子', ['5.07%', '5.07%', '--'], 'audit-level-1', 'numeric-first-default', '', 'numeric-total')
+      + row('一级可展开', '风格因子', ['3.46%', '3.46%', '--'], 'audit-level-1', 'numeric-first-open', 'numeric-style', 'numeric-total')
+      + row('二级', '贝塔', ['2.54%', '2.54%', '--'], 'audit-level-2', 'numeric-second-default', '', 'numeric-style')
+    : row('一级默认', '华夏成长混合', ['混合型', '持有中', '1 年 5 个月'], 'audit-level-1', 'mixed-first-default')
+      + row('一级展开', '权益产品', ['混合型 / 指数型', '持有中', '1 年 5 个月'], 'audit-level-1', 'mixed-first-open', 'mixed-equity')
+      + row('二级默认', '宝盈中证A500指数增强 A', ['指数型', '持有中', '8 个月'], 'audit-level-2', 'mixed-second-default', '', 'mixed-equity')
+      + row('二级展开', '指数增强组合', ['组合', '持有中', '8 个月'], 'audit-level-2', 'mixed-second-open', 'mixed-index', 'mixed-equity')
+      + row('二级明细 · 沿用二级样式', '宝盈中证A500指数增强 A', ['指数型', '持有中', '8 个月'], 'audit-level-2 audit-level-detail', 'mixed-second-detail', '', 'mixed-index');
+  const mainTable = `<div class="audit-table-scroll" role="region" aria-label="${name}多选层级示例" tabindex="0">
+    <table class="audit-table audit-table-selectable ${numericColumns ? 'audit-table-numeric' : 'audit-table-comprehensive'}">
+      <colgroup><col class="audit-checkbox-column"><col class="audit-label-column"><col span="3"></colgroup>
       <thead>
-        <tr class="audit-table-caption"><td colspan="4">表头</td></tr>
-        <tr class="audit-table-header">${columns.map(label => `<th scope="col">${esc(label)}</th>`).join('')}</tr>
+        <tr class="audit-table-caption"><td colspan="5">表头</td></tr>
+        <tr class="audit-table-header"><th scope="col" class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-select-all aria-label="全选${name}所有数据行"></th>${columns.map((label, index) => `<th scope="col"${numericColumns && index > 0 ? ' class="audit-number-heading"' : ''}>${esc(label)}</th>`).join('')}</tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;
+  if (numericColumns) return mainTable;
+  function titledTable(secondLevel) {
+    const note = '左侧带标题的' + (secondLevel ? '二级默认' : '一级默认');
+    return `<div class="audit-titled-example"><p class="audit-table-variant-label">${note}</p>
+      <div class="audit-table-scroll" role="region" aria-label="${note}示例" tabindex="0"><table class="audit-table audit-table-comprehensive audit-table-titled">
+        <colgroup><col class="audit-side-title-column"><col class="audit-titled-field-column"><col span="2"></colgroup>
+        <thead><tr class="audit-table-header"><th scope="col">标题</th><th scope="col">指标</th><th scope="col">华夏成长混合</th><th scope="col">宝盈中证A500指数增强 A</th></tr></thead>
+        <tbody><tr class="${secondLevel ? 'audit-level-2' : 'audit-level-1'}"><th scope="row" class="audit-side-title">${secondLevel ? '持有信息' : '产品信息'}</th><th scope="row">${secondLevel ? '持有时长' : '产品类型'}</th><td class="audit-value-text">${secondLevel ? '1 年 5 个月' : '混合型'}</td><td class="audit-value-text">${secondLevel ? '8 个月' : '指数型'}</td></tr></tbody>
+      </table></div></div>`;
+  }
+  return '<div class="audit-table-combination">' + mainTable + '<div class="audit-titled-examples">' + titledTable(false) + titledTable(true) + '</div></div>';
 }
 
 function auditRangeMarkup() {
@@ -99,6 +112,21 @@ function auditRuntime(root = document) {
       row.hidden=!visible;
     });
   }
+  function updateSelection(table) {
+    const selectAll = table.querySelector('[data-audit-select-all]');
+    if (!selectAll) return;
+    const checkboxes = Array.from(table.querySelectorAll('[data-audit-row-select]:not(:disabled)'));
+    const count = checkboxes.filter(checkbox => checkbox.checked).length;
+    selectAll.checked = checkboxes.length > 0 && count === checkboxes.length;
+    selectAll.indeterminate = count > 0 && count < checkboxes.length;
+    selectAll.toggleAttribute('checked', selectAll.checked);
+    selectAll.toggleAttribute('data-indeterminate', selectAll.indeterminate);
+    selectAll.disabled = checkboxes.length === 0;
+    checkboxes.forEach(checkbox => checkbox.toggleAttribute('checked', checkbox.checked));
+  }
+  function selectionDetail(table) {
+    return {selected: Array.from(table.querySelectorAll('[data-audit-row-select]:checked')).map(checkbox => checkbox.dataset.auditRowSelect)};
+  }
   function updateRange(range) {
     const start=Number(range.dataset.start),end=Number(range.dataset.end);
     const selection=range.querySelector('.audit-range-selection');
@@ -108,7 +136,7 @@ function auditRuntime(root = document) {
     range.querySelector('.start').setAttribute('aria-valuemax',end-1);
     range.querySelector('.end').setAttribute('aria-valuemin',start+1);
   }
-  root.querySelectorAll('.audit-table').forEach(updateRows);
+  root.querySelectorAll('.audit-table').forEach(table => { updateRows(table); updateSelection(table); });
   root.querySelectorAll('.audit-range').forEach(updateRange);
   root.addEventListener('click',event=>{
     const trigger=event.target.closest('.audit-select-trigger');
@@ -122,8 +150,19 @@ function auditRuntime(root = document) {
       if(items)drawMenu(select,path);
       else{select.dataset.selection=path.join(',');const text=labels.join(' / ');select.querySelector('.audit-select-value').textContent=labels[labels.length-1];select.querySelector('.audit-select-trigger').title=text;closeMenus();select.dispatchEvent(new CustomEvent('change',{bubbles:true,detail:{value:labels}}));}
     } else if(!event.target.closest('.audit-select,.actions'))closeMenus();
+    if (event.target.closest('.audit-checkbox-cell')) return;
     const toggle=event.target.closest('tr[data-node]')?.querySelector('[data-row-toggle]');
     if(toggle){toggle.setAttribute('aria-expanded',String(toggle.getAttribute('aria-expanded')!=='true'));updateRows(toggle.closest('table'));}
+  });
+  root.addEventListener('change', event => {
+    const checkbox = event.target.closest('[data-audit-select-all], [data-audit-row-select]');
+    if (!checkbox || checkbox.disabled) return;
+    const table = checkbox.closest('table');
+    if (checkbox.hasAttribute('data-audit-select-all')) {
+      table.querySelectorAll('[data-audit-row-select]:not(:disabled)').forEach(rowCheckbox => { rowCheckbox.checked = checkbox.checked; });
+    }
+    updateSelection(table);
+    table.dispatchEvent(new CustomEvent('tableselectionchange', {bubbles:true, detail:selectionDetail(table)}));
   });
   root.addEventListener('keydown',event=>{
     if(event.key==='Escape'){const active=root.querySelector('.audit-select-trigger[aria-expanded="true"]');closeMenus();active?.focus();}
@@ -173,22 +212,25 @@ function installAuditedComponents() {
     ['二级', '12px Regular，文字 #666666'],
     ['数值字体', 'Roboto 等宽数字，缺失值显示 --'],
     ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线'],
-    ['交互', '点击可展开的一级行或汇总行收起 / 展开明细，重新展开保留内部折叠状态'],
+    ['折叠', '点击展开按钮或所在数据行收起 / 展开，重新展开保留内部折叠状态；多选框独立操作，不触发折叠'],
+    ['多选框', '16 × 16px，圆角3px；默认1px #B9B8D8；选中 / 半选 #6865A7；禁用 #CBCBCB'],
+    ['选择规则', '每行独立选择；表头全选当前表全部数据行（含已收起的明细），部分选中时显示半选；折叠保留勾选'],
     ['窄屏', '表格在自身容器横向滚动，不撑宽整页']
   ];
   const mixedTableSpec = spec([
     ...commonTableRules,
-    ['内容组合', '表头 + 一级 + 二级 + 可折叠，展示产品类型、状态与持有时长'],
+    ['状态覆盖', '表头、一级默认、一级展开、二级默认、二级展开，以上状态均带多选框；另有左侧带标题的一级默认与二级默认'],
     ['对齐', '所有表头、行标签与表体内容均居左，数字与文字一致'],
-    ['列宽', '首列260px，其余列等宽'],
-    ['缩进', '一级28px / 二级46px']
-  ], '综合表格适合文字与数字混合内容。示例的权益产品与固收产品可独立展开 / 收起。', '564-55005');
+    ['列宽', '多选框列40px，行标签列260px，其余列等宽'],
+    ['缩进', '一级28px / 二级46px；二级展开的内部明细沿用12px Regular，额外缩进18px'],
+    ['左侧带标题', '两组独立小表不带多选框，左标题与对应数据行垂直居中对齐']
+  ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例单独展示。', '564-55005');
   const numericTableSpec = spec([
     ...commonTableRules,
-    ['内容组合', '表头 + 汇总 + 一级 + 二级 + 可折叠，数字列使用收益因子数据'],
+    ['状态覆盖', '表头、汇总、汇总可展开、一级、一级可展开、二级，全部带多选框；数字列使用收益因子数据'],
     ['对齐', '行标签居左；所有数字及对应列标题均居右'],
     ['汇总行', '14px Medium，位于明细上方，可展开一级明细'],
-    ['列宽', '首列120px，其余基金列等宽'],
+    ['列宽', '多选框列40px，行标签列120px，其余基金列等宽'],
     ['缩进', '汇总10px / 一级28px / 二级46px']
   ], '纯数字表格适合数值比较。总收益汇总可折叠所有一级明细，风格因子可独立折叠二级明细。', '564-55005');
   add(tables, '综合表格', auditTableMarkup(false), mixedTableSpec);

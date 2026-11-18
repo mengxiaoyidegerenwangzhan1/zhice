@@ -12,7 +12,7 @@ let current='buttons',tab='components',filter='',cards=[],codeValue='';
 function toast(t){$('#toast').textContent=t;$('#toast').style.display='block';clearTimeout(window.tt);window.tt=setTimeout(()=>$('#toast').style.display='none',2300)}
 async function copy(t){try{await navigator.clipboard.writeText(t);toast('已复制到剪贴板')}catch(e){const a=document.createElement('textarea');a.value=t;document.body.append(a);a.select();const ok=document.execCommand('copy');a.remove();toast(ok?'已复制到剪贴板':'复制失败，请下载代码')}}
 function btn(k='primary',s='默认'){return '<button class="z-btn '+(k==='secondary'?'secondary ':'')+(s==='移入'?'hover':'')+'" '+(s==='禁用'?'disabled':'')+'>'+(k==='primary'?'开始比较':'清空')+'</button>'}
-function dl(s='默认'){return '<button class="z-download '+(s==='移入'?'hover':'')+'" '+(s==='禁用'?'disabled':'')+'><img alt="" width="16" height="16" src="assets/'+(s==='禁用'?'56360':s==='移入'?'e5209':'6d79d')+'.svg">下载</button>'}
+function dl(s='默认'){return '<button class="z-download '+(s==='移入'?'hover':'')+'" '+(s==='禁用'?'disabled':'')+'>'+"<svg aria-hidden=\"true\" preserveAspectRatio=\"none\" overflow=\"visible\" style=\"display: block;\" width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g id=\"Frame\">\n<path id=\"Vector\" d=\"M2.5 13H13.5C13.646 13 13.766 13.047 13.86 13.141C13.953 13.234 14 13.354 14 13.5C14 13.646 13.953 13.766 13.86 13.86C13.766 13.953 13.646 14 13.5 14H2.5C2.354 14 2.234 13.953 2.14 13.86C2.047 13.766 2 13.646 2 13.5C2 13.354 2.047 13.234 2.14 13.141C2.234 13.047 2.354 13 2.5 13ZM8.5 9.032L12.188 5.344L12.907 6.047L7.954 11L3 6.047L3.703 5.344L7.5 9.141V2.001H8.5V9.032Z\" fill=\"currentColor\"/>\n</g>\n</svg>\n"+'下载</button>'}
 function topComponent(s='默认',icon=false){const img='<img alt="" src="assets/top'+(s==='移入'?'-hover':'')+'.svg" width="27" height="38">';return icon?'<div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center">'+img+'</div>':'<div class="top-wrap"><button class="backtop" aria-label="回到顶部">'+img+'</button></div>'}
 function field(s='默认'){return '<button aria-label="选择日期范围" class="z-date is-empty '+(s==='移入'?'hover':s==='展开'?'open':'')+'" '+(s==='禁用'?'disabled':'')+'><span class="start-value">选择日期</span><span class="to">至</span><span class="end-value">选择日期</span><img alt="" width="13" height="13" src="assets/'+(s==='展开'?'calendar-active':'a435c')+'.svg"></button>'}
 function date(open=false){return '<div class="date-wrap">'+field(open?'展开':'默认')+(open?calendar():'')+'</div>'}
@@ -485,7 +485,7 @@ async function svgFor(element) {
         if (!rectangle.width || !value.trim()) return;
         parts.push('<text x="' + (rectangle.x - bounds.x) + '" y="' + (rectangle.y - bounds.y + rectangle.height * 0.8) + '" fill="' + style.color + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '" font-weight="' + style.fontWeight + '">' + esc(value.trim()) + '</text>');
       };
-      if (node.parentElement.closest('.audit-table th') && range.getClientRects().length > 1) {
+      if (range.getClientRects().length > 1) {
         // Group characters by their rendered line and keep its measured position.
         let line = null;
         for (let index = 0; index < node.length; index++) {
@@ -514,6 +514,17 @@ async function svgFor(element) {
     const y = rectangle.y - bounds.y;
     if (node.tagName.toLowerCase() === 'svg') {
       parts.push(vectorMarkup(node.outerHTML, x, y, rectangle.width, rectangle.height, style.color));
+      return;
+    }
+    if (node.tagName === 'INPUT' && node.type === 'checkbox') {
+      const size = Math.min(rectangle.width, rectangle.height);
+      const left = x + (rectangle.width - size) / 2;
+      const top = y + (rectangle.height - size) / 2;
+      const selected = node.checked || node.indeterminate;
+      const accent = node.disabled ? '#CBCBCB' : '#6865A7';
+      parts.push('<rect x="' + (left + .5) + '" y="' + (top + .5) + '" width="' + (size - 1) + '" height="' + (size - 1) + '" rx="3" fill="' + (selected ? accent : '#ffffff') + '" stroke="' + (selected ? accent : '#B9B8D8') + '"/>');
+      if (node.indeterminate) parts.push('<path d="M' + (left + size * .25) + ' ' + (top + size * .5) + 'H' + (left + size * .75) + '" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>');
+      else if (node.checked) parts.push('<path d="M' + (left + size * .22) + ' ' + (top + size * .5) + 'l' + (size * .2) + ' ' + (size * .2) + ' ' + (size * .36) + ' ' + (-size * .4) + '" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>');
       return;
     }
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(node.tagName)) {
@@ -633,7 +644,7 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261118-segmented')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261118-table-states')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
   if (file.endsWith('.ttf')) {

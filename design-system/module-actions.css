@@ -19,9 +19,6 @@
 .zc-module-icon:disabled { opacity:.4; cursor:not-allowed; }
 .zc-module-icon.is-loading { opacity:1; background:#f2f3f5; cursor:wait; }
 .zc-module-icon.is-loading img { animation:zc-module-spin .8s linear infinite; }
-.zc-module-data { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:16px; color:#666; font-size:12px; line-height:18px; }
-.zc-module-data-label { color:#999; }
-.zc-module-data strong { color:#333; font:500 14px/18px Arial,sans-serif; font-variant-numeric:tabular-nums; }
 .zc-module-feedback { min-height:18px; margin:8px 0 0; color:#666; font-size:12px; line-height:18px; overflow-wrap:anywhere; }
 .zc-module-feedback:empty { display:none; }
 @keyframes zc-module-spin { to { transform:rotate(360deg); } }

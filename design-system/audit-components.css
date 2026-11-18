@@ -50,7 +50,7 @@
 .audit-table-comprehensive .audit-number,
 .audit-table-comprehensive .audit-value-text { text-align:left; }
 .audit-table-numeric .audit-number,
-.audit-table-numeric .audit-table-header th:not(:first-child) { text-align:right; }
+.audit-table-numeric .audit-table-header th.audit-number-heading { text-align:right; }
 .audit-range{width:100%;min-width:320px;height:260px;padding:0 12px;box-sizing:border-box}
 .audit-range-track{height:100%;position:relative;background:#f7f8fa}
 .audit-range-track>img{width:100%;height:260px;display:block}
@@ -158,3 +158,32 @@
   #visual-panel-components .audit-table-examples .actions { margin-left:0; }
   .audit-table-scroll { padding:12px; }
 }
+
+/* Selectable table states retain native checkbox semantics. */
+.audit-table .audit-checkbox-column { width:40px; }
+.audit-table .audit-checkbox-cell { width:40px; padding:12px; text-align:left; }
+.audit-checkbox {
+  appearance:none; display:block; position:relative; width:16px; height:16px;
+  margin:0; padding:0; border:1px solid #b9b8d8; border-radius:3px;
+  background:#fff; cursor:pointer; flex:none; box-sizing:border-box;
+}
+.audit-checkbox:checked, .audit-checkbox:indeterminate { background:#6865a7; border-color:#6865a7; }
+.audit-checkbox:checked::after {
+  content:""; position:absolute; left:4px; top:1px; width:5px; height:9px;
+  border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); box-sizing:border-box;
+}
+.audit-checkbox:indeterminate::after {
+  content:""; position:absolute; left:3px; top:6px; width:8px; height:2px;
+  border:0; background:#fff; transform:none;
+}
+.audit-checkbox:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
+.audit-checkbox:disabled { border-color:#cbcbcb; background:#f7f8fa; cursor:not-allowed; }
+.audit-checkbox:disabled:checked, .audit-checkbox:disabled:indeterminate { background:#cbcbcb; }
+.audit-table .audit-level-detail th { padding-left:64px; }
+.audit-table-combination, .audit-titled-examples { min-width:0; max-width:100%; }
+.audit-titled-examples { display:grid; gap:24px; margin-top:24px; border-top:1px solid #eee; padding-top:24px; }
+.audit-titled-example { min-width:0; max-width:100%; }
+.audit-table-variant-label { margin:0 0 8px; color:#666; font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif; }
+.audit-table-titled .audit-side-title-column { width:120px; }
+.audit-table-titled .audit-titled-field-column { width:160px; }
+.audit-table-titled .audit-side-title { padding-left:12px; vertical-align:middle; color:#333; font-size:14px; line-height:20px; font-weight:400; }
