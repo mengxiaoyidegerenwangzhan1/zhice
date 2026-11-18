@@ -1,7 +1,7 @@
 (function () {
   const views = [
-    ["overview", "产品概览"], ["returns", "收益"], ["holdings", "持仓分析"], ["attribution", "收益归因"],
-    ["manager", "基金经理"], ["company", "基金公司"], ["risk", "风险"], ["basics", "基本信息"]
+    ["overview", "产品概览"], ["returns", "收益"], ["risk", "风险"], ["holdings", "持仓分析"],
+    ["attribution", "收益归因"], ["manager", "基金经理"], ["company", "基金公司"], ["basics", "基本信息"]
   ];
   const viewMap = Object.fromEntries(views);
   const labels = Array.from({ length: 20 }, (_, i) => `${2018 + Math.floor(i / 12)}/${String(i % 12 + 1).padStart(2, "0")}`);
@@ -19,24 +19,24 @@
   }
 
   function header(active) {
+    const f = snapshot.fund;
     return `<header class="fund-identity-panel">
       <div class="fund-identity-main">
-        <div class="fund-title-row"><h1>交银定期支付双息平衡混合(516732)</h1><span class="fund-stars" aria-label="4星">★★★★<span>★</span></span></div>
-        <p>偏股混合型 · 大盘-成长型 · 华夏基金管理有限公司 · 基金经理 郑晓辉 / 刘睿聪</p>
-        <div class="fund-tags"><span>中国股票</span><span>风格</span><span>大盘-成长型</span><span>大盘 成长型</span><span>成立时间：2001-12-18</span></div>
+        <div class="fund-title-row"><h1>${f.name} (${f.code})</h1><span class="fund-stars" aria-label="三星">★★★<span>★★</span></span></div>
+        <p>${f.category} · ${f.style} · ${f.company} · 基金经理 ${f.managers.join(' / ')}</p>
+        <div class="fund-tags"><span>中国股票</span><span>风格 ${f.style}</span><span>成立时间：${f.inception}</span></div>
       </div>
       <div class="fund-identity-actions">${iconButton("plus-circle", "切换")}${iconButton("heart", "收藏")}${iconButton("layers", "对比")}</div>
       <dl class="fund-identity-metrics">
-        <div><dt>单位净值</dt><dd>1.3371<em>+0.58%</em></dd><small>2026-09-23</small></div>
-        <div><dt>累计净值</dt><dd>1.3371</dd><small>成立以来 +731.82%</small></div>
-        <div><dt>最新规模</dt><dd>39.38 <b>亿</b></dd><small>2026-06-30</small></div>
-        <div><dt>综合费率</dt><dd>1.70%</dd><small>同类平均 2.31%</small></div>
+        <div><dt>单位净值</dt><dd>${f.nav.toFixed(4)}<em class="${f.daily < 0 ? 'is-fall' : 'is-rise'}">${f.daily > 0 ? '+' : ''}${f.daily.toFixed(2)}%</em></dd><small>${f.navDate}</small></div>
+        <div><dt>累计净值</dt><dd>${f.accumulatedNav.toFixed(4)}</dd><small>成立以来</small></div>
+        <div><dt>最新规模</dt><dd>${f.size.toFixed(2)} <b>亿</b></dd><small>2026-06-30</small></div>
       </dl>${tabs(active)}
     </header>`;
   }
 
   function panel(kicker, title, content, controls = "", className = "") {
-    return `<section class="fund-panel ${className}"><header class="fund-panel-head"><div>${kicker ? `<span>${kicker}</span>` : ""}${title ? `<h2>${title}</h2>` : ""}</div>${controls ? `<div class="fund-panel-controls">${controls}</div>` : ""}</header>${content}</section>`;
+    return `<section class="fund-panel ${className}"><header class="fund-panel-head"><div>${title ? `<h2>${title}</h2>` : ""}</div>${controls ? `<div class="fund-panel-controls">${controls}</div>` : ""}</header>${content}</section>`;
   }
 
   function dataTable(headers, rows, numeric = []) {
@@ -146,7 +146,7 @@
 
     const dotPill = `<span class="fund-dot-pill"><i></i><i></i></span>`;
     return `${panel("SUMMARY", "核心总结", `${summary}${analysisCards()}`, "", "fund-overview-summary")}
-      ${panel("", "", `<div class="fund-two-charts">${chartBox("fund-overview-return", "收益表现", "is-lg")}${chartBox("fund-overview-risk", "风险表现", "is-lg")}</div>`, `${select("同类:偏股混合型", true)}${select("近1年")}${select("沪深300")}${select("申万一级行业", true)}${dotPill}`, "fund-overview-performance")}
+      ${panel("", "收益与风险", `<div class="fund-two-charts">${chartBox("fund-overview-return", "收益表现", "is-lg")}${chartBox("fund-overview-risk", "风险表现", "is-lg")}</div>`, `${select("同类:偏股混合型", true)}${select("近1年")}${select("沪深300")}${select("申万一级行业", true)}${dotPill}`, "fund-overview-performance")}
       ${panel("", "", `<div class="fund-split-content"><section><h3>前十大持仓股票</h3>${holdingsTable}</section><section><div class="fund-split-head"><h3>持仓盘中趋势</h3><span class="fund-trend-tag">趋势：向上</span></div><div id="fund-holding-trend" class="fund-chart" role="img" aria-label="持仓盘中趋势"></div></section></div>`, "", "fund-panel-plain fund-overview-holdings")}
       <div class="fund-two-panels">
         ${panel("SUMMARY", "阶段涨幅", stageTable, `<span class="fund-text-toggle"><button type="button" class="is-on">比较</button><button type="button">指标</button></span>`, "fund-overview-stage")}
@@ -188,7 +188,7 @@
       ["收益＞10%", "87.16%", "88%"], ["收益＞5%", "54.81%", "2%"], ["收益＞0", "53.56%", "2%"],
       ["收益＜-5%", "3.01%", "4%"], ["收益＜-10", "1.47%", "4%"]
     ];
-    const probTable = `<table class="fund-table fund-prob-table"><thead><tr><th>收益区间</th><th>交银定期支付双息混合</th><th>沪深300</th></tr></thead><tbody>${probRows.map(r => `<tr>${r.map((v, i) => `<td${i ? " class=is-num" : ""}>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    const probTable = `<table class="fund-table fund-prob-table"><thead><tr><th>收益区间</th><th>华夏成长混合</th><th>沪深300</th></tr></thead><tbody>${probRows.map(r => `<tr>${r.map((v, i) => `<td${i ? " class=is-num" : ""}>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
 
     return `${panel("SUMMARY", "业绩与投资者回报", `<div class="fund-return-layout">${chartBox("fund-cumulative-return", "累计收益")}${chartBox("fund-investor-gap", "投资者回报差异")}</div>${rolling}`, `${select("同类:偏股混合型", true)}${toolButton("bar-chart-3", "柱状图", true)}${toolButton("maximize", "全屏")}`)}
       ${panel("SUMMARY", "业绩与投资者回报", `<div class="fund-two-charts">${chartBox("fund-monthly-return", "月度收益")}${chartBox("fund-return-distribution", "月度收益分布")}</div>`, `${select("月度")}${toolButton("bar-chart-3", "柱状图", true)}${toolButton("line-chart", "折线图")}${toolButton("maximize", "全屏")}${toolButton("git-compare", "对比")}`)}
@@ -228,7 +228,7 @@
     const indicatorTable = (heads, rows) => `<table class="fund-risk-table"><thead><tr>${heads.map(v => `<th>${v}</th>`).join("")}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(v => `<td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
     const indicators = `<div class="fund-risk-indicators">${indicatorTable(returnHeads, returnRows)}${indicatorTable(riskHeads, riskRows)}</div>`;
 
-    const eventLegend = `<ul class="fund-event-legend"><li><i style="background:#5B8FF9"></i>交银定期支付双息混合</li><li><i style="background:#D98257"></i>沪深300</li><li><i style="background:#B5E8D5"></i>全球新冠疫情</li><li><i style="background:#C9E7B8"></i>佩洛西引发台海危机</li><li><i style="background:#F6D07A"></i>俄乌冲突爆发</li><li><i style="background:#F2A8A8"></i>美联储进入加息周期</li><li><i style="background:#D9C9F0"></i>中概股风波</li></ul>`;
+    const eventLegend = `<ul class="fund-event-legend"><li><i style="background:#5B8FF9"></i>华夏成长混合</li><li><i style="background:#D98257"></i>沪深300</li><li><i style="background:#B5E8D5"></i>全球新冠疫情</li><li><i style="background:#C9E7B8"></i>佩洛西引发台海危机</li><li><i style="background:#F6D07A"></i>俄乌冲突爆发</li><li><i style="background:#F2A8A8"></i>美联储进入加息周期</li><li><i style="background:#D9C9F0"></i>中概股风波</li></ul>`;
     const scenarioBody = `<div id="fund-scenario" class="fund-chart fund-scenario-chart" role="img" aria-label="情景分析"></div>${eventLegend}<div class="fund-table-wrap"><table class="fund-table fund-event-table"><thead><tr><th>事件</th><th>起止日期</th><th class="is-num">易方达科汇灵活配置混合</th><th class="is-num">沪深300</th></tr></thead><tbody>
       <tr><td>成长行情</td><td>2016-10-01 - 2016-11-28</td><td class="is-num is-rise">0.10%</td><td class="is-num is-rise">25.10%</td></tr>
       <tr><td>价值行情</td><td>2016-12-03 - 2017-01-16</td><td class="is-num is-rise">1.07%</td><td class="is-num is-rise">3.28%</td></tr>
@@ -439,7 +439,7 @@
       </div>`, `${scopePills()}${panelTools()}`)}
       ${panel("SUMMARY", "股票持仓详情", `<h4 class="fund-section-title">前十大重仓股票</h4>${topTenTable()}
         <h4 class="fund-section-title">前十大重仓股票权重变化</h4>${weightMatrix()}`, `${scopePills()}${panelTools()}`)}
-      ${panel("SUMMARY", "股票估值水平", `<section class="fund-chart-block is-lg"><div id="fund-valuation" class="fund-chart" role="img" aria-label="股票估值水平"></div><div class="fund-chart-legend fund-valuation-legend"><span><i class="is-dot" style="background:#5B63C8"></i>交银定期支付双息混合</span><span><i class="is-dot" style="background:#5B8FF9"></i>同类平均</span><span><i class="is-line is-orange"></i>沪深300</span><span><i class="is-line" style="color:#E58FB0"></i>重仓行业</span></div></section>`, `${scopePills()}${whiteSelect("PE")}${panelTools()}`)}
+      ${panel("SUMMARY", "股票估值水平", `<section class="fund-chart-block is-lg"><div id="fund-valuation" class="fund-chart" role="img" aria-label="股票估值水平"></div><div class="fund-chart-legend fund-valuation-legend"><span><i class="is-dot" style="background:#5B63C8"></i>华夏成长混合</span><span><i class="is-dot" style="background:#5B8FF9"></i>同类平均</span><span><i class="is-line is-orange"></i>沪深300</span><span><i class="is-line" style="color:#E58FB0"></i>重仓行业</span></div></section>`, `${scopePills()}${whiteSelect("PE")}${panelTools()}`)}
       ${panel("SUMMARY", "股票流动性", `<div class="fund-two-charts">
         <section class="fund-chart-block"><h3>股票换手率</h3><div id="fund-turnover" class="fund-chart"></div>
           <div class="fund-chart-legend"><span><i style="background:#6B68B3"></i>换手率</span><span><i class="is-line is-blue"></i>同类基金中位数</span><span><i class="is-line is-orange"></i>同类排名</span></div></section>
@@ -471,7 +471,7 @@
     const profile = `<div class="fund-manager-profile"><img src="./assets/fund-manager-avatar.png" alt="基金经理郑晓辉"><div><span>基金经理</span><h2>郑晓辉</h2><p>从业 12.4 年 · 管理规模 186.32 亿 · 在管基金 6 只</p><div class="fund-tags"><span>大盘成长</span><span>科技制造</span><span>中低换手</span></div></div></div>`;
     return `${panel("FUND MANAGER", "基金经理画像", profile)}
       ${panel("PERFORMANCE", "任职业绩", `<div class="fund-two-charts">${chartBox("fund-manager-performance", "任职累计收益")}${chartBox("fund-manager-ranking", "同类排名变化")}</div>`)}
-      ${panel("CAREER", "管理产品", dataTable(["基金名称","任职日期","任职回报","同类排名","管理规模"], [["交银定期支付双息平衡混合","2018-06-15","78.62%","128 / 860","39.38亿"],["交银成长动力混合","2020-02-21","46.31%","216 / 1042","28.16亿"],["交银优势行业混合","2021-09-03","21.08%","342 / 1180","17.44亿"]], [2,3,4]))}`;
+      ${panel("CAREER", "管理产品", dataTable(["基金名称","任职日期","任职回报","同类排名","管理规模"], [["华夏成长混合","2018-06-15","78.62%","128 / 860","39.38亿"],["交银成长动力混合","2020-02-21","46.31%","216 / 1042","28.16亿"],["交银优势行业混合","2021-09-03","21.08%","342 / 1180","17.44亿"]], [2,3,4]))}`;
   }
 
   function companyView() {
@@ -482,7 +482,7 @@
   }
 
   function basicsView() {
-    return `${panel("BASIC INFORMATION", "基金基本信息", dataTable(["字段","内容","字段","内容"], [["基金全称","交银定期支付双息平衡混合","基金代码","516732"],["基金类型","偏股混合型","成立日期","2001-12-18"],["基金公司","华夏基金管理有限公司","基金经理","郑晓辉 / 刘睿聪"],["托管银行","中国建设银行","最新规模","39.38亿"]]))}
+    return `${panel("BASIC INFORMATION", "基金基本信息", dataTable(["字段","内容","字段","内容"], [["基金全称","华夏成长混合","基金代码","516732"],["基金类型","偏股混合型","成立日期","2001-12-18"],["基金公司","华夏基金管理有限公司","基金经理","郑晓辉 / 刘睿聪"],["托管银行","中国建设银行","最新规模","39.38亿"]]))}
       ${panel("TRANSACTION", "申购与赎回", `<div class="fund-two-tables">${dataTable(["申购金额","费率"], [["50万元以下","1.50%"],["50万元至100万元","1.20%"],["100万元至500万元","0.80%"],["500万元以上","每笔1000元"]], [1])}${dataTable(["持有期限","赎回费率"], [["7日以内","1.50%"],["7日至365日","0.50%"],["365日至730日","0.20%"],["730日以上","0"]], [1])}</div>`)}
       ${panel("FEES", "运作费用", dataTable(["费率种类","本基金费率","同类平均","变更时间"], [["管理费率","1.50%","1.50%","2024-10-10"],["托管费率","0.50%","0.50%","2024-10-10"],["销售服务费","--","--","2024-10-10"]], [1,2]))}`;
   }
@@ -492,7 +492,7 @@
   function template(view) {
     const active = viewMap[view] ? view : "overview";
     document.body.classList.add("fund-sketch-mode");
-    return `<div class="fund-page" data-fund-view="${active}">${header(active)}<main class="fund-content">${renderers[active]()}</main></div>`;
+    return `<div class="fund-page fund-analysis-page" data-fund-view="${active}">${header(active)}<main class="fund-content">${(window.FundDetailSections?.[active] || renderers[active])()}</main></div>`;
   }
 
   function axisOption() {
@@ -625,7 +625,7 @@
 
     // 产品概览：收益与风险走势（5 项图例）
     const trendSeries = (scale, offset, risk) => [
-      { name: "交银定期支付双息混合", type: "line", showSymbol: false, data: labels.map((_, i) => +(offset + i * scale + Math.sin(i * .72) * 7 * scale).toFixed(2)), lineStyle: { width: 2 } },
+      { name: "华夏成长混合", type: "line", showSymbol: false, data: labels.map((_, i) => +(offset + i * scale + Math.sin(i * .72) * 7 * scale).toFixed(2)), lineStyle: { width: 2 } },
       { name: "同类平均", type: "line", showSymbol: false, data: labels.map((_, i) => +(offset + i * scale * .32 + Math.sin(i * .58 + 1) * 2.2 * scale).toFixed(2)), lineStyle: { width: 1.5, type: "dashed" } },
       { name: "沪深300", type: "line", showSymbol: false, data: labels.map((_, i) => +(offset - i * scale * .72 + Math.sin(i * .8) * 6 * scale).toFixed(2)), lineStyle: { width: 1.5 } },
       { name: "更换基金经理", type: "scatter", symbolSize: 6, data: [[risk ? 9 : 7, risk ? -8 : 42]] },
@@ -644,17 +644,17 @@
     // 收益页：月度收益（交银紫 / 沪深300橙）
     const monthCats = ["2018/01", "2018/03", "2018/05", "2018/09", "2018/07", "2018/11", "2019/01", "2019/03", "2019/05"];
     barPercent("fund-monthly-return", monthCats, [
-      { name: "交银定期支付双息混合", data: [24, 6, -8, 24, -12, 9, 7, 5, -9], barMaxWidth: 10 },
+      { name: "华夏成长混合", data: [24, 6, -8, 24, -12, 9, 7, 5, -9], barMaxWidth: 10 },
       { name: "沪深300", data: [30, 10, -5, 14, -6, 6, 4, 13, -7], barMaxWidth: 10 }
     ], -20, 60, 20);
     // 收益页：月度收益分布
     barPercent("fund-return-distribution", ["-15", "-10", "-5", "0", "5", "10", "15", "20"], [
-      { name: "交银定期支付双息混合", data: [3, 4, 12, 21, 10, 15, 5, 3], barMaxWidth: 10 },
+      { name: "华夏成长混合", data: [3, 4, 12, 21, 10, 15, 5, 3], barMaxWidth: 10 },
       { name: "沪深300", data: [4, 6, 17, 18, 9, 7, 2, 2], barMaxWidth: 10 }
     ], 0, 25, 5);
     // 收益页：收益预测概率分布
     barPercent("fund-return-forecast", ["＜-10%", "-10%~-5%", "-5%~-2%", "-2%~0%", "0%~2%", "2%~5%", "5%~10%", "＞10%"], [
-      { name: "交银定期支付双息混合", data: [12, 5, 18, 18, 72, 60, 32, 10], barMaxWidth: 12 },
+      { name: "华夏成长混合", data: [12, 5, 18, 18, 72, 60, 32, 10], barMaxWidth: 12 },
       { name: "沪深300", data: [28, 10, 20, 17, 58, 46, 8, 8], barMaxWidth: 12 }
     ], 0, 100, 20, "收益率", "概率", 10);
     riskReturnScatter();
@@ -699,7 +699,7 @@
       xAxis: { type: "value", name: "收益率", nameLocation: "middle", nameGap: 32, min: 11, max: 23, interval: 2, nameTextStyle: { color: "#666", fontSize: 12 }, axisTick: { show: false }, axisLine: { lineStyle: { color: "#666" } }, axisLabel: { color: "#666", fontSize: 12 }, splitLine: { lineStyle: { color: "#eaeaea" } } },
       yAxis: { type: "value", name: "年化波动率", nameLocation: "start", nameGap: 10, min: 8, max: 36, interval: 2, nameTextStyle: { color: "#666", fontSize: 12, align: "left" }, axisTick: { show: false }, axisLine: { show: false }, axisLabel: { color: "#666", fontSize: 12, formatter: v => majorY.has(v) ? v : "" }, splitLine: { lineStyle: { color: splitColors } } },
       series: [
-        { name: "交银定期支付双息混合", type: "scatter", symbolSize: 16, data: [[14.2, 34]], itemStyle: { color: "#6865A7" }, z: 5 },
+        { name: "华夏成长混合", type: "scatter", symbolSize: 16, data: [[14.2, 34]], itemStyle: { color: "#6865A7" }, z: 5 },
         { name: "沪深300", type: "scatter", symbolSize: 14, data: [[12.3, 32]], itemStyle: { color: "#D98257" }, z: 5,
           markLine: { symbol: "none", silent: true, label: { show: false }, lineStyle: { color: "#bbb" }, data: [{ xAxis: 17 }, { yAxis: 24 }] } },
         { name: "同类平均", type: "scatter", symbolSize: 7, data: [[15.8, 26.6]], itemStyle: { color: "#c9c9c9" } },
@@ -714,12 +714,12 @@
     const n = 40;
     const wave = (base, amp, drift, phase, k) => Array.from({ length: n }, (_, i) => +(base + i * drift + Math.sin(i * k + phase) * amp + Math.sin(i * .31 + phase) * amp * .4).toFixed(2));
     const top = [
-      { name: "交银定期支付双息混合", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 0, yAxisIndex: 0, data: wave(9, 2.2, .12, .5, .5), lineStyle: { color: "#6865A7", width: 2 } },
+      { name: "华夏成长混合", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 0, yAxisIndex: 0, data: wave(9, 2.2, .12, .5, .5), lineStyle: { color: "#6865A7", width: 2 } },
       { name: "同类平均", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 0, yAxisIndex: 0, data: wave(7, 1.2, .06, 1.2, .44), lineStyle: { color: "#BF3A61", width: 1.4, type: "dashed" } },
       { name: "沪深300", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 0, yAxisIndex: 0, data: wave(8, 2.6, .05, 2, .6), lineStyle: { color: "#D98257", width: 1.5 } }
     ];
     const bottom = [
-      { name: "交银定期支付双息混合", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 1, yAxisIndex: 1, data: wave(-10, 5, -.12, 2.4, .5).map(v => Math.min(0, v)), lineStyle: { color: "#6865A7", width: 2 } },
+      { name: "华夏成长混合", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 1, yAxisIndex: 1, data: wave(-10, 5, -.12, 2.4, .5).map(v => Math.min(0, v)), lineStyle: { color: "#6865A7", width: 2 } },
       { name: "同类平均", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 1, yAxisIndex: 1, data: wave(-8, 3, -.05, 0.6, .44).map(v => Math.min(0, v)), lineStyle: { color: "#BF3A61", width: 1.4, type: "dashed" } },
       { name: "沪深300", type: "line", showSymbol: false, symbol: "none", xAxisIndex: 1, yAxisIndex: 1, data: wave(-12, 4.5, -.08, 1.1, .6).map(v => Math.min(0, v)), lineStyle: { color: "#D98257", width: 1.5 } }
     ];
@@ -760,7 +760,7 @@
       xAxis: { type: "category", position: "top", data: ["今年以来", "近1月", "近3月", "近6月", "近1年", "近3年", "近5年"], axisTick: { show: false }, axisLine: { lineStyle: { color: "#666" } }, axisLabel: { color: "#777", fontSize: 14, interval: 0, margin: 6 } },
       yAxis: { type: "value", min: -40, max: 0, interval: 10, axisTick: { show: false }, axisLine: { show: false }, axisLabel: { color: "#808080", fontSize: 12, formatter: v => labels2[v] ?? "" }, splitLine: { lineStyle: { color: "#eaeaea" } } },
       series: [
-        { name: "交银定期支付双息混合", type: "bar", barMaxWidth: 12, data: [-7, -5, -7, -20, -18, -12, -33] },
+        { name: "华夏成长混合", type: "bar", barMaxWidth: 12, data: [-7, -5, -7, -20, -18, -12, -33] },
         { name: "沪深300", type: "bar", barMaxWidth: 12, data: [-6, -4, -8, -22, -14, -10, -37] },
         { name: "同类平均", type: "bar", barMaxWidth: 12, data: [-4, -3, -5, -18, -13, -9, -35] }
       ]
@@ -789,7 +789,7 @@
       yAxis: { type: "value", min: -20, max: 60, interval: 20, axisTick: { show: false }, axisLine: { show: false }, axisLabel: { color: "#8F8686", fontSize: 12, formatter: "{value}%" }, splitLine: { lineStyle: { color: "#eaeaea" } } },
       dataZoom: [{ type: "slider", height: 14, bottom: 26, borderColor: "#eaeaea", fillerColor: "rgba(104,101,167,.12)", handleStyle: { color: "#6865A7" }, textStyle: { color: "#999", fontSize: 10 }, start: 0, end: 100 }],
       series: [
-        { name: "交银定期支付双息混合", type: "line", showSymbol: false, symbol: "none", data: fundData, lineStyle: { color: "#5B8FF9", width: 1.6 },
+        { name: "华夏成长混合", type: "line", showSymbol: false, symbol: "none", data: fundData, lineStyle: { color: "#5B8FF9", width: 1.6 },
           markArea: { silent: true, data: [[band(0, "rgba(243,201,209,.55)"), band(7, "rgba(243,201,209,.55)")], [band(7, "rgba(188,232,216,.65)"), band(15, "rgba(188,232,216,.65)")], [band(15, "rgba(243,201,209,.55)"), band(24, "rgba(243,201,209,.55)")], [band(24, "rgba(198,235,221,.6)"), band(32, "rgba(198,235,221,.6)")], [band(32, "rgba(215,242,230,.7)"), band(37, "rgba(215,242,230,.7)")], [band(37, "rgba(243,201,209,.55)"), band(43, "rgba(243,201,209,.55)")]] } },
         { name: "沪深300", type: "line", showSymbol: false, symbol: "none", data: hsData, lineStyle: { color: "#D98257", width: 1.4 } }
       ]
@@ -919,7 +919,7 @@
       yAxis,
       dataZoom: [{ type: "slider", height: 14, bottom: 30, borderColor: "#eaeaea", fillerColor: "rgba(104,101,167,.12)", handleStyle: { color: "#6865A7" }, textStyle: { color: "#999", fontSize: 10 }, start: 0, end: 100 }],
       series: [
-        { name: "交银定期支付双息混合", type: "line", data: [24, 29, 26, 12, 24, 36, 28, 24, 39], symbol: "circle", symbolSize: 7, itemStyle: { color: "#5B63C8" }, lineStyle: { color: "#5B63C8", width: 1.6 } },
+        { name: "华夏成长混合", type: "line", data: [24, 29, 26, 12, 24, 36, 28, 24, 39], symbol: "circle", symbolSize: 7, itemStyle: { color: "#5B63C8" }, lineStyle: { color: "#5B63C8", width: 1.6 } },
         { name: "同类平均", type: "line", data: [28, 26, 35, 15, 25, 42, 27, 19, 48], symbol: "circle", symbolSize: 6, itemStyle: { color: "#fff", borderColor: "#B79CE0", borderWidth: 1.6 }, lineStyle: { color: "#B79CE0", width: 1.4 } },
         { name: "沪深300", type: "scatter", symbol: "rect", symbolSize: [16, 3], data: [null, 34, 30, 5, 18, 48, 40, 32, 44], itemStyle: { color: "#FFB038" } },
         { name: "重仓行业", type: "scatter", symbol: "rect", symbolSize: [16, 3], data: [null, 26, 36, 32, 42, 30, 22, 14, 42], itemStyle: { color: "#FF9B9B" } }

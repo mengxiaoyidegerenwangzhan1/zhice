@@ -1,0 +1,13 @@
+/* Reuse the design-system line-chart tooltip with a name/value-only row. */
+.fund-chart-tip.zc-return-line-tooltip { position: static; max-width: none; box-sizing: border-box; padding: 10px 12px; border: 1px solid #E5E5E5; border-radius: 8px; background: rgba(255,255,255,.98); box-shadow: 0 4px 12px rgba(0,0,0,.1); color: #333; font: 400 12px/18px "PingFang SC", "Microsoft YaHei", sans-serif; pointer-events: none; }
+.fund-chart-tip .fund-chart-tip-date { display: block; margin: 0 0 6px; color: #333; font-weight: 500; }
+.fund-chart-tip .fund-chart-tip-rows { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.fund-chart-tip .fund-chart-tip-row { display: grid; grid-template-columns: 8px minmax(0,1fr) minmax(55px,auto); gap: 6px; align-items: start; }
+.fund-chart-tip .fund-chart-tip-row > i { display: block; width: 8px; height: 2px; margin-top: 8px; }
+.fund-chart-tip .fund-chart-tip-name { min-width: 0; overflow-wrap: anywhere; }
+.fund-chart-tip .fund-chart-tip-value { color: #333; text-align: right; white-space: nowrap; font: 400 12px/18px Roboto, Arial, sans-serif; font-variant-numeric: tabular-nums; }
+.fund-chart-table-view { min-width: 0; max-height: 360px; overflow: auto; }
+.fund-chart-table-view[hidden], .fund-chart[hidden], .fund-donut-chart[hidden] { display: none !important; }
+.fund-chart-data-table { max-height: inherit; overflow: visible; }
+.fund-chart-data-table th { position: sticky; top: 0; z-index: 1; }
+.fund-chart-table-empty { padding: 60px 20px; color: #999; text-align: center; }

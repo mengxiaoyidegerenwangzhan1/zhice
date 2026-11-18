@@ -1,0 +1,40 @@
+/* Values and hierarchy follow the current design-system audit-table component. */
+.fund-page.fund-analysis-page[data-fund-view] .fund-canonical-scroll {width:100%;max-width:100%;min-width:0;overflow-x:auto;box-sizing:border-box;background:#fff;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table {width:100%;min-width:var(--fund-table-min-width,280px);table-layout:fixed;border-collapse:collapse;border:0;color:#333;background:#fff;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table th,
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table td {height:auto;min-height:0;padding:12px;vertical-align:middle;overflow-wrap:anywhere;white-space:normal;border:0;background:transparent;text-align:left;font:inherit;color:inherit;box-sizing:border-box;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .fund-table-label {padding:12px 10px;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table thead th {font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;color:#999;background:#fff;text-align:left;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table thead tr {border-bottom:1px solid #d9d9d9;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table tbody .audit-level-1,
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table tbody .audit-total {border-bottom:1px solid rgba(234,234,234,.85);}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table tbody .audit-level-2 {font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif;color:#666;border:0;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-row-heading {display:flex;align-items:center;gap:4px;min-width:0;margin-left:18px;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-level-2 .audit-row-heading {margin-left:36px;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-level-detail .audit-row-heading {margin-left:54px;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-total .audit-row-heading {margin-left:0;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-total {font-weight:400;background:#fff;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table.audit-table-numeric .audit-number,
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table.audit-table-numeric thead .audit-number-heading {text-align:right;font-family:Roboto,"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table.audit-table-numeric thead .audit-number-heading {font-family:"PingFang SC","Microsoft YaHei",sans-serif;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table.audit-table-numeric .audit-total .audit-number {font-size:14px;font-weight:500;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table.audit-table-comprehensive th,
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table.audit-table-comprehensive td {text-align:left;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-total th {font-size:14px;font-weight:400;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table [hidden] {display:none;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .is-rise {color:#e44f60;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .is-fall {color:#00b899;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table td.is-rise {color:#e44f60;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table td.is-fall {color:#00b899;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table .audit-numeral {font-family:Roboto,"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table button[data-row-toggle] {display:flex;align-items:center;gap:4px;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table button[data-row-toggle] img {width:14px;height:14px;flex:0 0 14px;}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table button[data-row-toggle][aria-expanded=true] img {transform:rotate(90deg);}
+.fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table button:focus-visible,.fund-page.fund-analysis-page[data-fund-view] .fund-canonical-scroll:focus-visible {outline:2px solid #6865a7;outline-offset:-2px;}
+@media(hover:hover){
+ .fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table tbody tr:hover,
+ .fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table tbody tr:hover>th,
+ .fund-page.fund-analysis-page[data-fund-view] table.fund-canonical-table tbody tr:hover>td {background:#f7f8fa;}
+}
+.fund-page.fund-analysis-page[data-fund-view] .fund-table-total {padding:12px;border-bottom:1px solid rgba(234,234,234,.85);font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;background:#fff;}
+.fund-page.fund-analysis-page[data-fund-view] .fund-table-total strong {font:500 14px/20px Roboto,"Helvetica Neue",Arial,sans-serif;}

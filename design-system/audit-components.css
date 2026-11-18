@@ -21,7 +21,7 @@
 .audit-table th,.audit-table td{padding:12px;vertical-align:middle;overflow-wrap:anywhere;text-align:left;font-weight:inherit}
 .audit-table th[scope="row"]{padding:12px 10px}
 .audit-table .audit-label-column{width:120px}
-.audit-table-header th{font-size:14px;font-weight:500;color:#333;text-align:left}
+.audit-table thead th,.component-table thead th,.sector-color-table thead th{font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;color:#999;text-align:left}
 .audit-table-header{border-bottom:1px solid #d9d9d9}
 .audit-table .audit-number{font-family:Roboto,"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;text-align:right}
 .audit-table .audit-total{font-weight:500}

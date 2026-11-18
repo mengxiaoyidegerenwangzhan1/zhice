@@ -1,0 +1,41 @@
+@import url('../design-system/audit-components.css');
+@import url('../design-system/title-help.css');
+@import url('../design-system/view-switch.css');
+@import url('../design-system/module-actions.css');
+
+/* Business layout around the unchanged design-system components. */
+.fund-page .fund-panel-controls { display:flex;align-items:center;flex-wrap:wrap;gap:12px;min-width:0; }
+.fund-page .fund-panel-controls > .zc-module-actions { margin-left:4px; }
+.fund-page .fund-panel-controls > .fund-module-tabs { margin-right:4px; }
+.fund-page .fund-linked-time { width:max-content;max-width:100%;min-width:0; }
+.fund-page .fund-linked-time .lt-controls { gap:12px;flex-wrap:wrap; }
+.fund-page .fund-linked-time .lt-input:focus,.fund-page .fund-linked-time .lt-input:focus-visible { border:0;outline:0;box-shadow:none; }
+.fund-page .fund-linked-time .lt-calendar,.fund-page .fund-linked-time .lt-more-panel { z-index:140; }
+.fund-page .fund-panel:has(.lt-more-panel:not([hidden]),.lt-calendar:not([hidden]),.audit-select-trigger[aria-expanded=true]) { z-index:10; }
+.fund-page .fund-panel h3 .zc-title-help-label { font-size:14px;font-weight:500;line-height:20px; }
+.fund-page .fund-panel h3 .zc-title-help { min-height:20px; }
+.fund-page .fund-panel-head { overflow:visible; }
+.fund-page .fund-panel.is-refreshing > :not(.fund-panel-head) { opacity:.25;pointer-events:none; }
+.fund-page .fund-panel.is-refreshing::after { content:'正在刷新…';position:absolute;inset:72px 20px 20px;display:grid;place-items:center;background:rgba(255,255,255,.65);color:#6865a7;font-size:14px;z-index:8;pointer-events:none; }
+.fund-page .fund-module-tabs { flex:0 0 auto; }
+.fund-page .tab-variant .visual-segmented.module-segmented { display:inline-flex;width:max-content;max-width:100%;height:32px;align-items:center;gap:0;padding:2px;border:0;border-radius:32px;background:#fff;box-shadow:0 0 12px rgba(0,0,0,.08);box-sizing:border-box; }
+.fund-page .tab-variant .visual-segmented.module-segmented button { display:inline-flex;flex:0 0 auto;align-items:center;justify-content:center;height:28px;min-height:28px;padding:0 12px;border:0;border-radius:22px;background:transparent;color:#666;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;white-space:nowrap;cursor:pointer;box-sizing:border-box; }
+.fund-page .tab-variant .visual-segmented.module-segmented button:not(:disabled):not([aria-disabled=true]):hover { background:#f2f3f5; }
+.fund-page .tab-variant .visual-segmented.module-segmented button.is-active,.fund-page .tab-variant .visual-segmented.module-segmented button[aria-selected=true] { background:#f2f3f5;color:#333;font-weight:500; }
+.fund-page .tab-variant .visual-segmented.module-segmented button:focus-visible { outline:2px solid #6865a7;outline-offset:-2px; }
+.fund-page .tab-variant .visual-segmented.module-segmented button:disabled,.fund-page .tab-variant .visual-segmented.module-segmented button[aria-disabled=true] { color:#cbcbcb;background:transparent;cursor:not-allowed; }
+.fund-page .fund-panel.is-selection-empty > :not(.fund-panel-head):not(.fund-selection-empty),
+.fund-page .fund-rolling.is-selection-empty > :not(.fund-rolling-head):not(.fund-selection-empty) { display:none!important; }
+.fund-page .fund-selection-empty { min-height:240px;display:grid;place-items:center;color:#999;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif; }
+.fund-page .fund-selection-empty[hidden] { display:none; }
+/* Old prototype headings styled every descendant span as an English kicker.
+   Restore the canonical component typography inside those headings. */
+.fund-page.fund-analysis-page .fund-panel-head .zc-title-help { display:inline-flex;color:#333;font:600 16px/22px "PingFang SC","Microsoft YaHei",sans-serif; }
+.fund-page.fund-analysis-page .fund-panel-head .zc-title-help-label { display:inline;color:#333;font:600 16px/22px "PingFang SC","Microsoft YaHei",sans-serif; }
+.fund-page.fund-analysis-page .fund-panel-head .zc-title-help-panel { display:block;color:#333;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif; }
+.fund-page.fund-analysis-page .fund-panel-head .zc-title-help-panel[hidden] { display:none; }
+.fund-page.fund-analysis-page .fund-panel-head .audit-field-label { display:inline;color:#999;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif; }
+.fund-page.fund-analysis-page .fund-panel-head .audit-select-value { display:block;color:#333;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif; }
+.fund-page.fund-analysis-page .fund-panel-head .audit-menu-option span,
+.fund-page.fund-analysis-page .fund-panel-head .linked-time-widget span:not(.lt-icon) { color:inherit;font:inherit; }
+.fund-page.fund-analysis-page .fund-panel-head .linked-time-widget .lt-to { color:var(--lt-muted); }

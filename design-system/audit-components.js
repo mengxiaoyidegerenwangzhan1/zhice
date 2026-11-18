@@ -207,9 +207,9 @@ function installAuditedComponents() {
     tableHoverRule,
     ['单元格内边距', '上下、左右各12px，行高随内容自适应'],
     ['行标题格', '上下12px、左右10px；箭头 / 图标与文字间距4px'],
-    ['表头', '14px Medium，文字 #333333，长名称换行'],
-    ['一级', '14px Regular，可展开项左侧显示箭头'],
-    ['二级', '12px Regular，文字 #666666'],
+    ['顶部表头', '仅 thead 中的列标题、分组表头为14px / PingFang SC Regular（400）/ #999999，长名称换行；不改变表体行标题'],
+    ['一级', '表体行标题及数据为14px Regular / #333333；可展开项左侧显示箭头'],
+    ['二级', '表体行标题及数据为12px Regular / #666666'],
     ['数值字体', 'Roboto 等宽数字，缺失值显示 --'],
     ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线'],
     ['折叠', '点击展开按钮或所在数据行收起 / 展开，重新展开保留内部折叠状态；多选框独立操作，不触发折叠'],
@@ -223,20 +223,20 @@ function installAuditedComponents() {
     ['对齐', '所有表头、行标签与表体内容均居左，数字与文字一致'],
     ['列宽', '多选框列40px，行标签列260px，其余列等宽'],
     ['层级缩进', '内容层一级18px / 二级36px，独立于单元格内边距；二级内部明细额外缩进18px'],
-    ['左侧带标题', '两组独立小表不带多选框，不展示顶部表头；只保留左侧标题与对应内容，垂直居中对齐']
+    ['左侧带标题', '两组独立小表不带多选框，不展示顶部表头；左侧分组标题沿用14px Regular / #333333，与对应内容垂直居中对齐']
   ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例与上方表格在同一组件区域内分项展示。', '564-55005');
   const numericTableSpec = spec([
     ...commonTableRules,
     ['状态覆盖', '表头、汇总、汇总可展开、一级、一级可展开、二级，全部带多选框；数字列使用收益因子数据'],
     ['对齐', '行标签居左；所有数字及对应列标题均居右'],
-    ['汇总行', '行标题14px Regular，不额外加大加粗；数值14px Medium；位于明细上方，可展开一级明细'],
+    ['汇总行', '表体行标题14px / PingFang SC Regular（400）/ #333333，不额外加大加粗；数值14px Medium，沿用原数值颜色；位于明细上方，可展开一级明细'],
     ['列宽', '多选框列40px，行标签列120px，其余基金列等宽'],
     ['层级缩进', '内容层汇总0px / 一级18px / 二级36px，独立于单元格内边距']
   ], '纯数字表格适合数值比较。总收益汇总可折叠所有一级明细，风格因子可独立折叠二级明细。', '564-55005');
   add(tables, '综合表格', auditTableMarkup(false), mixedTableSpec);
   add(tables, '纯数字表格', auditTableMarkup(true), numericTableSpec);
 
-  tables.querySelectorAll('th,td').forEach(cell => {
+  tables.querySelectorAll('tbody th,tbody td').forEach(cell => {
     if (cell.classList.contains('audit-number')) return;
     const walker=document.createTreeWalker(cell,NodeFilter.SHOW_TEXT);
     const textNodes=[];

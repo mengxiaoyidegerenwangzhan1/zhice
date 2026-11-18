@@ -1,6 +1,5 @@
 (function installTitleHelp() {
   const examples = [
-    {key:'default', name:'默认', title:'股票资产分布', text:'此处展示当前指标的定义、统计范围及口径说明。', initialOpen:false, node:'623-219786'},
     {key:'single', name:'说明单条移入', title:'持有收益概率', text:'以历史区间内不同日期为买入日，统计持有指定时长后，各收益区间出现的比例。', initialOpen:true, node:'623-219789'},
     {key:'multiple', name:'说明多条移入', title:'大类资产分布', items:['根据基金经理当期在管基金公布的季报统计得到基金经理每个季度所管基金的大类资产分布情况汇总。','不同报告期内，基金经理管理的基金数量可能不同，汇总结果可能存在差异。'], initialOpen:true, node:'623-219792'}
   ];
@@ -87,7 +86,7 @@
         if (action === 'spec') {
           const rows = [['标题', '16px Semibold / 22px，#333333'], ['布局高度', '随标题自适应；浮层脱离文档流，不预留面板高度'], ['问号', '16 × 16px；距标题4px；默认 #999999，移入/展开 #6865A7'], ['浮层', '宽240px，高度自适应；圆角8px；无箭头'], ['面板内边距', '上下8px，左右12px'], ['面板颜色', '96%白色背景 / 1px #B9B8D8描边'], ['阴影', '0 4px 12px rgba(0,0,0,.08)'], ['单条正文', '14px Regular / 20px，#333333'], ['多条正文', '14px Regular / 22px，#333333；条目间8px'], ['列表圆点', '6px / #6865A7，槽宽8px，距文字4px'], ['位置', '优先标题右侧并顶部对齐；单条间距12px，多条8px；空间不足时自动换边或移至下方']];
           document.getElementById('spec-dialog-title').textContent = example.name + ' · 标题说明规范';
-          document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rows.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>移入问号、键盘聚焦或点击问号展开说明，标题保持原颜色。</li><li>移入说明面板继续显示；移出问号与面板后短暂延迟收起。</li><li>点击外部、焦点移出或按Esc收起。说明面板跟随标题定位，不撑宽页面。</li><li>单条使用段落，多条使用主色圆点；保持文字左对齐。</li><li>本页单条与多条初始展开便于核对样式；默认示例中的说明为占位演示内容。</li></ol>';
+          document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rows.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>移入问号、键盘聚焦或点击问号展开说明，标题保持原颜色。</li><li>移入说明面板继续显示；移出问号与面板后短暂延迟收起。</li><li>点击外部、焦点移出或按Esc收起。说明面板跟随标题定位，不撑宽页面。</li><li>单条使用段落，多条使用主色圆点；保持文字左对齐。</li><li>本页保留单条与多条两个可交互示例，初始展开便于核对样式。</li></ol>';
           document.getElementById('spec-dialog').showModal();
         } else if (action === 'code') {
           codeValue = await exportCode(example); document.getElementById('dialog-title').textContent = '标题说明 · 开发代码'; document.getElementById('code-text').textContent = codeValue; document.getElementById('code-dialog').showModal();

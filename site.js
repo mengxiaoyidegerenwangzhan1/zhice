@@ -1153,6 +1153,11 @@ function bindInlineResult(fid, box) {
 function renderFund() {
   view.innerHTML = fundTemplate();
   window.FundAnalysisView.renderCharts();
+  window.FundDetailSections?.renderCharts?.();
+  window.FundChartUI?.enhance(view.querySelector('.fund-page'));
+  window.FundComponents?.mount(view.querySelector('.fund-page'));
+  window.FundLayout?.mount(view.querySelector('.fund-page'));
+  window.FundTables?.mount(view.querySelector('.fund-page'));
 }
 let fundScrollCleanup=null;
 
@@ -1202,6 +1207,7 @@ function updateNav(module) {
 }
 function renderRoute(preserveScroll=false) {
   window.ManagerCompareView?.dispose();
+  window.FundLayout?.dispose();
   document.body.classList.remove("fund-sketch-mode");
   if(fundScrollCleanup){ document.removeEventListener("scroll", fundScrollCleanup); fundScrollCleanup=null; }
   const y=preserveScroll?scrollY:0; disposeCharts(); const route=parseRoute(); absorbParams(route); const module=route.segments[0]||'home'; updateNav(module); document.getElementById('route-progress').classList.add('is-running');

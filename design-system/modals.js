@@ -19,16 +19,12 @@
   }
 
   function demoMarkup() {
-    return '<div class="zc-task-demo"><div class="zc-task-demo-toolbar"><button class="zc-task-button" type="button" data-task-open>打开弹窗</button><button class="zc-task-button zc-task-button-secondary" type="button" data-task-restore hidden>重新展示</button></div><div class="zc-task-preview">' + panelMarkup('task-preview') + '</div><p class="zc-task-feedback" role="status" hidden></p><dialog class="zc-task-dialog" aria-labelledby="task-overlay-title">' + panelMarkup('task-overlay') + '</dialog></div>';
+    return '<div class="zc-task-demo"><div class="zc-task-preview">' + panelMarkup('task-preview') + '</div><p class="zc-task-feedback" role="status" hidden></p></div>';
   }
 
   function taskModalRuntime(root = document) {
     root.querySelectorAll('.zc-task-demo').forEach(host => {
       const preview = host.querySelector('.zc-task-preview .zc-task-panel');
-      const dialog = host.querySelector('.zc-task-dialog');
-      const overlay = dialog.querySelector('.zc-task-panel');
-      const restore = host.querySelector('[data-task-restore]');
-      const open = host.querySelector('[data-task-open]');
       const feedback = host.querySelector('.zc-task-feedback');
       function bind(panel, onClose) {
         const form = panel.querySelector('form');
@@ -103,12 +99,14 @@
           reset() { cancelPending(); closeTime(); form.reset(); form.querySelectorAll('[aria-invalid]').forEach(input => input.removeAttribute('aria-invalid')); form.querySelectorAll('.zc-task-error').forEach(error => { error.hidden = true; error.textContent = ''; }); }
         };
       }
-      const inlineState = bind(preview, () => { preview.hidden = true; host.querySelector('.zc-task-preview').hidden = true; restore.hidden = false; restore.focus(); });
-      const overlayState = bind(overlay, () => { dialog.close(); open.focus(); });
-      open.addEventListener('click', () => { overlayState.reset(); feedback.hidden = true; dialog.showModal(); overlay.querySelector('[name="name"]').focus(); });
-      restore.addEventListener('click', () => { inlineState.reset(); preview.hidden = false; host.querySelector('.zc-task-preview').hidden = false; restore.hidden = true; feedback.hidden = true; preview.querySelector('[name="name"]').focus(); });
-      dialog.addEventListener('cancel', event => { event.preventDefault(); overlayState.cancel(); dialog.close(); open.focus(); });
-      dialog.addEventListener('close', () => overlayState.cancel());
+      const inlineState = bind(preview, reason => {
+        inlineState.reset();
+        if (reason !== 'created') {
+          feedback.hidden = false;
+          feedback.textContent = '已取消，示例已恢复默认值';
+        }
+        preview.querySelector('[name="name"]').focus();
+      });
     });
   }
 
@@ -123,11 +121,11 @@
     try {
       if (action === 'spec') {
         document.getElementById('spec-dialog-title').textContent = '表单弹窗 · 设计规范';
-        const rows = [['外框', '宽520px，高度自适应（默认约434px）；圆角16px；白底，无外描边；投影0 0 12px rgba(0,0,0,.08)'], ['标题', '16px Semibold / 22px，#333333'], ['标题区内距', '左右24px，上16px，下12px'], ['正文内距', '左右24px，上下16px；字段间20px，标签与控件间8px'], ['表单控件', '高度32px，14px Regular / 20px；胶囊圆角99px；左右12px内距'], ['文字颜色', '正文 #333333；占位 #999999'], ['控件描边', '1px #EAEAEA（85%）；移入/聚焦 #B9B8D8'], ['多行输入', '默认高100px，圆角12px；上下8px、左右12px内距'], ['触发时间', '频率与时刻两列等宽，间距12px'], ['操作区', '左右24px，上12px，下16px；按钮间16px'], ['按钮', '高34px，取消70px / 创建68px；主色 #6865A7'], ['关闭图标', '18px / #999999'], ['分割线', '标题区下方与操作区上方：1px #EEEEEE']];
-        document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rows.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>点击“打开弹窗”展示遮罩，焦点进入任务名称；Tab在弹窗内移动。</li><li>右上角关闭、取消或Esc收起弹窗；点击遮罩保持打开。再次打开恢复默认值。</li><li>名称与任务内容必填；时刻采用24小时制HH:mm，可直接编辑或点击时钟选择。</li><li>点击创建先校验，错误在对应字段下方显示；提交中禁用创建，防止重复点击。</li><li>演示提交成功后关闭并显示反馈；独立代码通过taskcreate事件传出表单数据，未连接实际定时任务服务。</li><li>窄屏缩小宽度，内容过高时可滚动，操作区和字段不溢出。</li></ol>';
+        const rows = [['外框', '宽520px，高度自适应（默认约434px）；圆角16px；白底，无外描边；投影0 0 12px rgba(0,0,0,.08)'], ['标题', '16px Semibold / 22px，#333333'], ['标题区内距', '左右24px，上16px，下12px'], ['正文内距', '左右24px，上下16px；字段间20px，标签与控件间8px'], ['表单控件', '高度32px，14px Regular / 20px；胶囊圆角99px；左右12px内距'], ['文字颜色', '正文 #333333；占位 #999999'], ['控件描边', '默认1px #EAEAEA（85%）；移入、聚焦及键盘焦点均为单层1px #B9B8D8，不叠加outline或外圈阴影'], ['多行输入', '默认高100px，圆角12px；上下8px、左右12px内距'], ['触发时间', '频率与时刻两列等宽，间距12px'], ['操作区', '左右24px，上12px，下16px；按钮间16px'], ['按钮', '高34px，取消70px / 创建68px；主色 #6865A7'], ['关闭图标', '18px / #999999'], ['分割线', '标题区下方与操作区上方：1px #EEEEEE']];
+        document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rows.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>页面直接展示一个可编辑示例，不额外提供打开或重新展示工具栏。</li><li>右上角关闭、取消或Esc重置当前表单并显示取消反馈；示例保持可见，方便继续试用。时间选择展开时，Esc先收起时间选择。</li><li>名称与任务内容必填；时刻采用24小时制HH:mm，可直接编辑或点击时钟选择。</li><li>点击创建先校验，错误在对应字段下方显示；提交中禁用创建，防止重复点击。</li><li>演示提交成功后显示反馈并恢复默认值；独立代码通过taskcreate事件传出表单数据，未连接实际定时任务服务。</li><li>窄屏缩小宽度，内容过高时可滚动，操作区和字段不溢出。</li></ol>';
         document.getElementById('spec-dialog').showModal();
       } else if (action === 'code') {
-        const response = await fetch('modals.css?v=20261118-modal-outline');
+        const response = await fetch('modals.css?v=20261118-modal-single-border');
         if (!response.ok) throw new Error('弹窗样式读取失败');
         codeValue = '<!doctype html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>新建定时任务 · 表单弹窗</title><style>' + await response.text() + '\nbody{margin:24px;background:#f2f3f5}.zc-task-demo{max-width:640px;margin:auto}</style></head><body>' + demoMarkup() + '<script>(' + taskModalRuntime.toString() + ')();<\/script></body></html>';
         document.getElementById('dialog-title').textContent = '表单弹窗 · 开发代码'; document.getElementById('code-text').textContent = codeValue; document.getElementById('code-dialog').showModal();
