@@ -149,6 +149,33 @@
   background:transparent; color:#cbcbcb; cursor:not-allowed;
 }
 
+/* Module tabs reuse the neutral quick-select style. */
+.tab-variant .visual-segmented.module-segmented {
+  display:inline-flex; width:max-content; max-width:100%; height:32px;
+  align-items:center; gap:0; padding:2px; border:0; border-radius:32px;
+  background:#fff; box-shadow:0 0 12px rgba(0,0,0,.08); box-sizing:border-box;
+}
+.tab-variant .visual-segmented.module-segmented button {
+  display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center;
+  height:28px; min-height:28px; padding:0 12px; border:0; border-radius:22px;
+  background:transparent; color:#666; font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+  white-space:nowrap; cursor:pointer; box-sizing:border-box;
+}
+.tab-variant .visual-segmented.module-segmented button:not(:disabled):not([aria-disabled="true"]):hover {
+  background:#f2f3f5;
+}
+.tab-variant .visual-segmented.module-segmented button.is-active,
+.tab-variant .visual-segmented.module-segmented button[aria-selected="true"] {
+  background:#f2f3f5; color:#333; font-weight:500;
+}
+.tab-variant .visual-segmented.module-segmented button:focus-visible {
+  outline:2px solid #6865a7; outline-offset:-2px;
+}
+.tab-variant .visual-segmented.module-segmented button:disabled,
+.tab-variant .visual-segmented.module-segmented button[aria-disabled="true"] {
+  color:#cbcbcb; background:transparent; cursor:not-allowed;
+}
+
 /* Keep component previews inside the available column on narrow screens. */
 #visual-panel-components .table-spec,
 #visual-panel-components .select-spec,

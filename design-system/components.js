@@ -364,6 +364,7 @@ function legacyRuntime(root = document) {
   root.addEventListener('click', event => {
     const tab = event.target.closest('.fund-tabs-demo button, .tab-variant .visual-segmented button');
     if (tab && !tab.disabled && tab.getAttribute('aria-disabled') !== 'true') {
+      const previous = tab.parentElement.querySelector('[aria-selected="true"]');
       tab.parentElement.querySelectorAll('button').forEach(button => {
         const selected = button === tab;
         button.classList.toggle('is-active', selected);
@@ -371,6 +372,9 @@ function legacyRuntime(root = document) {
         if (button.hasAttribute('aria-pressed')) button.setAttribute('aria-pressed', String(selected));
         button.tabIndex = selected ? 0 : -1;
       });
+      if (tab.closest('.module-segmented') && previous !== tab) {
+        tab.parentElement.dispatchEvent(new CustomEvent('moduletabchange', {bubbles:true, detail:{value:tab.dataset.moduleValue}}));
+      }
     }
 
     const trigger = event.target.closest('.select-control');
@@ -645,7 +649,7 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261118-table-cell-padding')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261118-module-tabs')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
   if (file.endsWith('.ttf')) {
@@ -836,13 +840,27 @@ function addIndividualActions(sample, name, specification, page) {
                 ['选中指示线','3px / #6865A7；顶部圆角 4px；宽度跟随文字']
               ].map(row => '<div><dt>'+row[0]+'</dt><dd>'+row[1]+'</dd></div>').join('') + '</dl><p>单击切换，同一时间只选中一项；再次点击当前项保持不变。移入仅强调文字，禁用项不可切换。支持方向键、Home 和 End 切换。</p><a href="https://www.figma.com/design/rTKeLXF81fJZFEsIIjZWXp/?node-id=235-9961" target="_blank" rel="noreferrer">查看 Figma 源组件 ↗</a>';
             }
+            if (name === '模块内 Tab') {
+              content.innerHTML = '<dl class="component-rule-list">' + [
+                ['用途','模块内平级内容切换，复用快捷选择的中性灰选中态'],
+                ['尺寸','整体高32px，选项高28px，宽度随文字自适应'],
+                ['内边距','容器2px；选项左右12px'],
+                ['圆角','容器32px / 选项22px'],
+                ['文字','14px / 20px；PingFang SC Regular；选中Medium'],
+                ['选中','背景 #F2F3F5；文字 #333333'],
+                ['未选 / 移入','未选透明底、#666666文字；移入 #F2F3F5 底色'],
+                ['容器','白底，无描边；阴影0 0 12px rgba(0,0,0,.08)'],
+                ['位置','模块标题右侧，与下载 / 刷新操作间距16px'],
+                ['禁用','文字 #CBCBCB，不响应切换']
+              ].map(row => '<div><dt>'+row[0]+'</dt><dd>'+row[1]+'</dd></div>').join('') + '</dl><p class="component-rule-note">默认选中比较；同一时间仅选中一项。点击、左右方向键、Home / End切换，重复点击当前项保持不变。切换通过moduletabchange事件通知业务模块，保留当前日期和筛选条件；模块内容高度自适应。</p>';
+            }
             const excluded = name === '下划线 Tab' ? ['分段', '容器圆角'] : name === '胶囊分段 Tab' ? ['下划线', '指示条'] : name === '普通下拉' ? ['联级宽度'] : name === '分级标签' ? ['单级底色', '同级间距'] : [];
             content.querySelectorAll('.component-rule-list > div').forEach(row => {
               if (excluded.some(text => row.querySelector('dt')?.textContent.includes(text))) row.remove();
             });
             const notes = {
               '下划线 Tab': '用于页面主要内容视图切换。同一个控件内只保留一个选中项。',
-              '胶囊分段 Tab': '用于模块内的平级视图切换。示例默认选中收益归因比较；点击互斥切换，再点当前项保持不变。支持左右方向键、Home、End，自动跳过禁用项。',
+              '胶囊分段 Tab': '用于页面二级内容切换。示例默认选中收益归因比较；点击互斥切换，再点当前项保持不变。支持左右方向键、Home、End，自动跳过禁用项。',
               '普通下拉': '用于周期、基准等单级选择。弹出菜单宽度不小于触发器。',
               '联级下拉': '用于板块与行业等树形分类，触发器中保留层级路径。',
               '分级标签': '按父级到子级从左向右排列，底色逐级变浅。',
