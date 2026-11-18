@@ -19,24 +19,24 @@
 .audit-table-scroll{overflow-x:auto;width:100%;max-width:100%;min-width:0;padding:20px;background:#fff;box-sizing:border-box}
 .audit-table{width:100%;min-width:720px;border-collapse:collapse;table-layout:fixed;color:#333;background:#fff;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif}
 .audit-table th,.audit-table td{padding:12px;vertical-align:middle;overflow-wrap:anywhere;text-align:left;font-weight:inherit}
+.audit-table th[scope="row"]{padding:12px 10px}
 .audit-table .audit-label-column{width:120px}
-.audit-table-header th:first-child{padding-inline:10px}
 .audit-table-header th{font-size:14px;font-weight:500;color:#333;text-align:left}
 .audit-table-header{border-bottom:1px solid #d9d9d9}
 .audit-table .audit-number{font-family:Roboto,"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;text-align:right}
 .audit-table .audit-total{font-weight:500}
 .audit-table .audit-total,.audit-table .audit-level-1{border-bottom:1px solid rgba(234,234,234,.85)}
-.audit-table .audit-total th{padding-left:10px;font-size:14px;font-weight:400}
-.audit-table .audit-level-1 th{padding-left:28px}
+.audit-table .audit-total th{font-size:14px;font-weight:400}
+.audit-table .audit-level-1 .audit-row-heading{margin-left:18px}
 .audit-table .audit-level-2{font-size:12px;line-height:18px;color:#666}
-.audit-table .audit-level-2 th{padding-left:46px}
-.audit-table .audit-table-caption td{padding-inline:0;color:#666;font-size:12px;line-height:18px}
+.audit-table .audit-level-2 .audit-row-heading{margin-left:36px}
+.audit-table .audit-table-caption td{color:#666;font-size:12px;line-height:18px}
 .audit-table tr[hidden]{display:none}
 @media (hover:hover){
   .audit-table tbody tr:not(.audit-table-caption):hover{background-color:var(--zc-hover)}
 }
-.audit-table button{display:flex;gap:6px;align-items:center;border:0;background:transparent;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
-.audit-table .audit-total button{gap:4px}
+.audit-row-heading{display:flex;gap:4px;align-items:center;min-width:0}
+.audit-table button{display:flex;gap:4px;align-items:center;border:0;background:transparent;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer}
 .audit-table button img{flex:0 0 14px}
 .audit-table button[aria-expanded=true] img{transform:rotate(90deg)}
 .audit-table button:hover{color:#6865a7}
@@ -181,11 +181,11 @@
 .audit-checkbox:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
 .audit-checkbox:disabled { border-color:#cbcbcb; background:#f7f8fa; cursor:not-allowed; }
 .audit-checkbox:disabled:checked, .audit-checkbox:disabled:indeterminate { background:#cbcbcb; }
-.audit-table .audit-level-detail th { padding-left:64px; }
+.audit-table .audit-level-detail .audit-row-heading { margin-left:54px; }
 .audit-table-combination, .audit-titled-examples { min-width:0; max-width:100%; }
 .audit-titled-examples { display:grid; gap:16px; margin-top:12px; }
 .audit-titled-example { min-width:0; max-width:100%; }
 .audit-table-variant-label { margin:0 0 8px; color:#666; font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif; }
 .audit-table-titled .audit-side-title-column { width:120px; }
 .audit-table-titled .audit-titled-field-column { width:160px; }
-.audit-table-titled .audit-side-title { padding-left:12px; vertical-align:middle; color:#333; font-size:14px; line-height:20px; font-weight:400; }
+.audit-table-titled .audit-side-title { vertical-align:middle; color:#333; font-size:14px; line-height:20px; font-weight:400; }

@@ -19,7 +19,7 @@ function auditTableMarkup(numericColumns = false) {
     : ['产品 / 分类', '产品类型', '持有状态', '持有时长'];
   function row(note, label, values, level, key, id = '', parent = '') {
     const parentAttribute = parent ? ` data-parent="${parent}"` : '';
-    const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${esc(label)}</span></button>` : esc(label);
+    const labelMarkup = id ? `<button type="button" class="audit-row-heading" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${esc(label)}</span></button>` : `<span class="audit-row-heading"><span class="audit-row-label">${esc(label)}</span></span>`;
     return `<tr class="audit-table-caption"${parentAttribute}><td colspan="5">${note}</td></tr>
       <tr class="${level}" data-audit-row="${key}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
         <td class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-row-select="${key}" aria-label="选择${esc(label)}"></td>
@@ -54,7 +54,7 @@ function auditTableMarkup(numericColumns = false) {
     return `<div class="audit-titled-example"><p class="audit-table-variant-label">${note}</p>
       <div class="audit-table-scroll" role="region" aria-label="${note}示例" tabindex="0"><table class="audit-table audit-table-comprehensive audit-table-titled">
         <colgroup><col class="audit-side-title-column"><col class="audit-titled-field-column"><col span="2"></colgroup>
-        <tbody><tr class="${secondLevel ? 'audit-level-2' : 'audit-level-1'}"><th scope="row" class="audit-side-title">${secondLevel ? '持有信息' : '产品信息'}</th><th scope="row">${secondLevel ? '持有时长' : '产品类型'}</th><td class="audit-value-text">${secondLevel ? '1 年 5 个月' : '混合型'}</td><td class="audit-value-text">${secondLevel ? '8 个月' : '指数型'}</td></tr></tbody>
+        <tbody><tr class="${secondLevel ? 'audit-level-2' : 'audit-level-1'}"><th scope="row" class="audit-side-title">${secondLevel ? '持有信息' : '产品信息'}</th><th scope="row"><span class="audit-row-heading"><span class="audit-row-label">${secondLevel ? '持有时长' : '产品类型'}</span></span></th><td class="audit-value-text">${secondLevel ? '1 年 5 个月' : '混合型'}</td><td class="audit-value-text">${secondLevel ? '8 个月' : '指数型'}</td></tr></tbody>
       </table></div></div>`;
   }
   return '<div class="audit-table-combination">' + mainTable + '<div class="audit-titled-examples">' + titledTable(false) + titledTable(true) + '</div></div>';
@@ -205,7 +205,8 @@ function installAuditedComponents() {
   const commonTableRules = [
     ['表面', '白底，无竖向分割线'],
     tableHoverRule,
-    ['单元格内边距', '上、下各 12px，行高随内容自适应'],
+    ['单元格内边距', '上下、左右各12px，行高随内容自适应'],
+    ['行标题格', '上下12px、左右10px；箭头 / 图标与文字间距4px'],
     ['表头', '14px Medium，文字 #333333，长名称换行'],
     ['一级', '14px Regular，可展开项左侧显示箭头'],
     ['二级', '12px Regular，文字 #666666'],
@@ -221,7 +222,7 @@ function installAuditedComponents() {
     ['状态覆盖', '表头、一级默认、一级展开、二级默认、二级展开，以上状态均带多选框；另有左侧带标题的一级默认与二级默认'],
     ['对齐', '所有表头、行标签与表体内容均居左，数字与文字一致'],
     ['列宽', '多选框列40px，行标签列260px，其余列等宽'],
-    ['缩进', '一级28px / 二级46px；二级展开的内部明细沿用12px Regular，额外缩进18px'],
+    ['层级缩进', '内容层一级18px / 二级36px，独立于单元格内边距；二级内部明细额外缩进18px'],
     ['左侧带标题', '两组独立小表不带多选框，不展示顶部表头；只保留左侧标题与对应内容，垂直居中对齐']
   ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例与上方表格在同一组件区域内分项展示。', '564-55005');
   const numericTableSpec = spec([
@@ -230,7 +231,7 @@ function installAuditedComponents() {
     ['对齐', '行标签居左；所有数字及对应列标题均居右'],
     ['汇总行', '行标题14px Regular，不额外加大加粗；数值14px Medium；位于明细上方，可展开一级明细'],
     ['列宽', '多选框列40px，行标签列120px，其余基金列等宽'],
-    ['缩进', '汇总10px / 一级28px / 二级46px']
+    ['层级缩进', '内容层汇总0px / 一级18px / 二级36px，独立于单元格内边距']
   ], '纯数字表格适合数值比较。总收益汇总可折叠所有一级明细，风格因子可独立折叠二级明细。', '564-55005');
   add(tables, '综合表格', auditTableMarkup(false), mixedTableSpec);
   add(tables, '纯数字表格', auditTableMarkup(true), numericTableSpec);
