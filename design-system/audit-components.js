@@ -9,7 +9,7 @@ function auditSelectMarkup(cascade = false, titlePosition = '') {
       {label:'行业指数',children:['申万行业指数','中证行业指数']},{label:'风格指数',children:['成长指数','价值指数']}]},
     {label:'债券指数',children:['中债综合指数','中证全债指数']},{label:'基金指数',children:['股票基金指数','混合基金指数']},{label:'商品指数',children:['商品综合指数']},{label:'港股指数',children:['恒生指数','恒生科技指数']}
   ] : ['行业分布 - 申万行业分类','行业分布 - 中信行业分类','行业分布 - 中证行业分类','行业分布 - 证监会行业分类','板块分布'];
-  return '<div class="audit-select-row">'+(titlePosition==='outside'?'<span class="audit-field-label">'+label+'</span>':'')+'<div class="audit-select" data-tree="'+esc(JSON.stringify(tree))+'" data-selection="'+(cascade?'0,0,0,0':'0')+'"><button type="button" class="audit-select-trigger" aria-haspopup="listbox" aria-expanded="false" title="'+esc(fullPath)+'" style="width:'+(cascade?(titlePosition==='inside'?232:188):(titlePosition==='inside'?320:280))+'px">'+(titlePosition==='inside'?'<span class="audit-field-label">'+label+'</span>':'')+'<span class="audit-select-value">'+value+'</span><img src="assets/audit/20df2.svg" width="12" height="12" alt=""></button></div></div>';
+  return '<div class="audit-select-row">'+(titlePosition==='outside'?'<span class="audit-field-label">'+label+'</span>':'')+'<div class="audit-select" data-tree="'+esc(JSON.stringify(tree))+'" data-selection="'+(cascade?'0,0,0,0':'0')+'"><button type="button" class="audit-select-trigger" aria-haspopup="listbox" aria-expanded="false" title="'+esc(fullPath)+'">'+(titlePosition==='inside'?'<span class="audit-field-label">'+label+'</span>':'')+'<span class="audit-select-value">'+value+'</span><img src="assets/audit/20df2.svg" width="12" height="12" alt=""></button></div></div>';
 }
 
 function auditTableMarkup(numericColumns = false) {
@@ -198,7 +198,7 @@ function installAuditedComponents() {
     const sample=document.createElement('div');sample.className='individual-component-sample';sample.innerHTML=html;container.append(sample);addIndividualActions(sample,name,documentation);
   }
   const selectStack=document.querySelector('.select-control-demo');selectStack.replaceChildren();
-  const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','普通154px起；级联188px起'],['内边距','左右12px'],['内置标题','14px / PingFang SC Regular / #999999'],['菜单','圆角8px / 上下内距8px / 左右无外边距 / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；选择框只显示末级名称，完整路径保留在标题提示和选中数据中，重开恢复路径。移入与选中底色铺满菜单列左右，文字保留12px内距。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
+  const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','内容自适应；无内置标题120–220px，内置标题160–240px；超长文字省略'],['内边距','左右12px'],['内置标题','14px / PingFang SC Regular / #999999'],['菜单','圆角8px / 上下内距8px / 左右无外边距 / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；选择框只显示末级名称，完整路径保留在标题提示和选中数据中，重开恢复路径。宽度随当前内容自适应并受上下限约束；超长内容省略，移入触发器查看完整名称或路径。移入与选中底色铺满菜单列左右，文字保留12px内距。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
   for(const cascade of [false,true])for(const position of ['', 'inside'])add(selectStack,(cascade?'级联选择器':'普通下拉')+(position==='inside'?' · 内置标题':position==='outside'?' · 前置标题':''),auditSelectMarkup(cascade,position),selectSpec);
   const tables = document.querySelector('.table-spec .audit-table-examples');
   tables.replaceChildren();

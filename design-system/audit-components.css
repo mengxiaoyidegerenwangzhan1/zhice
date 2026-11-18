@@ -1,7 +1,8 @@
 .audit-select-row{display:flex;align-items:center;gap:8px;max-width:100%;font:14px/20px "PingFang SC","Microsoft YaHei",sans-serif}
 .audit-field-label{color:#999;white-space:nowrap;flex:0 0 auto;font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif}
 .audit-select{position:relative;max-width:100%;min-width:0;display:inline-block}
-.audit-select-trigger{display:flex;align-items:center;gap:8px;height:32px;max-width:100%;min-width:154px;border:1px solid transparent;border-radius:20px;background:#fff;padding:0 12px;box-shadow:0 0 12px #00000014;color:#333;font:inherit;cursor:pointer}
+.audit-select-trigger{display:flex;align-items:center;gap:8px;height:32px;width:max-content;max-width:min(220px,100%);min-width:120px;border:1px solid transparent;border-radius:20px;background:#fff;padding:0 12px;box-shadow:0 0 12px #00000014;color:#333;font:inherit;cursor:pointer}
+.audit-select-trigger:has(.audit-field-label){min-width:160px;max-width:min(240px,100%)}
 .audit-select-trigger:hover,.audit-select-trigger[aria-expanded=true]{border-color:#b9b8d8}
 .audit-select-trigger:focus-visible{outline:2px solid #6865a7;outline-offset:2px}
 .audit-select-value{flex:1;min-width:0;text-align:left;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
