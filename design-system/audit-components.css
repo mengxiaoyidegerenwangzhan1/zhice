@@ -192,17 +192,17 @@
 .audit-table .audit-checkbox-column { width:40px; }
 .audit-table .audit-checkbox-cell { width:40px; padding:12px; text-align:left; }
 .audit-checkbox {
-  appearance:none; display:block; position:relative; width:16px; height:16px;
+  appearance:none; display:block; position:relative; width:14px; height:14px;
   margin:0; padding:0; border:1px solid #999; border-radius:4px;
   background:#fff; cursor:pointer; flex:none; box-sizing:border-box;
 }
 .audit-checkbox:checked, .audit-checkbox:indeterminate { background:#6865a7; border-color:#6865a7; }
 .audit-checkbox:checked::after {
-  content:""; position:absolute; left:4px; top:1px; width:5px; height:9px;
-  border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); box-sizing:border-box;
+  content:""; position:absolute; left:3px; top:1px; width:4px; height:7px;
+  border:solid #fff; border-width:0 1.5px 1.5px 0; transform:rotate(45deg); box-sizing:border-box;
 }
 .audit-checkbox:indeterminate::after {
-  content:""; position:absolute; left:3px; top:6px; width:8px; height:2px;
+  content:""; position:absolute; left:3px; top:5px; width:6px; height:2px;
   border:0; background:#fff; transform:none;
 }
 .audit-checkbox:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
