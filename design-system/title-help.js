@@ -8,14 +8,13 @@
   const question = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1"/><path d="M5.9 5.8a2.1 2.1 0 0 1 4.2 0c0 1.4-2.1 1.5-2.1 3.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="11.5" r=".7" fill="currentColor"/></svg>';
   function markup(example, prefix) {
     const content = example.items ? '<ul>' + example.items.map(text => '<li><span class="zc-title-help-dot" aria-hidden="true"></span><span>' + escapeHtml(text) + '</span></li>').join('') + '</ul>' : '<p>' + escapeHtml(example.text) + '</p>';
-    return '<div class="zc-title-help-demo" style="min-height:' + (example.initialOpen ? example.items ? 180 : 78 : 22) + 'px"><div class="zc-title-help" data-initial-open="' + example.initialOpen + '" data-panel-gap="' + (example.items ? 8 : 12) + '"><span class="zc-title-help-label">' + escapeHtml(example.title) + '</span><button type="button" class="zc-title-help-trigger" aria-label="' + escapeHtml(example.title) + '说明" aria-expanded="false" aria-describedby="' + prefix + '-panel">' + question + '</button><div class="zc-title-help-panel" id="' + prefix + '-panel" role="tooltip" hidden>' + content + '</div></div></div>';
+    return '<div class="zc-title-help-demo"><div class="zc-title-help" data-initial-open="' + example.initialOpen + '" data-panel-gap="' + (example.items ? 8 : 12) + '"><span class="zc-title-help-label">' + escapeHtml(example.title) + '</span><button type="button" class="zc-title-help-trigger" aria-label="' + escapeHtml(example.title) + '说明" aria-expanded="false" aria-describedby="' + prefix + '-panel">' + question + '</button><div class="zc-title-help-panel" id="' + prefix + '-panel" role="tooltip" hidden>' + content + '</div></div></div>';
   }
 
   function titleHelpRuntime(root = document) {
     root.querySelectorAll('.zc-title-help').forEach(widget => {
       const trigger = widget.querySelector('.zc-title-help-trigger');
       const panel = widget.querySelector('.zc-title-help-panel');
-      const surface = widget.closest('.zc-title-help-demo');
       const initialOpen = widget.dataset.initialOpen === 'true';
       let open = false, closeTimer = null, frame = 0;
       function place() {
@@ -38,12 +37,6 @@
         left = Math.max(inset, Math.min(left, window.innerWidth - width - inset));
         top = Math.max(inset, Math.min(top, window.innerHeight - height - inset));
         panel.style.left = left + 'px'; panel.style.top = top + 'px';
-        // Reserve only the demonstration surface, while the real tooltip stays floating.
-        if (initialOpen && surface) {
-          const reserve = below && top >= box.bottom ? box.height + 8 + height : Math.max(box.height, height);
-          const expected = Math.ceil(reserve) + 'px';
-          if (surface.style.minHeight !== expected) surface.style.minHeight = expected;
-        }
       }
       function schedulePlace() {
         if (frame) return;
@@ -92,7 +85,7 @@
       if (!action) return;
       try {
         if (action === 'spec') {
-          const rows = [['标题', '16px Semibold / 22px，#333333'], ['问号', '16 × 16px；距标题4px；默认 #999999，移入/展开 #6865A7'], ['浮层', '宽240px，高度自适应；圆角8px；无箭头'], ['面板内边距', '上下8px，左右12px'], ['面板颜色', '96%白色背景 / 1px #B9B8D8描边'], ['阴影', '0 4px 12px rgba(0,0,0,.08)'], ['单条正文', '14px Regular / 20px，#333333；示例高78px'], ['多条正文', '14px Regular / 22px，#333333；条目间8px；示例高180px'], ['列表圆点', '6px / #6865A7，槽宽8px，距文字4px'], ['位置', '优先标题右侧并顶部对齐；单条间距12px，多条8px；空间不足时自动换边或移至下方']];
+          const rows = [['标题', '16px Semibold / 22px，#333333'], ['布局高度', '随标题自适应；浮层脱离文档流，不预留面板高度'], ['问号', '16 × 16px；距标题4px；默认 #999999，移入/展开 #6865A7'], ['浮层', '宽240px，高度自适应；圆角8px；无箭头'], ['面板内边距', '上下8px，左右12px'], ['面板颜色', '96%白色背景 / 1px #B9B8D8描边'], ['阴影', '0 4px 12px rgba(0,0,0,.08)'], ['单条正文', '14px Regular / 20px，#333333'], ['多条正文', '14px Regular / 22px，#333333；条目间8px'], ['列表圆点', '6px / #6865A7，槽宽8px，距文字4px'], ['位置', '优先标题右侧并顶部对齐；单条间距12px，多条8px；空间不足时自动换边或移至下方']];
           document.getElementById('spec-dialog-title').textContent = example.name + ' · 标题说明规范';
           document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rows.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>移入问号、键盘聚焦或点击问号展开说明，标题保持原颜色。</li><li>移入说明面板继续显示；移出问号与面板后短暂延迟收起。</li><li>点击外部、焦点移出或按Esc收起。说明面板跟随标题定位，不撑宽页面。</li><li>单条使用段落，多条使用主色圆点；保持文字左对齐。</li><li>本页单条与多条初始展开便于核对样式；默认示例中的说明为占位演示内容。</li></ol>';
           document.getElementById('spec-dialog').showModal();

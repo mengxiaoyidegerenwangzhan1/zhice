@@ -26,7 +26,7 @@
 .audit-table .audit-number{font-family:Roboto,"Helvetica Neue",Arial,sans-serif;font-variant-numeric:tabular-nums;text-align:right}
 .audit-table .audit-total{font-weight:500}
 .audit-table .audit-total,.audit-table .audit-level-1{border-bottom:1px solid rgba(234,234,234,.85)}
-.audit-table .audit-total th{padding-left:10px}
+.audit-table .audit-total th{padding-left:10px;font-size:14px;font-weight:400}
 .audit-table .audit-level-1 th{padding-left:28px}
 .audit-table .audit-level-2{font-size:12px;line-height:18px;color:#666}
 .audit-table .audit-level-2 th{padding-left:46px}
@@ -166,7 +166,7 @@
 .audit-table .audit-checkbox-cell { width:40px; padding:12px; text-align:left; }
 .audit-checkbox {
   appearance:none; display:block; position:relative; width:16px; height:16px;
-  margin:0; padding:0; border:1px solid #999; border-radius:50%;
+  margin:0; padding:0; border:1px solid #999; border-radius:4px;
   background:#fff; cursor:pointer; flex:none; box-sizing:border-box;
 }
 .audit-checkbox:checked, .audit-checkbox:indeterminate { background:#6865a7; border-color:#6865a7; }

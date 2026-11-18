@@ -53,9 +53,9 @@
   const section = document.createElement('article'); section.className = 'component-spec'; section.dataset.catalogId = 'view-switch'; section.id = 'component-view-switch';
   section.innerHTML = '<div class="original-spec-heading"><h3>图表 / 列表切换</h3></div><div class="zc-view-switch-samples"></div>';
   document.getElementById('content').append(section);
-  for (const value of ['list','chart']) {
+  for (const value of ['chart']) {
     const unit = document.createElement('section'); unit.className = 'individual-component zc-view-switch-example';
-    const title = value === 'list' ? '列表选中（默认）' : '图表选中';
+    const title = '交互示例';
     unit.innerHTML = '<div class="individual-component-heading"><h4>' + title + '</h4><div class="actions"><button type="button" data-view-export="svg">复制 SVG</button><button type="button" data-view-export="spec">查看规范</button><button type="button" data-view-export="code">查看代码</button><a href="https://www.figma.com/design/rTKeLXF81fJZFEsIIjZWXp?node-id=623-219794" target="_blank" rel="noreferrer">Figma 源组件</a></div></div>' + markup(value);
     section.querySelector('.zc-view-switch-samples').append(unit);
     unit.addEventListener('click', async event => {
@@ -63,7 +63,7 @@
       if (!action) return;
       try {
         if (action === 'spec') {
-          const rules = [['整体尺寸', '62 × 32px；左图表，右列表'], ['外壳', '白底，圆角99px，无描边；内边距2px，按钮间距2px'], ['按钮 / 原始切图', '按钮28 × 28px；56 × 56px原切图以28 × 28px显示，有效图形约18 × 18px'], ['默认态', '透明背景，图形 #666666'], ['选中态', '使用自带 #F2F3F5 圆底与 #333333 图形的选中切图；不重复叠加底色'], ['移入', '未选中项显示 #F2F3F5 圆形底色'], ['阴影', '0 0 12px rgba(0,0,0,.08)'], ['初始状态', '默认选中列表，可由data-view配置']];
+          const rules = [['整体尺寸', '62 × 32px；左图表，右列表'], ['外壳', '白底，圆角99px，无描边；内边距2px，按钮间距2px'], ['按钮 / 原始切图', '按钮28 × 28px；56 × 56px原切图以28 × 28px显示，有效图形约18 × 18px'], ['默认态', '透明背景，图形 #666666'], ['选中态', '使用自带 #F2F3F5 圆底与 #333333 图形的选中切图；不重复叠加底色'], ['移入', '未选中项显示 #F2F3F5 圆形底色'], ['阴影', '0 0 12px rgba(0,0,0,.08)'], ['初始状态', '本页示例初始选中图表，可由data-view配置']];
           document.getElementById('spec-dialog-title').textContent = '图表 / 列表切换 · 设计规范';
           document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rules.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>同一时间仅选中一个视图；点击后切换对应的默认 / 选中切图。</li><li>重复点击当前项保持选中，不重复触发切换。</li><li>Tab聚焦当前项，左右方向键或Home / End切换；支持Enter与空格操作。</li><li>切换通过viewchange事件通知对应模块；示例只展示控件，不附加演示数据。</li><li>SVG导出当前选中态；独立HTML内嵌全部原切图和交互代码。</li></ol>';
           document.getElementById('spec-dialog').showModal();
