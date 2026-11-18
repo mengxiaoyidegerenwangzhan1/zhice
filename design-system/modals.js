@@ -127,7 +127,7 @@
         document.getElementById('spec-dialog-body').innerHTML = '<h3>尺寸与样式</h3><table><tbody>' + rows.map(row => '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>').join('') + '</tbody></table><h3>交互规则</h3><ol><li>点击“打开弹窗”展示遮罩，焦点进入任务名称；Tab在弹窗内移动。</li><li>右上角关闭、取消或Esc收起弹窗；点击遮罩保持打开。再次打开恢复默认值。</li><li>名称与任务内容必填；时刻采用24小时制HH:mm，可直接编辑或点击时钟选择。</li><li>点击创建先校验，错误在对应字段下方显示；提交中禁用创建，防止重复点击。</li><li>演示提交成功后关闭并显示反馈；独立代码通过taskcreate事件传出表单数据，未连接实际定时任务服务。</li><li>窄屏缩小宽度，内容过高时可滚动，操作区和字段不溢出。</li></ol>';
         document.getElementById('spec-dialog').showModal();
       } else if (action === 'code') {
-        const response = await fetch('modals.css?v=20261118-modal-shadow');
+        const response = await fetch('modals.css?v=20261118-modal-outline');
         if (!response.ok) throw new Error('弹窗样式读取失败');
         codeValue = '<!doctype html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>新建定时任务 · 表单弹窗</title><style>' + await response.text() + '\nbody{margin:24px;background:#f2f3f5}.zc-task-demo{max-width:640px;margin:auto}</style></head><body>' + demoMarkup() + '<script>(' + taskModalRuntime.toString() + ')();<\/script></body></html>';
         document.getElementById('dialog-title').textContent = '表单弹窗 · 开发代码'; document.getElementById('code-text').textContent = codeValue; document.getElementById('code-dialog').showModal();

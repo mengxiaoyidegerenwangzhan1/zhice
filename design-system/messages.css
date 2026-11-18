@@ -1,7 +1,7 @@
 .zhice-message {
   --message-accent: #48cb95;
   --message-background: #f0fff9;
-  --message-border: #c9ffe9;
+  --message-border: #dbf2e9;
   box-sizing: border-box;
   display: flex;
   align-items: center;

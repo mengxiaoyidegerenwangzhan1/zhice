@@ -2,7 +2,7 @@
   const types = [
     {type: 'error', title: '错误', text: '什么什么操作失败', accent: '#F26173', background: '#FFF0F2', border: '#FFD8DC', node: '610-83961'},
     {type: 'warning', title: '警告', text: '您选择了不同类型的基金，建议同类型基金对比更具有参考意义。', accent: '#FFC069', background: '#FFFAF2', border: '#FFECD2', node: '610-83973'},
-    {type: 'success', title: '正确', text: '什么什么操作已经成功', accent: '#48CB95', background: '#F0FFF9', border: '#C9FFE9', node: '610-83985'}
+    {type: 'success', title: '正确', text: '什么什么操作已经成功', accent: '#48CB95', background: '#F0FFF9', border: '#DBF2E9', node: '610-83985'}
   ];
 
   function markup(item) {
@@ -33,7 +33,7 @@
   ];
 
   async function exportCode(item) {
-    const response = await fetch('messages.css?v=20261118-message-titles');
+    const response = await fetch('messages.css?v=20261118-success-border');
     if (!response.ok) throw new Error('气泡样式读取失败');
     const css = await response.text();
     const iconResponse = await fetch('assets/messages/' + item.type + '.png');

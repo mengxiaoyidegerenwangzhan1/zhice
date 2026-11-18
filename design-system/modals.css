@@ -30,7 +30,7 @@
 }
 .zc-task-control::placeholder { color: #999; opacity: 1; }
 .zc-task-control:hover { border-color: #b9b8d8; }
-.zc-task-control:focus { border-color: #b9b8d8; box-shadow: 0 0 0 2px rgba(104,101,167,.08); }
+.zc-task-control:focus { border-color: #b9b8d8; box-shadow: none; }
 .zc-task-control[aria-invalid="true"] { border-color: #f26173; }
 .zc-task-control:disabled { color: #cbcbcb; background: #f7f8fa; cursor: not-allowed; }
 .zc-task-trigger-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
