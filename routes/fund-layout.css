@@ -51,7 +51,7 @@ body.fund-sketch-mode .app-topbar-inner {max-width:none;padding-left:56px;paddin
 .fund-page.fund-analysis-page .fund-analyst-grid {margin-top:16px;}
 .fund-page.fund-analysis-page .fund-panel .fund-chart-block+.fund-chart-block {min-width:0;}
 .fund-identity-space {height:0;}
-.fund-page.fund-analysis-page.is-header-compact .fund-identity-panel {position:fixed;z-index:90;top:68px;left:56px;right:56px;padding:16px 20px 0;border-radius:16px 16px 0 0;box-shadow:0 4px 12px #00000008;}
+.fund-page.fund-analysis-page.is-header-compact .fund-identity-panel {position:fixed;z-index:90;top:68px;left:56px;right:56px;padding:16px 20px 0;border-radius:0;box-shadow:0 4px 12px #00000008;}
 .fund-page.fund-analysis-page.is-header-compact .fund-identity-main {width:calc(100% - 250px);min-height:32px;}
 .fund-page.fund-analysis-page.is-header-compact .fund-identity-main>p,.fund-page.fund-analysis-page.is-header-compact .fund-tags,.fund-page.fund-analysis-page.is-header-compact .fund-identity-metrics {display:none;}
 .fund-page.fund-analysis-page.is-header-compact .fund-identity-actions {top:20px;}

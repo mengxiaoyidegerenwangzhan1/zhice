@@ -7,7 +7,7 @@ body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view] 
 body.fund-sketch-mode .app-topbar-inner {width:100%;max-width:1440px;padding-inline:32px;}
 body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view].is-header-compact>.fund-identity-panel {
   position:fixed;inset:auto;top:var(--fund-fixed-top,68px);left:var(--fund-fixed-left,32px);
-  width:var(--fund-fixed-width,calc(100vw - 64px));right:auto;border-radius:16px 16px 0 0;
+  width:var(--fund-fixed-width,calc(100vw - 64px));right:auto;border-radius:0;
 }
 
 /* Former artboard dimensions must not constrain the live page. */
