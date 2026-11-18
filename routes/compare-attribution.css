@@ -58,7 +58,6 @@
 .zc-attr-sort.is-asc img { transform: rotate(180deg); }
 .zc-attr-sort:disabled { cursor: default; }
 .zc-attr-sort:not(:disabled):hover { color: #6865a7; }
-.zc-attr-rank { position: absolute; top: 0; left: 0; display: block; width: 20px; height: auto; }
 .zc-attr-factor-wrap { overflow: auto; border: 1px solid rgba(234,234,234,.85); }
 .zc-attr-factor-table .zc-attr-level-1 > * { background: #f7f8fa; color: #333; font-size: 14px; font-weight: 500; }
 .zc-attr-factor-table .zc-attr-level-2 > * { background: #fff; color: #333; font-size: 14px; font-weight: 400; }
@@ -162,32 +161,11 @@
 }
 
 .zc-attr-inline-rank {
-  display: inline-grid;
+  display: block;
   flex: 0 0 16px;
-  place-items: center;
   width: 16px;
-  height: 16px;
-  border: 1px solid #c1c1c1;
-  border-radius: 6px;
-  background: linear-gradient(192deg, #d9d9d9 9%, #afafaf 91%);
-  color: #fff;
-  font: 500 12px/14px Roboto, Arial, sans-serif;
-}
-
-.zc-attr-inline-rank.rank-1 {
-  border-color: #ffc545;
-  background: linear-gradient(#fcd273, #e7a511);
-  text-shadow: 0 2px 4px #ce8e00e6;
-}
-
-.zc-attr-inline-rank.rank-2 {
-  border-color: #7e89e0;
-  background: linear-gradient(192deg, #939de7 9%, #5a64b0 91%);
-}
-
-.zc-attr-inline-rank.rank-3 {
-  border-color: #f2ab4e;
-  background: linear-gradient(192deg, #efb568 9%, #cb8347 91%);
+  height: auto;
+  max-width: none;
 }
 
 .zc-fund-attribution .zc-attr-factor-table .zc-attr-level-2 > th {

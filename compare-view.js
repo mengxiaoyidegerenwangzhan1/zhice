@@ -41,7 +41,7 @@ function fundCards(){
 }
 function pill(labels,value,attr){return `<div class="zc-pill">${labels.map((l,i)=>`<button ${attr}="${i}" class="${i===value?'selected':''}">${l}</button>`).join('')}</div>`}
 function controls(){
-  return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((label,index)=>`<button role="tab" aria-selected="${index===tab}" data-tab="${index}" class="${index===tab?'active':''}">${label}</button>`).join('')}</div>${tab===3?`<button type="button" class="zc-reference-toggle ${showDifferences?'is-on':''}" role="switch" aria-checked="${showDifferences}" aria-label="参照差值" data-reference-toggle><img src="./assets/compare-controls/reference-toggle.svg" width="22" height="22" alt=""><span>参照差值</span></button>`:''}</div>`;
+  return `<div class="zc-controls"><div class="zc-tabs" role="tablist">${['产品概览比较','收益与风险比较','资产配置比较','收益归因比较'].map((label,index)=>`<button role="tab" aria-selected="${index===tab}" data-tab="${index}" class="${index===tab?'active':''}">${label}</button>`).join('')}</div>${tab===3&&pinned?`<button type="button" class="zc-reference-toggle ${showDifferences?'is-on':''}" role="switch" aria-checked="${showDifferences}" aria-label="参照差值" data-reference-toggle><img src="./assets/compare-controls/reference-toggle.svg" width="22" height="22" alt=""><span>参照差值</span></button>`:''}</div>`;
 }
 function table(rows,returns=false){
   const numericRows=['基金代码','成立日期','最新单位净值','最新规模','管理费率','托管费率'];
@@ -221,6 +221,7 @@ function datesForPeriod(range, value) {
 function analysisRange(scope, initial = {}) {
   if (!analysisRanges.has(scope)) {
     const range = {start,end,period:'共同时段',unit:'月',holdingMonths:3,...initial};
+    range.defaultPeriod = range.period;
     range.commonStart = range.start;
     range.commonEnd = range.end;
     Object.assign(range,datesForPeriod(range,range.period));
@@ -237,7 +238,6 @@ function analysisTimeControls(scope, initial = {}) {
   const range = analysisRange(scope,initial);
   return window.ZhiceComparisonTime.markup(scope, range, {
     showDate: initial.showDate !== false,
-    inception: fundSampleInception,
   });
 }
 

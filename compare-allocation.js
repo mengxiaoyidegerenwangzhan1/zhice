@@ -234,7 +234,7 @@
   }
 
   function render(options) {
-    const routeClass = isRepresentative(options) ? 'zc-representative-allocation' : 'zc-fund-allocation';
+    const routeClass = `zc-fund-allocation${isRepresentative(options) ? ' zc-representative-allocation' : ''}`;
     return `<div class="zc-allocation-view ${routeClass}">${definitions.map(definition => section(definition, options)).join('')}</div>`;
   }
 

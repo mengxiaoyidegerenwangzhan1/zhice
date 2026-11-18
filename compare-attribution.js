@@ -21,7 +21,7 @@
     stockIndustry: industryOptions[0], brinsonIndustry: industryOptions[0],
     brinsonBenchmark: benchmarkOptions[0], factorBenchmark: benchmarkOptions[0],
     sort: { stock: null, brinson: null },
-    expanded: new Set(['total']),
+    expanded: new Set(['total', 'total-style']),
     fundExpanded: new Set(['total', 'total-style']),
   };
   const styleFactors = [
@@ -78,11 +78,8 @@
     if (!Number.isFinite(value)) return `<td class="${classes}"><span class="zc-attr-missing">--</span></td>`;
     const roundedValue = Math.round(value * 100) / 100;
     const numberClass = `zc-attr-number${roundedValue < 0 ? ' is-negative' : ''}${settings.positive && roundedValue > 0 ? ' is-positive' : ''}`;
-    const representative = isRepresentative(options);
     const rank = settings.rank
-      ? representative
-        ? `<img class="zc-attr-rank rank-${settings.rank}" src="${assets}rank-${settings.rank}.png" width="20" alt="排名第${settings.rank}">`
-        : `<span class="zc-attr-inline-rank rank-${settings.rank}" role="img" aria-label="排名第${settings.rank}">${settings.rank}</span>`
+      ? `<img class="zc-attr-inline-rank rank-${settings.rank}" src="${assets}rank-${settings.rank}.png?v=2" width="16" alt="排名第${settings.rank}">`
       : '';
     let difference = '';
     if (compared) {
@@ -92,8 +89,8 @@
       difference = `<span class="zc-attr-difference" data-attr-difference="${delta ?? ''}" aria-hidden="${!shown}"${delta === null && shown ? ' title="参照基金暂无数据，无法计算差值"' : ''}>${shown ? text : ''}</span>`;
     }
     const valueText = `<span class="${numberClass}" data-attr-value="${roundedValue}">${roundedValue.toFixed(2)}%</span>`;
-    const valueLine = representative ? valueText : `<span class="zc-attr-value-line">${rank}${valueText}</span>`;
-    return `<td class="${classes}${rank && !representative ? ' has-inline-rank' : ''}">${representative ? rank : ''}<span class="zc-attr-value-pair">${valueLine}${difference}</span></td>`;
+    const valueLine = `<span class="zc-attr-value-line">${rank}${valueText}</span>`;
+    return `<td class="${classes}${rank ? ' has-inline-rank' : ''}"><span class="zc-attr-value-pair">${valueLine}${difference}</span></td>`;
   }
 
   function fundCells(fund, values, referenceValues, options, settings = {}) {
@@ -235,7 +232,7 @@
   }
 
   function render(options) {
-    return `<div class="zc-attribution-view ${isRepresentative(options) ? 'zc-representative-attribution' : 'zc-fund-attribution'}${referenceFund(options) ? ' has-reference' : ''}${options.showDifferences === false ? ' hide-differences' : ''}">${['stock', 'brinson', 'factor'].map(key => section(key, options)).join('')}</div>`;
+    return `<div class="zc-attribution-view zc-fund-attribution${isRepresentative(options) ? ' zc-representative-attribution' : ''}${referenceFund(options) ? ' has-reference' : ''}${options.showDifferences === false ? ' hide-differences' : ''}">${['stock', 'brinson', 'factor'].map(key => section(key, options)).join('')}</div>`;
   }
 
   function replaceSection(key, root, options) {

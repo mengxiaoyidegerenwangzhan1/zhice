@@ -12,7 +12,7 @@
         '不同报告期内，基金经理管理的基金数量可能不同，汇总结果可能存在差异。',
       ],
     },
-    { key: 'industries', title: '股票资产分布', help: ['展示基金经理旗下基金的股票持仓分布，占比按所选行业或板块分类汇总。'] },
+    { key: 'industries', title: '股票资产分布', report: true, help: ['展示基金经理旗下基金的股票持仓分布，占比按所选行业或板块分类汇总。'] },
     { key: 'stocks', title: '前十大重仓股票', report: true, holdings: 10 },
     { key: 'bonds', title: '债券资产分布', report: true, help: ['根据所选报告期汇总基金经理旗下基金的债券资产分布。'] },
     { key: 'bond-holdings', title: '前五大重仓债券', report: true, holdings: 5, help: ['根据所选报告期展示基金经理旗下基金持仓占比最高的五只债券。'] },
@@ -90,6 +90,7 @@
       const data = byReport[reportFor(key, options)];
       return labels.map((label, index) => [label, data?.[index] || []]);
     }
+    if (reportFor(key, options) !== latestReport) return industries.map(([label, , color]) => [label, [], color]);
     const grouping = industryGroups[value(options, key, 'classification', classifications[0])];
     if (!grouping) return industries;
     return grouping.map((label, group) => {
@@ -111,10 +112,9 @@
       </button>
       <span id="${scope(key)}-help" role="tooltip">${help.map(line => `<span>${line}</span>`).join('')}</span>
     </span>` : '';
-    const asOf = key === 'industries' ? `<small>截止日期： <span class="zc-allocation-number">${escape(options.asOf || '2026-11-06')}</span></small>` : '';
     const download = holdings ? `data-analysis-download="${scope(key)}"` : 'data-manager-allocation-image';
     return `<div class="zc-manager-allocation-head">
-      <div class="zc-manager-allocation-heading"><h2>${title}</h2>${tooltip}${asOf}</div>
+      <div class="zc-manager-allocation-heading"><h2>${title}</h2>${tooltip}</div>
       <div class="zc-manager-allocation-actions">
         ${category || period ? `<div class="zc-manager-allocation-controls">${category}${period}</div>` : ''}
         <div class="zc-manager-allocation-tools" role="group" aria-label="${title}操作">

@@ -11,10 +11,11 @@
     ['手动修改日期', '可在快捷区间基础上单独修改任一端，保留另一端；有效的新范围生效后清除快捷项高亮，更多恢复原名称。'],
     ['选择起止日期', '点击字段切换单日历，首次选好开始日期后自动进入结束日期选择；开始不能晚于结束，结束不能早于开始。'],
     ['打开日历或尚未选完', '保留上一次生效的结果及快捷项选中态。'],
-    ['清空日期', '有日期时，移入日期框或获得焦点后显示右侧清空按钮，提示“清空日期”；一次清空两端日期和快捷项选中态。']
+    ['清空日期', '有日期时，移入日期框或获得焦点后显示右侧清空按钮，提示“清空日期”；组合组件清空后自动恢复配置的默认时段，并将默认起止日期回填到日期框。手动删空两端日期时执行相同规则；单独使用日期框时保持为空。']
   ];
   const specHtml = '<h3>尺寸与样式</h3><table><thead><tr><th>规范项</th><th>值 / 说明</th></tr></thead><tbody>' + [
     ['默认范围', '组合组件默认选中成立以来；可用data-default-shortcut指定其他默认项；data-shortcuts="false"时仅显示日期框，初始为空'],
+    ['清空后回填', '组合组件清空按钮和手动删空两端均恢复data-default-shortcut配置的默认项，并同步起止日期；没有配置时使用第一个快捷项。仅日期框保持为空。'],
     ['快捷选择', '高32px，选项高28px，左右内边距12px，容器圆角32px，选项圆角22px'],
     ['更多面板', '宽271px，内边距上下16px、左右12px，圆角8px，描边#B9B8D8'],
     ['经理任期浮层', '与主面板内容区等宽，距入口下方6px，圆角8px，描边#B9B8D8；悬停底色铺满整行，左右无外间距；选中经理显示勾选和主色文字'],
@@ -54,6 +55,7 @@
       const commonLabel = options.commonLabel || '共同任期';
       const common = options.common || { start:'2025-08-25', end:today };
       const firstShortcut = options.firstShortcut || { key:'inception', label:'成立以来' };
+      const defaultShortcut = options.defaultShortcut || host.dataset.defaultShortcut || firstShortcut.key;
       const escape = value => String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
       const parse = value => {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return null;
@@ -176,6 +178,16 @@
       function applyRange(start,end,selection,label) {
         state.draft = {start:clamp(start),end:clamp(end)};
         return commit('shortcut',selection,label);
+      }
+      function resetDates() {
+        if (hasShortcuts && (selectOption(defaultShortcut) || selectOption(firstShortcut.key))) return;
+        state.committed={start:'',end:''};
+        state.draft={start:'',end:''};
+        state.selected=null;
+        state.moreLabel='更多';
+        closePanels();
+        syncCommittedState();
+        emitChange('clear');
       }
       function renderMore() {
         const year = Number(anchor.slice(0,4));
@@ -331,8 +343,7 @@
         }
         if (button?.dataset.ltOption) return selectOption(button.dataset.ltOption);
         if (button?.hasAttribute('data-lt-clear')) {
-          state.committed={start:'',end:''};state.draft={start:'',end:''};state.selected=null;state.moreLabel='更多';
-          closePanels();syncCommittedState();emitChange('clear');return;
+          resetDates();return;
         }
         if (button?.dataset.ltNav) {
           const side = Number(button.dataset.ltSide);
@@ -385,22 +396,28 @@
         state.draft[side]=event.target.value.trim();
         state.previewEnd='';
         setError('');
+        if (!state.draft.start && !state.draft.end) { resetDates();return; }
         if (validRange()) commit('manual');
         else {renderSelection();if(state.calendarOpen)renderCalendar();}
       });
       host.addEventListener('change',event => {
         if (!event.target.dataset.ltInput || validRange()) return;
+        if (!state.draft.start && !state.draft.end) { resetDates();return; }
         if (state.draft.start && !withinBounds(state.draft.start) || state.draft.end && !withinBounds(state.draft.end)) setError('请输入有效日期，格式为 YYYY-MM-DD');
         else if (state.draft.start && state.draft.end && state.draft.start>state.draft.end) setError('结束日期应不早于开始日期');
       });
       host.addEventListener('keydown',event => {
         if (event.key==='Escape') {event.preventDefault();closePanels();}
         if (event.key==='ArrowDown' && event.target.dataset.ltInput) {event.preventDefault();openCalendar(event.target.dataset.ltInput);get('[data-lt-nav]')?.focus();}
-        if (event.key==='Enter' && event.target.dataset.ltInput) {event.preventDefault();commit('manual');}
+        if (event.key==='Enter' && event.target.dataset.ltInput) {
+          event.preventDefault();
+          if (!state.draft.start && !state.draft.end) resetDates();
+          else commit('manual');
+        }
       });
       host.linkedTimeApi={getState:()=>JSON.parse(JSON.stringify(state)),select:selectOption,clear:()=>get('[data-lt-clear]').click(),close:closePanels};
       renderMore();renderFields();syncCommittedState();
-      if (!restored && hasShortcuts && !selectOption(host.dataset.defaultShortcut || firstShortcut.key)) selectOption(firstShortcut.key);
+      if (!restored && hasShortcuts && !selectOption(defaultShortcut)) selectOption(firstShortcut.key);
     });
     if (!document.linkedTimeOutsideListening) {
       document.linkedTimeOutsideListening = true;

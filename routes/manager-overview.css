@@ -32,9 +32,9 @@
 .zc-mo-table td { background: #fff; }
 .zc-mo-table td.is-reference { background: #f8f7fc; }
 .zc-mo-table td.is-best { background: #fef5f5; }
-.zc-manager-overview.is-comprehensive .zc-mo-table-wrap { border: 0; }
-.zc-manager-overview.is-comprehensive :is(.zc-mo-table th, .zc-mo-table td) { border-right: 0; border-bottom-color: rgba(234, 234, 234, .85); padding-inline: 10px 12px; }
-.zc-manager-overview.is-comprehensive .zc-mo-table th { background: #fff; color: #333; }
+.zc-manager-overview .zc-mo-table-wrap { border: 0; }
+.zc-manager-overview :is(.zc-mo-table th, .zc-mo-table td) { border-right: 0; border-bottom-color: rgba(234, 234, 234, .85); padding-inline: 10px 12px; }
+.zc-manager-overview .zc-mo-table th { background: #fff; color: #333; }
 .zc-mo-number { font-family: Roboto, 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; }
 .zc-mo-number.is-negative { color: #36b397; }
 .zc-mo-number.is-positive { color: #bf3a61; }

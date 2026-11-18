@@ -76,6 +76,7 @@
     const key = `${mode}:${scope}`;
     if (!ranges.has(key)) {
       const value = { start: '2025-12-09', end: '2026-11-06', period: '共同时段', unit: '月', holdingMonths: 3, ...initial };
+      value.defaultPeriod = value.period;
       value.commonStart ??= value.start;
       value.commonEnd ??= value.end;
       ranges.set(key, value);
@@ -85,11 +86,8 @@
 
   function timeControls(scope, initial = {}) {
     const value = range(scope, initial);
-    const inceptionDates = mode === 'representative' ? managers.map(manager => selectedProduct(manager).inceptionDate) : [];
-    const inception = inceptionDates.length && inceptionDates.every(Boolean) ? inceptionDates.sort().at(-1) : '';
     return window.ZhiceComparisonTime.markup(scope, value, {
       showDate: initial.showDate !== false,
-      inception,
     });
   }
 

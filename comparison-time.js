@@ -1,6 +1,5 @@
 (() => {
   const selections = {
-    '成立以来': 'inception',
     '共同时段': 'common',
     '共同任期': 'common',
     '近1月': 'month',
@@ -29,17 +28,20 @@
     return [...entries.values()];
   }
 
-  function markup(scope, range, { showDate = true, inception = '' } = {}) {
+  function markup(scope, range, { showDate = true } = {}) {
     const commonLabel = range.commonLabel || '共同时段';
     const selected = range.timeSelection ?? selections[range.period] ??
       (/^\d{4}年度$/.test(range.period) ? `annual-${range.period.slice(0, 4)}` : '');
     const shortcutBar = ['common', 'year', 'three-years'];
     const selectedLabel = selected === 'common' ? commonLabel : range.period;
     const moreLabel = selected && !shortcutBar.includes(selected) ? selectedLabel : '更多';
+    const defaultPeriod = range.defaultPeriod || '共同时段';
+    const defaultShortcut = selections[defaultPeriod] ||
+      (/^\d{4}年度$/.test(defaultPeriod) ? `annual-${defaultPeriod.slice(0, 4)}` : 'common');
     return `<div class="zc-analysis-time zc-comparison-time linked-time-widget" data-linked-time data-comparison-time="${escape(scope)}"
       data-lt-state="committed" data-lt-start="${range.timeCleared ? '' : escape(range.start)}" data-lt-end="${range.timeCleared ? '' : escape(range.end)}"
       data-lt-selection="${range.timeCleared ? '' : escape(selected)}" data-lt-label="${range.timeCleared ? '更多' : escape(moreLabel)}"
-      data-inception="${escape(inception)}" data-show-date="${showDate}"></div>`;
+      data-default-shortcut="${escape(defaultShortcut)}" data-show-date="${showDate}"></div>`;
   }
 
   function bind(root, getRange, render, { tenures = [] } = {}) {
@@ -57,7 +59,7 @@
         end: anchor,
         min: minimum,
         max: anchor,
-        inception: widget.dataset.inception,
+        inception: '',
         common: { start: range.commonStart, end: anchor },
         commonLabel,
         firstShortcut: { key: 'common', label: commonLabel },

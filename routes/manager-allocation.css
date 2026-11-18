@@ -32,7 +32,8 @@
 .zc-manager-allocation-controls { gap: 20px; flex: none; }
 .zc-manager-allocation-controls > .zc-analysis-select { width: 200px; }
 [data-manager-allocation-section="assets"] .zc-analysis-select { width: 192px; }
-[data-manager-allocation-section="industries"] .zc-analysis-select { width: 252px; }
+[data-manager-allocation-section="industries"] .zc-analysis-select:first-child { width: 252px; }
+[data-manager-allocation-section="industries"] .zc-analysis-select:last-child { width: 192px; }
 [data-manager-allocation-section="bonds"] .zc-analysis-select:first-child { width: 180px; }
 
 .zc-manager-allocation-tools,
