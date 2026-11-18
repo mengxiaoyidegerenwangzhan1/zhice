@@ -2,7 +2,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const base='https://www.figma.com/design/rTKeLXF81fJZFEsIIjZWXp/?node-id=';
 const pages={
-buttons:{title:'按钮',en:'Button',node:'110-5339',desc:'明确操作层级，让每一次行动都有清晰的引导。',rules:['主要按钮用于核心操作，次要按钮用于辅助操作。','每类包含默认、移入、禁用。主要按钮禁用沿用浅紫底与主色文字。','图文组合：16 px 图标 + 4 px 间距 + 14 px 文字。'],spec:[['按钮高度','34 px'],['主 / 次按钮示例','96 × 34 / 70 × 34 px'],['左右内边距','20 px'],['圆角','99 px'],['文字','14 px · 主按钮 Medium / 次按钮 Regular'],['操作组间距','16 px']]},
+buttons:{title:'按钮',en:'Button',node:'110-5339',desc:'明确操作层级，让每一次行动都有清晰的引导。',rules:['主要按钮用于核心操作，次要按钮用于辅助操作，三级按钮用于轻量文字或图文操作。','主按钮展示默认、移入、禁用三种状态；禁用时沿用浅紫底与主色文字，不响应点击。','三级按钮无底色、无描边；下载仅作为图文操作示例。图文组合为16px图标、4px间距与14px文字。'],spec:[['按钮高度','34 px'],['主 / 次按钮示例','96 × 34 / 70 × 34 px'],['左右内边距','20 px'],['圆角','99 px'],['文字','14 px · 主按钮 Medium / 次按钮 Regular'],['操作组间距','16 px']]},
 date:{title:'日期范围选择器',en:'Date Range Picker',node:'93-4904',desc:'从起点到终点，清晰展示日期选择的每一个状态。',rules:['初始显示灰色占位文字，默认图标 #666666；悬停或展开使用主题色。选完起止日期后回显并收起。','左右展示连续月份，仅在各自本月绘制选区。','年、月可独立切换，导航按月或年浏览并保留已选区间。','默认范围为 2020-01-01 至今天，可通过容器 data-min / data-max 配置。边界日期外禁用，年份与月份选项按范围生成。','点击外部或按 Esc 收起，未完成的选择恢复到上次确认结果。'],spec:[['选择框','260 × 32 px · 圆角 20 px'],['日历面板','526 × 310 px · 圆角 8 px'],['日期单元格','26 × 26 px · 间距 8 px'],['面板内边距','16 px'],['面板描边','#B9B8D8'],['日历图标','默认 #666666 / 展开 #6865A7'],['文字','14 px · PingFang SC Regular']]},
 quick:{title:'快捷时间选择器',en:'Quick Time Select',node:'117-5215',desc:'常用区间一步直达，更多选项保持轻巧、有序。',rules:['默认选择共同时段，常用区间互斥。','移入更多展开，移出触发项和面板后收起；点击更多也可展开，点击外部或按 Esc 收起。','展开时保留当前选择；点选后收起并回显所选项；再次展开保留面板内高亮；点击常用项恢复“更多”。'],spec:[['整体 / 选项高度','32 / 28 px'],['选项左右内边距','12 px'],['外壳 / 选项圆角','32 / 22 px'],['更多面板','270px 宽 / 高度自适应'],['面板间距','8 px'],['面板布局','区间三列；年度两列，分组纵向排列'],['选中样式','#F2F3F5 背景 / #333333 Medium']]},
 top:{title:'回到顶部',en:'Back to Top',node:'117-5943',desc:'在长页面中提供轻量、稳定的返回入口。',rules:['页面滚动超过一屏显示，一屏以内隐藏。','固定在可视区域右下角，不随内容滚动。','点击平滑回到顶部，返回一屏以内时隐藏。'],spec:[['组件外框','80 × 80 px'],['按钮容器','68 × 68 px'],['圆角','8 px'],['图标槽','40 × 40 px'],['图形','26.92 × 38.263 px'],['描边 / 阴影','1 px #E2E2E2 / 0 0 12 px rgba(0,0,0,.08)'],['固定位置示例','右 24 px / 下 24 px']]}}
@@ -35,11 +35,18 @@ function card(c,i){
  return '<article class="component-spec card integrated-spec" data-catalog-id="'+(c.page==='time'?'time-range':c.page==='top'?'back-top':c.page)+'" data-card="'+i+'"><div class="spec-heading"><h3>'+c.name+'</h3><div class="actions"><button data-action="svg" data-i="'+i+'">复制 SVG</button><button data-action="spec" data-i="'+i+'">查看规范</button><button data-action="code" data-i="'+i+'">&lt;/&gt; 查看代码</button><a class="component-source-link" href="'+base+p.node+'" target="_blank" rel="noreferrer">Figma 源组件 ↗</a></div></div><div class="component-spec-layout"><div class="preview-column"><div class="component-demo-surface stage"><div class="sample">'+c.html+'</div></div></div></div></article>';
 }
 function viewSpec(c){
- const p=pages[c.page];
+ const p=c.page==='buttons'?buttonSpecification(c.name):pages[c.page];
  $('#spec-dialog-title').textContent=c.name+' · 设计规范';
  if(c.page==='time'){$('#spec-dialog-body').innerHTML=window.ZhiceLinkedTime.specHtml;$('#spec-dialog').showModal();return;}
  $('#spec-dialog-body').innerHTML='<h3>尺寸与样式</h3><table><thead><tr><th>规范项</th><th>值 / 说明</th></tr></thead><tbody>'+p.spec.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('')+'</tbody></table><h3>交互规则</h3><ol>'+p.rules.map(r=>'<li>'+r+'</li>').join('')+'</ol>';
  $('#spec-dialog').showModal();
+}
+function buttonSpecification(name) {
+ const common = pages.buttons;
+ if (name === '主要按钮') return {...common, spec:[...common.spec, ['默认','背景 #6865A7 / 白色文字'], ['移入','背景 #7774B3 / 白色文字'], ['禁用','背景 #F4F4FC / 文字 #6865A7；原生 disabled']], rules:['用于页面核心操作；同一操作区域优先保留一个主按钮。','示例同时展示默认、移入、禁用态。禁用按钮不可聚焦或触发点击，鼠标为不可操作样式。']};
+ if (name === '三级按钮') return {...common, spec:[['形态','文字或图文操作，无底色、无描边'], ['文字','14px Regular / #555759'], ['图标','16 × 16px，与文字间距4px'], ['移入','文字与图标使用主色 #6865A7'], ['禁用','文字与图标 #CBCBCB，不可触发']], rules:['用于轻量或辅助操作，下载仅为三级按钮的图文示例。','鼠标移入强调文字和图标；禁用时不响应点击。']};
+ if (name === '次要按钮') return {...common, rules:['用于取消、清空等辅助操作。','默认白底浅灰描边；移入使用浅灰背景；禁用时文字为 #CBCBCB，不响应点击。']};
+ return common;
 }
 function render(){
  const previous=current;
@@ -356,7 +363,7 @@ function quickRuntime(root=document){
 function legacyRuntime(root = document) {
   root.addEventListener('click', event => {
     const tab = event.target.closest('.fund-tabs-demo button, .tab-variant .visual-segmented button');
-    if (tab && !tab.disabled) {
+    if (tab && !tab.disabled && tab.getAttribute('aria-disabled') !== 'true') {
       tab.parentElement.querySelectorAll('button').forEach(button => {
         const selected = button === tab;
         button.classList.toggle('is-active', selected);
@@ -404,9 +411,10 @@ function legacyRuntime(root = document) {
   });
   root.addEventListener('keydown', event => {
     const tab = event.target.closest('.fund-tabs-demo button, .tab-variant .visual-segmented button');
-    if (tab && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+    if (tab && !tab.disabled && tab.getAttribute('aria-disabled') !== 'true' && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
       event.preventDefault();
-      const tabs = Array.from(tab.parentElement.querySelectorAll('button:not(:disabled)'));
+      const tabs = Array.from(tab.parentElement.querySelectorAll('button:not(:disabled)')).filter(button => button.getAttribute('aria-disabled') !== 'true');
+      if (!tabs.length) return;
       let index = tabs.indexOf(tab) + (event.key === 'ArrowRight' ? 1 : -1);
       if (event.key === 'Home') index = 0;
       if (event.key === 'End') index = tabs.length - 1;
@@ -508,11 +516,34 @@ async function svgFor(element) {
       parts.push(vectorMarkup(node.outerHTML, x, y, rectangle.width, rectangle.height, style.color));
       return;
     }
-    if (node.tagName === 'INPUT') {
-      const value = node.value || node.placeholder;
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(node.tagName)) {
+      const value = node.tagName === 'SELECT' ? node.selectedOptions[0]?.textContent || '' : node.value || node.placeholder;
       const padding = parseFloat(style.paddingLeft) || 0;
+      const border = parseFloat(style.borderTopWidth) || 0;
+      const background = style.backgroundColor;
+      if (border || background !== 'rgba(0, 0, 0, 0)') {
+        parts.push('<rect x="' + (x + border / 2) + '" y="' + (y + border / 2) + '" width="' + (rectangle.width - border) + '" height="' + (rectangle.height - border) + '" rx="' + Math.min(parseFloat(style.borderTopLeftRadius) || 0, rectangle.height / 2) + '" fill="' + background + '" stroke="' + (border ? style.borderTopColor : 'none') + '" stroke-width="' + border + '"/>');
+      }
       const anchor = style.textAlign === 'center' ? 'middle' : 'start';
-      parts.push('<text x="' + (anchor === 'middle' ? x + rectangle.width / 2 : x + padding) + '" y="' + (y + rectangle.height / 2 + parseFloat(style.fontSize) * .35) + '" text-anchor="' + anchor + '" fill="' + (node.value ? style.color : '#999999') + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '">' + esc(value) + '</text>');
+      const textX = anchor === 'middle' ? x + rectangle.width / 2 : x + padding + border;
+      const color = node.value ? style.color : '#999999';
+      const textAttributes = ' text-anchor="' + anchor + '" fill="' + color + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '" font-weight="' + style.fontWeight + '"';
+      if (node.tagName === 'TEXTAREA') {
+        const context = document.createElement('canvas').getContext('2d');
+        context.font = style.font;
+        const maxWidth = rectangle.width - padding - (parseFloat(style.paddingRight) || 0) - 2 * border;
+        const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.4;
+        let line = '', row = 0;
+        const drawLine = () => { parts.push('<text x="' + textX + '" y="' + (y + (parseFloat(style.paddingTop) || 0) + border + parseFloat(style.fontSize) * .85 + row * lineHeight) + '"' + textAttributes + '>' + esc(line) + '</text>'); row++; line = ''; };
+        for (const character of value) {
+          if (character === '\n') { drawLine(); continue; }
+          if (line && context.measureText(line + character).width > maxWidth) drawLine();
+          line += character;
+        }
+        if (line) drawLine();
+      } else {
+        parts.push('<text x="' + textX + '" y="' + (y + rectangle.height / 2 + parseFloat(style.fontSize) * .35) + '"' + textAttributes + '>' + esc(value) + '</text>');
+      }
       return;
     }
     const maskImage = style.maskImage || style.webkitMaskImage;
@@ -533,6 +564,13 @@ async function svgFor(element) {
     if (node.tagName === 'IMG') {
       const response = await fetch(node.currentSrc || node.src);
       if (!response.ok) throw new Error('图标资源读取失败');
+      const mime = (response.headers.get('content-type') || '').split(';')[0];
+      if (mime && mime !== 'image/svg+xml') {
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const data = btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join(''));
+        parts.push('<image x="' + x + '" y="' + y + '" width="' + rectangle.width + '" height="' + rectangle.height + '" href="data:' + mime + ';base64,' + data + '"/>');
+        return;
+      }
       const source = await response.text();
       let angle = 0;
       if (style.transform.startsWith('matrix(')) {
@@ -545,7 +583,8 @@ async function svgFor(element) {
     if (node.classList.contains('range')) {
       parts.push('<rect x="' + x + '" y="' + y + '" width="' + (rectangle.width + (node.classList.contains('range-continues') ? 8 : 0)) + '" height="' + rectangle.height + '" fill="#f4f4fc"/>');
     }
-    const border = parseFloat(style.borderTopWidth);
+    const modalDivider = node.matches('.zc-task-header, .zc-task-footer');
+    const border = modalDivider ? 0 : parseFloat(style.borderTopWidth);
     const background = style.backgroundColor;
     if (background !== 'rgba(0, 0, 0, 0)' || border) {
       if (node.classList.contains('is-range-start') || node.classList.contains('is-range-end')) {
@@ -571,6 +610,11 @@ async function svgFor(element) {
       parts.push('<path d="M'+x+' '+(y+rectangle.height)+'v-1a2 2 0 0 1 2-2h'+Math.max(0,rectangle.width-4)+'a2 2 0 0 1 2 2v1z" fill="#6865a7"/>');
     }
     for (const child of node.childNodes) await walk(child);
+    if (modalDivider) {
+      const atTop = node.classList.contains('zc-task-footer');
+      const rule = parseFloat(atTop ? style.borderTopWidth : style.borderBottomWidth);
+      if (rule) parts.push('<rect x="' + x + '" y="' + (atTop ? y : y + rectangle.height - rule) + '" width="' + rectangle.width + '" height="' + rule + '" fill="' + (atTop ? style.borderTopColor : style.borderBottomColor) + '"/>');
+    }
     if (node.matches('.audit-table tr')) {
       const rule = parseFloat(style.borderBottomWidth);
       if (rule) parts.push('<rect x="' + x + '" y="' + (y + rectangle.height - rule) + '" width="' + rectangle.width + '" height="' + rule + '" fill="' + style.borderBottomColor + '"/>');
@@ -589,7 +633,7 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261117-table-alignment')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261118-segmented')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
   if (file.endsWith('.ttf')) {
@@ -706,8 +750,23 @@ function installIndividualComponentActions() {
       const sample = document.createElement('div');
       sample.className = 'individual-component-sample';
       button.before(sample);
-      sample.append(button);
-      addIndividualActions(sample, ['主要按钮', '次要按钮', '下载按钮'][index], null, 'buttons');
+      if (index === 0) {
+        const states = document.createElement('div');
+        states.style.cssText = 'display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px';
+        ['默认', '移入', '禁用'].forEach((state, stateIndex) => {
+          const item = document.createElement('div');
+          item.style.cssText = 'display:flex;flex-direction:column;align-items:flex-start;gap:8px';
+          const label = document.createElement('span');
+          label.style.cssText = 'font-size:12px;line-height:18px;color:#999';
+          label.textContent = state;
+          item.append(label);
+          if (stateIndex === 0) item.append(button);
+          else item.insertAdjacentHTML('beforeend', btn('primary', state));
+          states.append(item);
+        });
+        sample.append(states);
+      } else sample.append(button);
+      addIndividualActions(sample, ['主要按钮', '次要按钮', '三级按钮'][index], null, 'buttons');
     });
   }
 }
@@ -745,13 +804,14 @@ function addIndividualActions(sample, name, specification, page) {
             content.innerHTML = specification;
             if (name === '胶囊分段 Tab') {
               content.innerHTML = '<dl class="component-rule-list">' + [
-                ['容器高度','32px'],['选项高度','28px'],['容器内距','2px'],
-                ['选项内距','左右12px'],['圆角','容器32px / 选项22px'],
-                ['文字','14px 苹方 Regular；选中 Medium'],
-                ['默认文字','#555759'],['选中样式','#F2F3F5 背景 / #333333 文字'],
+                ['示例尺寸','450 × 36px'],['选项高度','32px'],['容器内距','2px'],
+                ['选项内距','上下6px / 左右12px'],['圆角','容器与选中块均99px'],
+                ['文字','14px / 20px；PingFang SC Regular；选中 Medium'],
+                ['默认文字','#666666'],['选中样式','rgba(104,101,167,.08) 背景 / #6865A7 文字'],
+                ['移入 / 禁用','移入 #F2F3F5 底色；禁用 #CBCBCB 文字且不可切换'],
                 ['容器背景','#FFFFFF'],['容器阴影','0 0 12px rgba(0,0,0,.08)'],
-                ['宽度','根据选项内容自适应']
-              ].map(row=>'<div><dt>'+row[0]+'</dt><dd>'+row[1]+'</dd></div>').join('') + '</dl><p class="component-rule-note">同一时间只选中一项；点击切换，移入显示浅灰底。整体样式按提供的胶囊选择器规范。</p>';
+                ['宽度','随选项文字自适应；窄屏横向滚动']
+              ].map(row=>'<div><dt>'+row[0]+'</dt><dd>'+row[1]+'</dd></div>').join('') + '</dl><p class="component-rule-note">同一时间只选中一项；点击切换，移入显示浅灰底。</p><a href="https://www.figma.com/design/rTKeLXF81fJZFEsIIjZWXp/?node-id=620-211715" target="_blank" rel="noreferrer">查看 Figma 源组件 ↗</a>';
             }
 
             if (name === '下划线 Tab（一级 Tab）') {
@@ -770,7 +830,7 @@ function addIndividualActions(sample, name, specification, page) {
             });
             const notes = {
               '下划线 Tab': '用于页面主要内容视图切换。同一个控件内只保留一个选中项。',
-              '胶囊分段 Tab': '用于图表或模块内的平级数据视图切换。同一个控件内只保留一个选中项。',
+              '胶囊分段 Tab': '用于模块内的平级视图切换。示例默认选中收益归因比较；点击互斥切换，再点当前项保持不变。支持左右方向键、Home、End，自动跳过禁用项。',
               '普通下拉': '用于周期、基准等单级选择。弹出菜单宽度不小于触发器。',
               '联级下拉': '用于板块与行业等树形分类，触发器中保留层级路径。',
               '分级标签': '按父级到子级从左向右排列，底色逐级变浅。',

@@ -1,67 +1,49 @@
 // Components reconciled against the Figma component specification page.
 function auditSelectMarkup(cascade = false, titlePosition = '') {
   const label = cascade ? '基准' : '分布';
-  const value = cascade ? 'A股指数 / 规模指数 / 上证规模指数 / 上证综指' : '行业分布 - 申万行业分类';
+  const value = cascade ? '上证综指' : '行业分布 - 申万行业分类';
+  const fullPath = cascade ? 'A股指数 / 规模指数 / 上证规模指数 / 上证综指' : value;
   const tree = cascade ? [
     {label:'A股指数',children:[
       {label:'规模指数',children:[{label:'上证规模指数',children:['上证综指','上证180','上证50','上证380','科创50']},{label:'深证规模指数',children:['深证成指','深证100']},{label:'中证规模指数',children:['沪深300','中证500','中证1000']}]},
       {label:'行业指数',children:['申万行业指数','中证行业指数']},{label:'风格指数',children:['成长指数','价值指数']}]},
     {label:'债券指数',children:['中债综合指数','中证全债指数']},{label:'基金指数',children:['股票基金指数','混合基金指数']},{label:'商品指数',children:['商品综合指数']},{label:'港股指数',children:['恒生指数','恒生科技指数']}
   ] : ['行业分布 - 申万行业分类','行业分布 - 中信行业分类','行业分布 - 中证行业分类','行业分布 - 证监会行业分类','板块分布'];
-  return '<div class="audit-select-row">'+(titlePosition==='outside'?'<span class="audit-field-label">'+label+'</span>':'')+'<div class="audit-select" data-tree="'+esc(JSON.stringify(tree))+'" data-selection="'+(cascade?'0,0,0,0':'0')+'"><button type="button" class="audit-select-trigger" aria-haspopup="listbox" aria-expanded="false" style="width:'+(cascade?(titlePosition==='inside'?416:343):(titlePosition==='inside'?320:280))+'px">'+(titlePosition==='inside'?'<span class="audit-field-label">'+label+'</span>':'')+'<span class="audit-select-value">'+value+'</span><img src="assets/audit/20df2.svg" width="12" height="12" alt=""></button></div></div>';
+  return '<div class="audit-select-row">'+(titlePosition==='outside'?'<span class="audit-field-label">'+label+'</span>':'')+'<div class="audit-select" data-tree="'+esc(JSON.stringify(tree))+'" data-selection="'+(cascade?'0,0,0,0':'0')+'"><button type="button" class="audit-select-trigger" aria-haspopup="listbox" aria-expanded="false" title="'+esc(fullPath)+'" style="width:'+(cascade?(titlePosition==='inside'?232:188):(titlePosition==='inside'?320:280))+'px">'+(titlePosition==='inside'?'<span class="audit-field-label">'+label+'</span>':'')+'<span class="audit-select-value">'+value+'</span><img src="assets/audit/20df2.svg" width="12" height="12" alt=""></button></div></div>';
 }
 
-function auditTableMarkup() {
-  function row(note, label, value, level, id = '', parent = '') {
+function auditTableMarkup(numericColumns = false) {
+  const name = numericColumns ? '纯数字表格' : '综合表格';
+  const columns = numericColumns
+    ? ['收益 / 因子', '宝盈中证A500指数增强 A', '国寿安保安泽纯债39个月定期开放债券 A', '易方达纳斯达克100ETF联接(QDII-LOF) A']
+    : ['产品 / 分类', '产品类型', '持有状态', '持有时长'];
+  function row(note, label, values, level, id = '', parent = '') {
     const parentAttribute = parent ? ` data-parent="${parent}"` : '';
-    const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${label}</span></button>` : label;
-    return `<tr class="audit-table-caption"${parentAttribute}><td colspan="5">${note}</td></tr>
+    const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${esc(label)}</span></button>` : esc(label);
+    return `<tr class="audit-table-caption"${parentAttribute}><td colspan="4">${note}</td></tr>
       <tr class="${level}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
         <th scope="row">${labelMarkup}</th>
-        <td class="audit-number">${value}</td>
-        <td class="audit-number">${value}</td>
-        <td class="audit-number">--</td>
-        <td></td>
+        ${values.map(value => `<td class="${numericColumns ? 'audit-number' : 'audit-value-text'}">${esc(value)}</td>`).join('')}
       </tr>`;
   }
-
-  return `<div class="audit-table-scroll" role="region" aria-label="简洁表格示例" tabindex="0">
-    <table class="audit-table">
-      <colgroup><col class="audit-label-column"><col span="4"></colgroup>
+  const rows = numericColumns
+    ? row('汇总行 · 可展开', '总收益', ['6.63%', '6.63%', '--'], 'audit-total', 'numeric-total')
+      + row('一级', '全A因子', ['5.07%', '5.07%', '--'], 'audit-level-1', '', 'numeric-total')
+      + row('一级 · 可展开', '风格因子', ['3.46%', '3.46%', '--'], 'audit-level-1', 'numeric-style', 'numeric-total')
+      + row('二级', '贝塔', ['2.54%', '2.54%', '--'], 'audit-level-2', '', 'numeric-style')
+    : row('一级 · 可展开', '权益产品', ['混合型 / 指数型', '持有中', '1 年 5 个月'], 'audit-level-1', 'mixed-equity')
+      + row('二级', '华夏成长混合', ['混合型', '持有中', '1 年 5 个月'], 'audit-level-2', '', 'mixed-equity')
+      + row('二级', '宝盈中证A500指数增强 A', ['指数型', '持有中', '8 个月'], 'audit-level-2', '', 'mixed-equity')
+      + row('一级 · 可展开', '固收产品', ['债券型', '未持有', '--'], 'audit-level-1', 'mixed-bond')
+      + row('二级', '国寿安保安泽纯债39个月定期开放债券 A', ['债券型', '未持有', '--'], 'audit-level-2', '', 'mixed-bond');
+  return `<div class="audit-table-scroll" role="region" aria-label="${name}示例" tabindex="0">
+    <table class="audit-table ${numericColumns ? 'audit-table-numeric' : 'audit-table-comprehensive'}">
+      <colgroup><col class="audit-label-column"><col span="3"></colgroup>
       <thead>
-        <tr class="audit-table-caption"><td colspan="5">表头</td></tr>
-        <tr class="audit-table-header">
-          <th scope="col">收益 / 因子</th>
-          <th scope="col">宝盈中证A500指数增强 A</th>
-          <th scope="col">国寿安保安泽纯债39个月定期开放债券 A</th>
-          <th scope="col">易方达纳斯达克100ETF联接(QDII-LOF) A</th>
-          <th scope="col" aria-label="预留基金列"></th>
-        </tr>
+        <tr class="audit-table-caption"><td colspan="4">表头</td></tr>
+        <tr class="audit-table-header">${columns.map(label => `<th scope="col">${esc(label)}</th>`).join('')}</tr>
       </thead>
-      <tbody>
-        ${row('汇总行', '总收益', '6.63%', 'audit-total', 'total')}
-        ${row('一级', '全A因子', '5.07%', 'audit-level-1', '', 'total')}
-        ${row('一级 · 可展开', '风格因子', '3.46%', 'audit-level-1', 'style', 'total')}
-        ${row('二级', '贝塔', '2.54%', 'audit-level-2', '', 'style')}
-      </tbody>
-    </table>
-  </div>`;
-}
-
-function auditFlatTableMarkup(name, columns, rows, numericColumns = false) {
-  const columnHeader = label => `<th scope="col">${esc(label)}</th>`;
-
-  return `<div class="audit-table-scroll audit-table-flat-preview" role="region" aria-label="${esc(name)}示例" tabindex="0">
-    <table class="audit-table audit-table-flat${numericColumns ? ' audit-table-numeric' : ''}">
-      <thead>
-        <tr class="audit-table-header">${columns.map(columnHeader).join('')}</tr>
-      </thead>
-      <tbody>
-        ${rows.map(({label, values, total}) => `<tr${total ? ' class="audit-total"' : ''}>
-          <th scope="row">${esc(label)}</th>
-          ${values.map(value => `<td class="${/^[+−-]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?%?$/.test(value) ? 'audit-number' : 'audit-value-text'}">${esc(value)}</td>`).join('')}
-        </tr>`).join('')}
-      </tbody>
+      <tbody>${rows}</tbody>
     </table>
   </div>`;
 }
@@ -138,7 +120,7 @@ function auditRuntime(root = document) {
       let items=JSON.parse(select.dataset.tree),item,labels=[];
       path.forEach(i=>{item=items[i];labels.push(typeof item==='string'?item:item.label);items=typeof item==='object'?item.children:null;});
       if(items)drawMenu(select,path);
-      else{select.dataset.selection=path.join(',');const text=labels.join(' / ');select.querySelector('.audit-select-value').textContent=text;select.querySelector('.audit-select-trigger').title=text;closeMenus();select.dispatchEvent(new CustomEvent('change',{bubbles:true,detail:{value:labels}}));}
+      else{select.dataset.selection=path.join(',');const text=labels.join(' / ');select.querySelector('.audit-select-value').textContent=labels[labels.length-1];select.querySelector('.audit-select-trigger').title=text;closeMenus();select.dispatchEvent(new CustomEvent('change',{bubbles:true,detail:{value:labels}}));}
     } else if(!event.target.closest('.audit-select,.actions'))closeMenus();
     const toggle=event.target.closest('tr[data-node]')?.querySelector('[data-row-toggle]');
     if(toggle){toggle.setAttribute('aria-expanded',String(toggle.getAttribute('aria-expanded')!=='true'));updateRows(toggle.closest('table'));}
@@ -177,55 +159,40 @@ function installAuditedComponents() {
     const sample=document.createElement('div');sample.className='individual-component-sample';sample.innerHTML=html;container.append(sample);addIndividualActions(sample,name,documentation);
   }
   const selectStack=document.querySelector('.select-control-demo');selectStack.replaceChildren();
-  const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','普通154px起；级联188px起'],['内边距','左右12px'],['菜单','圆角8px / 内边距8px / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；重开恢复路径。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
+  const selectSpec=spec([['触发器','高32px / 圆角20px'],['宽度','普通154px起；级联188px起'],['内边距','左右12px'],['菜单','圆角8px / 上下内距8px / 左右无外边距 / 行高32px'],['选中','浅紫底 #F5F5FF / #6865A7'],['字体','14px 苹方 Regular']],'普通菜单选择后回填并收起。级联父级仅浏览，末级确认；选择框只显示末级名称，完整路径保留在标题提示和选中数据中，重开恢复路径。移入与选中底色铺满菜单列左右，文字保留12px内距。下方空间不足时向上展开，Esc或点击外部关闭且保留原值。','206-9185');
   for(const cascade of [false,true])for(const position of ['', 'inside'])add(selectStack,(cascade?'级联选择器':'普通下拉')+(position==='inside'?' · 内置标题':position==='outside'?' · 前置标题':''),auditSelectMarkup(cascade,position),selectSpec);
   const tables = document.querySelector('.table-spec .audit-table-examples');
+  tables.replaceChildren();
   const tableHoverRule = ['移入', '数据行整行填充 #F7F8FA，移出后恢复'];
-  const tableSpec = spec([
+  const commonTableRules = [
     ['表面', '白底，无竖向分割线'],
     tableHoverRule,
     ['单元格内边距', '上、下各 12px，行高随内容自适应'],
-    ['表头', '14px Medium，文字 #333333，左对齐，长名称换行'],
-    ['汇总行', '14px Medium，可展开一级明细'],
+    ['表头', '14px Medium，文字 #333333，长名称换行'],
     ['一级', '14px Regular，可展开项左侧显示箭头'],
     ['二级', '12px Regular，文字 #666666'],
-    ['列宽', '首列 120px，基金列等宽'],
-    ['缩进', '汇总 10px / 一级 28px / 二级 46px'],
-    ['数值', 'Roboto 等宽数字，右对齐，缺失值显示 --'],
-    ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线']
-  ], '点击汇总行或可展开的一级行，显示或收起下一级明细。表头和行高可随内容换行增高，窄屏可横向滚动。', '564-55005');
-  add(tables, '简洁表格 · 层级规范', auditTableMarkup(), tableSpec);
-
-  const pair = document.createElement('div');
-  pair.className = 'audit-table-pair';
-  tables.append(pair);
-
-  const flatRules = [
-    tableHoverRule,
-    ['单元格内边距', '上、下各 12px，行高随内容自适应'],
-    ['数值字体', 'Roboto 等宽数字']
+    ['数值字体', 'Roboto 等宽数字，缺失值显示 --'],
+    ['分割线', '表头下方 1px #D9D9D9。汇总与一级下方 1px #EAEAEA（85%）。二级行省略底线'],
+    ['交互', '点击可展开的一级行或汇总行收起 / 展开明细，重新展开保留内部折叠状态'],
+    ['窄屏', '表格在自身容器横向滚动，不撑宽整页']
   ];
-
-  function addFlatTable(container, name, columns, rows, note, extraRules = [], numericColumns = false) {
-    const markup = auditFlatTableMarkup(name, columns, rows, numericColumns);
-    const headerRules = [['表头', '14px Medium，文字 #333333']];
-    const alignmentRule = ['对齐', numericColumns ? '项目名称居左，数字及对应列标题居右' : '所有表头与表体内容均居左'];
-    const documentation = spec([...headerRules, ...flatRules, alignmentRule, ...extraRules], note);
-    add(container, name, markup, documentation);
-  }
-
-  addFlatTable(pair, '数值汇总表', ['资产类别', '市值（万元）', '权重'], [
-    {label:'合计', values:['1,000.0', '100.00%'], total:true},
-    {label:'股票', values:['620.5', '62.05%']},
-    {label:'债券', values:['248.3', '24.83%']},
-    {label:'现金', values:['131.2', '13.12%']}
-  ], '示例为资产配置，汇总行在明细上方。', [['汇总行', '14px Medium，与明细共享列宽和对齐方式']], true);
-
-  addFlatTable(pair, '文字与数字混合表', ['基金名称', '近1年收益', '持有时长'], [
-    {label:'华夏成长混合', values:['6.63%', '1 年 5 个月']},
-    {label:'宝盈中证A500指数增强 A', values:['3.46%', '8 个月']},
-    {label:'易方达蓝筹精选混合', values:['−2.18%', '未持有']}
-  ], '示例为持有明细，收益率是纯数值，持有时长包含文字。');
+  const mixedTableSpec = spec([
+    ...commonTableRules,
+    ['内容组合', '表头 + 一级 + 二级 + 可折叠，展示产品类型、状态与持有时长'],
+    ['对齐', '所有表头、行标签与表体内容均居左，数字与文字一致'],
+    ['列宽', '首列260px，其余列等宽'],
+    ['缩进', '一级28px / 二级46px']
+  ], '综合表格适合文字与数字混合内容。示例的权益产品与固收产品可独立展开 / 收起。', '564-55005');
+  const numericTableSpec = spec([
+    ...commonTableRules,
+    ['内容组合', '表头 + 汇总 + 一级 + 二级 + 可折叠，数字列使用收益因子数据'],
+    ['对齐', '行标签居左；所有数字及对应列标题均居右'],
+    ['汇总行', '14px Medium，位于明细上方，可展开一级明细'],
+    ['列宽', '首列120px，其余基金列等宽'],
+    ['缩进', '汇总10px / 一级28px / 二级46px']
+  ], '纯数字表格适合数值比较。总收益汇总可折叠所有一级明细，风格因子可独立折叠二级明细。', '564-55005');
+  add(tables, '综合表格', auditTableMarkup(false), mixedTableSpec);
+  add(tables, '纯数字表格', auditTableMarkup(true), numericTableSpec);
 
   tables.querySelectorAll('th,td').forEach(cell => {
     if (cell.classList.contains('audit-number')) return;

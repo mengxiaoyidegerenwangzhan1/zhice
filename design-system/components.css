@@ -211,6 +211,11 @@
   margin-right:auto;
   justify-content:flex-start;
 }
+@media(max-width:1050px) {
+  .has-component-directory:not([hidden]) { grid-template-columns:minmax(0,1fr); }
+  .component-directory { width:100%; max-width:100%; min-width:0; }
+  .directory-links { max-width:100%; min-width:0; }
+}
 @media(max-width:900px) {
   .visual-system-page .topbar .visual-tabs { margin-left:0; }
 }

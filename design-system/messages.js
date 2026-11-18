@@ -6,13 +6,8 @@
   ];
 
   function markup(item) {
-    const symbol = item.type === 'error'
-      ? '<path d="m4.4 4.4 3.2 3.2m0-3.2L4.4 7.6" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round"/>'
-      : item.type === 'warning'
-        ? '<path d="M6 3.1v3.5" stroke="white" stroke-width="1.3" stroke-linecap="round"/><circle cx="6" cy="8.6" r=".7" fill="white"/>'
-        : '<path d="m3.5 6 1.7 1.7 3.3-3.4" fill="none" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>';
     return '<div class="zhice-message" data-type="' + item.type + '" role="' + (item.type === 'success' ? 'status' : 'alert') + '">' +
-      '<svg class="zhice-message-icon" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="currentColor"/>' + symbol + '</svg>' +
+      '<img class="zhice-message-icon" width="12" height="12" src="assets/messages/' + item.type + '.png" alt="">' +
       '<span class="zhice-message-text">' + item.text + '</span>' +
       '<button class="zhice-message-close" type="button" aria-label="关闭' + item.title + '提示"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.1"/><path d="m4.7 4.7 4.6 4.6m0-4.6L4.7 9.3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg></button></div>';
   }
@@ -32,7 +27,7 @@
     ['圆角 / 描边', '99px / 1px'],
     ['内边距', '上下8px，左右12px'],
     ['正文', 'PingFang SC Regular · 12px / 17px · #333333'],
-    ['状态图标', '12 × 12px，与正文间距6px'],
+    ['状态图标', '使用提供的24 × 24px透明PNG切图，以12 × 12px显示；与正文间距6px'],
     ['关闭图标', '14 × 14px · #999999，右侧内边距12px'],
     ['阴影', '0 0 12px rgba(0,0,0,.08)']
   ];
@@ -41,7 +36,12 @@
     const response = await fetch('messages.css?v=20261118-messages');
     if (!response.ok) throw new Error('气泡样式读取失败');
     const css = await response.text();
-    return '<!doctype html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + item.title + '气泡</title><style>' + css + '\nbody{margin:24px}</style></head><body>' + markup(item) + '<script>(' + messageRuntime.toString() + ')();<\/script></body></html>';
+    const iconResponse = await fetch('assets/messages/' + item.type + '.png');
+    if (!iconResponse.ok) throw new Error('气泡图标读取失败');
+    const bytes = new Uint8Array(await iconResponse.arrayBuffer());
+    const iconData = 'data:image/png;base64,' + btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join(''));
+    const component = markup(item).replace('assets/messages/' + item.type + '.png', iconData);
+    return '<!doctype html>\n<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + item.title + '气泡</title><style>' + css + '\nbody{margin:24px}</style></head><body>' + component + '<script>(' + messageRuntime.toString() + ')();<\/script></body></html>';
   }
 
   const section = document.createElement('article');

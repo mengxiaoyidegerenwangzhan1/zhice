@@ -113,3 +113,33 @@
 .fund-tab-demo.is-active::after { left:0; width:100%; height:3px; transform:none; border-radius:4px 4px 0 0; opacity:1; }
 .fund-tab-demo:disabled { color:#cbcbcb; cursor:not-allowed; }
 .fund-tab-demo:disabled::after { opacity:0; }
+
+/* Secondary comparison tabs — Figma 620:211715. */
+.tab-variant .visual-segmented.comparison-segmented {
+  display:inline-flex; width:max-content; max-width:100%; min-width:0; height:36px;
+  align-items:center; gap:0; padding:2px; border:0; border-radius:99px;
+  background:#fff; box-shadow:0 0 12px rgba(0,0,0,.08); box-sizing:border-box;
+  overflow-x:auto; overflow-y:hidden; scrollbar-width:none;
+}
+.tab-variant .visual-segmented.comparison-segmented::-webkit-scrollbar { display:none; }
+.tab-variant .visual-segmented.comparison-segmented button {
+  display:inline-flex; flex:0 0 auto; align-items:center; justify-content:center;
+  height:32px; min-height:32px; padding:6px 12px; border:0; border-radius:99px;
+  background:transparent; color:#666; font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+  font-size:14px; line-height:20px; font-weight:400; white-space:nowrap; cursor:pointer;
+  box-sizing:border-box;
+}
+.tab-variant .visual-segmented.comparison-segmented button:not(.is-active):not([aria-pressed="true"]):not(:disabled):not([aria-disabled="true"]):hover {
+  background:#f2f3f5;
+}
+.tab-variant .visual-segmented.comparison-segmented button.is-active,
+.tab-variant .visual-segmented.comparison-segmented button[aria-pressed="true"] {
+  background:rgba(104,101,167,.08); color:#6865a7; font-weight:500;
+}
+.tab-variant .visual-segmented.comparison-segmented button:focus-visible {
+  outline:2px solid #6865a7; outline-offset:-2px;
+}
+.tab-variant .visual-segmented.comparison-segmented button:disabled,
+.tab-variant .visual-segmented.comparison-segmented button[aria-disabled="true"] {
+  background:transparent; color:#cbcbcb; cursor:not-allowed;
+}

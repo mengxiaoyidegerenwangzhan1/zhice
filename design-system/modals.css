@@ -1,0 +1,82 @@
+.zc-task-panel, .zc-task-panel * { box-sizing: border-box; }
+.zc-task-panel {
+  width: 520px; max-width: 100%; border: 0; border-radius: 16px;
+  background: #fff; color: #333; overflow: visible;
+  font: 400 14px/20px "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.zc-task-panel[hidden], .zc-task-demo [hidden], .zc-task-dialog [hidden] { display: none; }
+.zc-task-form { margin: 0; }
+.zc-task-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 16px 24px 12px; border-bottom: 1px solid #eee;
+}
+.zc-task-header h4, #visual-panel-components .zc-task-header h4 {
+  margin: 0; color: #333; font-size: 16px; font-weight: 600; line-height: 22px;
+}
+.zc-task-close {
+  display: grid; place-items: center; flex: 0 0 18px; width: 18px; height: 22px;
+  padding: 0; border: 0; background: transparent; color: #999; cursor: pointer;
+}
+.zc-task-close svg { display: block; width: 18px; height: 18px; }
+.zc-task-close:hover { color: #6865a7; }
+.zc-task-body { display: grid; gap: 20px; padding: 16px 24px; }
+.zc-task-field { min-width: 0; }
+.zc-task-label { display: block; margin: 0 0 8px; font-size: 14px; line-height: 20px; font-weight: 400; color: #333; }
+.zc-task-control {
+  appearance: none; display: block; width: 100%; height: 32px; margin: 0;
+  padding: 5px 12px; border: 1px solid rgba(234,234,234,.85); border-radius: 99px;
+  background: #fff; color: #333; font: inherit; outline: none; box-shadow: none;
+}
+.zc-task-control::placeholder { color: #999; opacity: 1; }
+.zc-task-control:hover { border-color: #b9b8d8; }
+.zc-task-control:focus { border-color: #b9b8d8; box-shadow: 0 0 0 2px rgba(104,101,167,.08); }
+.zc-task-control[aria-invalid="true"] { border-color: #f26173; }
+.zc-task-control:disabled { color: #cbcbcb; background: #f7f8fa; cursor: not-allowed; }
+.zc-task-trigger-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+.zc-task-select-wrap, .zc-task-time-wrap { position: relative; min-width: 0; }
+.zc-task-select-wrap .zc-task-control { padding-right: 34px; cursor: pointer; }
+.zc-task-select-arrow { position: absolute; top: 10px; right: 12px; width: 12px; height: 12px; color: #999; pointer-events: none; }
+.zc-task-time-wrap > input { padding-right: 36px; }
+.zc-task-clock { position: absolute; right: 12px; top: 7px; width: 18px; height: 18px; display: grid; place-items: center; border: 0; padding: 0; background: transparent; color: #999; cursor: pointer; }
+.zc-task-clock svg { width: 14px; height: 14px; }
+.zc-task-clock:hover, .zc-task-clock[aria-expanded="true"] { color: #6865a7; }
+.zc-task-textarea { height: 100px; min-height: 100px; padding: 8px 12px; border-radius: 12px; line-height: 20px; resize: vertical; }
+.zc-task-error { margin: 4px 0 0; color: #f26173; font-size: 12px; line-height: 18px; }
+.zc-task-footer { display: flex; align-items: center; justify-content: flex-end; gap: 16px; padding: 12px 24px 16px; border-top: 1px solid #eee; }
+.zc-task-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-width: 68px; height: 34px; padding: 0 20px; border: 0; border-radius: 99px;
+  background: #6865a7; color: #fff; font: 500 14px/20px "PingFang SC", "Microsoft YaHei", sans-serif; cursor: pointer; white-space: nowrap;
+}
+.zc-task-button:hover { background: #7774b3; }
+.zc-task-button:disabled { background: #f4f4fc; color: #6865a7; cursor: not-allowed; }
+.zc-task-button-secondary { min-width: 70px; border: 1px solid rgba(234,234,234,.85); background: #fff; color: #666; font-weight: 400; }
+.zc-task-button-secondary:hover { background: #f2f3f5; color: #333; }
+.zc-task-button:focus-visible, .zc-task-close:focus-visible, .zc-task-clock:focus-visible { outline: 2px solid #6865a7; outline-offset: 3px; }
+.zc-task-time-popover { position: absolute; z-index: 5; right: 0; top: 40px; width: 210px; max-width: calc(100vw - 32px); padding: 12px; border: 1px solid #b9b8d8; border-radius: 8px; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,.08); }
+.zc-task-time-options { display: grid; grid-template-columns: 1fr 12px 1fr; gap: 6px; align-items: end; margin-bottom: 12px; }
+.zc-task-time-options label { color: #999; font-size: 12px; }
+.zc-task-time-options select { appearance: auto; padding: 4px 8px; border-radius: 8px; font-size: 14px; }
+.zc-task-time-options span { align-self: end; height: 32px; line-height: 32px; text-align: center; }
+.zc-task-time-popover > button { width: 100%; height: 28px; font-size: 12px; }
+.zc-task-demo-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+.zc-task-demo-toolbar .zc-task-button { font-size: 12px; }
+.zc-task-preview { padding: 24px; border-radius: 12px; background: #f7f8fa; }
+.zc-task-preview .zc-task-panel { margin: 0 auto; }
+.zc-task-feedback { margin: 16px 0 0; padding: 8px 12px; border: 1px solid #c9ffe9; border-radius: 12px; background: #f0fff9; color: #333; font-size: 12px; line-height: 18px; }
+.zc-task-dialog {
+  width: fit-content; max-width: calc(100vw - 32px); max-height: calc(100dvh - 32px);
+  margin: auto; padding: 0; border: 0; border-radius: 16px; background: #fff;
+  box-shadow: none; overflow: auto; overscroll-behavior: contain;
+}
+.zc-task-dialog::backdrop { background: rgba(0,0,0,.35); }
+body:has(.zc-task-dialog[open]) { overflow: hidden; }
+@media (max-width: 600px) {
+  .zc-task-preview { padding: 12px; }
+  .zc-task-header { padding-left: 20px; padding-right: 20px; }
+  .zc-task-body { padding-left: 20px; padding-right: 20px; }
+  .zc-task-footer { padding-left: 20px; padding-right: 20px; }
+}
+@media (max-width: 380px) {
+  .zc-task-trigger-row { grid-template-columns: minmax(0,1fr); }
+}
