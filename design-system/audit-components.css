@@ -181,14 +181,9 @@
 .audit-checkbox:disabled:checked, .audit-checkbox:disabled:indeterminate { background:#cbcbcb; }
 .audit-table .audit-level-detail th { padding-left:64px; }
 .audit-table-combination, .audit-titled-examples { min-width:0; max-width:100%; }
-.audit-titled-examples { display:grid; gap:0; margin-top:16px; border-top:1px solid #eee; padding-top:16px; }
+.audit-titled-examples { display:grid; gap:24px; margin-top:24px; border-top:1px solid #eee; padding-top:24px; }
 .audit-titled-example { min-width:0; max-width:100%; }
 .audit-table-variant-label { margin:0 0 8px; color:#666; font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif; }
 .audit-table-titled .audit-side-title-column { width:120px; }
 .audit-table-titled .audit-titled-field-column { width:160px; }
 .audit-table-titled .audit-side-title { padding-left:12px; vertical-align:middle; color:#333; font-size:14px; line-height:20px; font-weight:400; }
-
-/* State notes sit beside actual row labels instead of occupying separate rows. */
-.audit-row-content { display:flex; flex-wrap:wrap; align-items:center; gap:4px 8px; min-width:0; }
-.audit-row-content > button { max-width:100%; }
-.audit-row-state { color:#999; font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif; overflow-wrap:anywhere; }

@@ -19,10 +19,11 @@ function auditTableMarkup(numericColumns = false) {
     : ['产品 / 分类', '产品类型', '持有状态', '持有时长'];
   function row(note, label, values, level, key, id = '', parent = '') {
     const parentAttribute = parent ? ` data-parent="${parent}"` : '';
-    const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${esc(label)}</span></button>` : `<span class="audit-row-label">${esc(label)}</span>`;
-    return `<tr class="${level}" data-audit-row="${key}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
+    const labelMarkup = id ? `<button type="button" data-row-toggle="${id}" aria-expanded="true"><img src="assets/audit/2a444.svg" width="14" height="14" alt=""><span class="audit-row-label">${esc(label)}</span></button>` : esc(label);
+    return `<tr class="audit-table-caption"${parentAttribute}><td colspan="5">${note}</td></tr>
+      <tr class="${level}" data-audit-row="${key}"${id ? ` data-node="${id}"` : ''}${parentAttribute}>
         <td class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-row-select="${key}" aria-label="选择${esc(label)}"></td>
-        <th scope="row"><div class="audit-row-content">${labelMarkup}<span class="audit-row-state" aria-hidden="true">${esc(note)}</span></div></th>
+        <th scope="row">${labelMarkup}</th>
         ${values.map(value => `<td class="${numericColumns ? 'audit-number' : 'audit-value-text'}">${esc(value)}</td>`).join('')}
       </tr>`;
   }
@@ -41,24 +42,23 @@ function auditTableMarkup(numericColumns = false) {
     <table class="audit-table audit-table-selectable ${numericColumns ? 'audit-table-numeric' : 'audit-table-comprehensive'}">
       <colgroup><col class="audit-checkbox-column"><col class="audit-label-column"><col span="3"></colgroup>
       <thead>
+        <tr class="audit-table-caption"><td colspan="5">表头</td></tr>
         <tr class="audit-table-header"><th scope="col" class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-select-all aria-label="全选${name}所有数据行"></th>${columns.map((label, index) => `<th scope="col"${numericColumns && index > 0 ? ' class="audit-number-heading"' : ''}>${esc(label)}</th>`).join('')}</tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;
   if (numericColumns) return mainTable;
-  const titledRows = [
-    {level:'audit-level-1', title:'产品信息', field:'产品类型', state:'一级默认', values:['混合型', '指数型']},
-    {level:'audit-level-2', title:'持有信息', field:'持有时长', state:'二级默认', values:['1 年 5 个月', '8 个月']}
-  ];
-  const titledTable = `<div class="audit-titled-examples"><p class="audit-table-variant-label">左侧标题组合</p>
-    <div class="audit-table-scroll" role="region" aria-label="左侧标题组合示例" tabindex="0"><table class="audit-table audit-table-comprehensive audit-table-titled">
-      <colgroup><col class="audit-side-title-column"><col class="audit-titled-field-column"><col span="2"></colgroup>
-      <thead><tr class="audit-table-header"><th scope="col">标题</th><th scope="col">指标</th><th scope="col">华夏成长混合</th><th scope="col">宝盈中证A500指数增强 A</th></tr></thead>
-      <tbody>${titledRows.map(item => `<tr class="${item.level}"><th scope="row" class="audit-side-title">${item.title}</th><th scope="row"><div class="audit-row-content"><span class="audit-row-label">${item.field}</span><span class="audit-row-state" aria-hidden="true">${item.state}</span></div></th>${item.values.map(value => `<td class="audit-value-text">${value}</td>`).join('')}</tr>`).join('')}</tbody>
-    </table></div></div>`;
-  return '<div class="audit-table-combination">' + mainTable + titledTable + '</div>';
-
+  function titledTable(secondLevel) {
+    const note = '左侧带标题的' + (secondLevel ? '二级默认' : '一级默认');
+    return `<div class="audit-titled-example"><p class="audit-table-variant-label">${note}</p>
+      <div class="audit-table-scroll" role="region" aria-label="${note}示例" tabindex="0"><table class="audit-table audit-table-comprehensive audit-table-titled">
+        <colgroup><col class="audit-side-title-column"><col class="audit-titled-field-column"><col span="2"></colgroup>
+        <thead><tr class="audit-table-header"><th scope="col">标题</th><th scope="col">指标</th><th scope="col">华夏成长混合</th><th scope="col">宝盈中证A500指数增强 A</th></tr></thead>
+        <tbody><tr class="${secondLevel ? 'audit-level-2' : 'audit-level-1'}"><th scope="row" class="audit-side-title">${secondLevel ? '持有信息' : '产品信息'}</th><th scope="row">${secondLevel ? '持有时长' : '产品类型'}</th><td class="audit-value-text">${secondLevel ? '1 年 5 个月' : '混合型'}</td><td class="audit-value-text">${secondLevel ? '8 个月' : '指数型'}</td></tr></tbody>
+      </table></div></div>`;
+  }
+  return '<div class="audit-table-combination">' + mainTable + '<div class="audit-titled-examples">' + titledTable(false) + titledTable(true) + '</div></div>';
 }
 
 function auditRangeMarkup() {
@@ -205,7 +205,6 @@ function installAuditedComponents() {
   const tableHoverRule = ['移入', '数据行整行填充 #F7F8FA，移出后恢复'];
   const commonTableRules = [
     ['表面', '白底，无竖向分割线'],
-    ['状态标记', '行标签旁的12px灰色文字仅用于说明规范状态，不属于业务字段；与展开按钮分开呈现'],
     tableHoverRule,
     ['单元格内边距', '上、下各 12px，行高随内容自适应'],
     ['表头', '14px Medium，文字 #333333，长名称换行'],
@@ -224,8 +223,8 @@ function installAuditedComponents() {
     ['对齐', '所有表头、行标签与表体内容均居左，数字与文字一致'],
     ['列宽', '多选框列40px，行标签列260px，其余列等宽'],
     ['缩进', '一级28px / 二级46px；二级展开的内部明细沿用12px Regular，额外缩进18px'],
-    ['左侧带标题', '一张共享表头的小表展示一级默认与二级默认，不带多选框；左标题与对应数据行垂直居中对齐']
-  ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例合并为共享表头的完整组合。', '564-55005');
+    ['左侧带标题', '两组独立小表不带多选框，左标题与对应数据行垂直居中对齐']
+  ], '综合表格适合文字与数字混合内容。一级与二级展开分别可收起其明细；内部明细沿用二级样式。左侧带标题示例单独展示。', '564-55005');
   const numericTableSpec = spec([
     ...commonTableRules,
     ['状态覆盖', '表头、汇总、汇总可展开、一级、一级可展开、二级，全部带多选框；数字列使用收益因子数据'],
