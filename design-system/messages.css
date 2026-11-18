@@ -1,0 +1,46 @@
+.zhice-message {
+  --message-accent: #48cb95;
+  --message-background: #f0fff9;
+  --message-border: #c9ffe9;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 600px;
+  max-width: 100%;
+  min-height: 35px;
+  padding: 8px 12px;
+  border: 1px solid var(--message-border);
+  border-radius: 99px;
+  background: var(--message-background);
+  color: #333;
+  box-shadow: 0 0 12px rgba(0, 0, 0, .08);
+  font: 400 12px/17px "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.zhice-message[data-type="error"] {
+  --message-accent: #f26173;
+  --message-background: #fff0f2;
+  --message-border: #ffd8dc;
+}
+.zhice-message[data-type="warning"] {
+  --message-accent: #ffc069;
+  --message-background: #fffaf2;
+  --message-border: #ffecd2;
+}
+.zhice-message[hidden], .message-restore[hidden] { display: none; }
+.zhice-message-icon { display: block; flex: 0 0 12px; width: 12px; height: 12px; color: var(--message-accent); }
+.zhice-message-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.zhice-message-close {
+  appearance: none; display: grid; place-items: center; flex: 0 0 14px;
+  width: 14px; height: 17px; margin: 0; padding: 0; border: 0;
+  background: transparent; color: #999; cursor: pointer;
+}
+.zhice-message-close svg { display: block; width: 14px; height: 14px; }
+.zhice-message-close:hover { color: #666; }
+.zhice-message-close:focus-visible { outline: 2px solid #6865a7; outline-offset: 4px; border-radius: 50%; }
+#component-message .message-example + .message-example { margin-top: 32px; }
+#component-message .message-example .individual-component-heading { margin-bottom: 20px; }
+#component-message .message-example h4 { color: var(--message-title-color); font-size: 20px; font-weight: 500; line-height: 28px; }
+.message-preview { min-height: 35px; }
+.message-restore { min-height: 35px; padding: 6px 12px; border: 1px solid #eaeaea; border-radius: 18px; background: #fff; color: #666; font: 400 12px/17px "PingFang SC", sans-serif; cursor: pointer; }
+.message-restore:hover { color: #6865a7; background: #f4f4fc; }
