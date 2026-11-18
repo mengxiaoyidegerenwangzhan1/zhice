@@ -4,6 +4,24 @@
     cleanup();
     if (!page) return;
     const header = page.querySelector('.fund-identity-panel');
+    const tabs = page.querySelector('.fund-tabs');
+    tabs?.addEventListener('keydown', event => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+      const items = [...tabs.querySelectorAll('[role="tab"]:not(:disabled)')];
+      const current = items.indexOf(event.target.closest('[role="tab"]'));
+      if (current < 0) return;
+      event.preventDefault();
+      const index = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : (current + (event.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length;
+      sessionStorage.setItem('zhice-fund-tab-focus', items[index].dataset.fundTab);
+      items[index].click();
+    });
+    const focusedTab = sessionStorage.getItem('zhice-fund-tab-focus');
+    if (focusedTab) {
+      sessionStorage.removeItem('zhice-fund-tab-focus');
+      const button = [...tabs.querySelectorAll('[role="tab"]')].find(item => item.dataset.fundTab === focusedTab);
+      button?.focus({preventScroll:true});
+    }
+
     const spacer = document.createElement('div');
     spacer.className = 'fund-identity-space';
     header.before(spacer);

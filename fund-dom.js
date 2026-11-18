@@ -15,7 +15,7 @@
   const chartBox = (id, title, className = "") => `<section class="fund-chart-block ${className}"><h3>${title}</h3><div id="${id}" class="fund-chart" role="img" aria-label="${title}"></div></section>`;
 
   function tabs(active) {
-    return `<nav class="fund-tabs" aria-label="基金分析页面">${views.map(([id, label]) => `<button type="button" data-fund-tab="${id}"${id === active ? ' class="is-active" aria-current="page"' : ""}>${label}</button>`).join("")}</nav>`;
+    return `<nav class="fund-tabs fund-tabs-demo" role="tablist" aria-label="基金分析页面">${views.map(([id, label]) => `<button class="fund-tab-demo${id === active ? " is-active" : ""}" type="button" role="tab" aria-selected="${id === active}" tabindex="${id === active ? 0 : -1}" data-fund-tab="${id}"${id === active ? ' aria-current="page"' : ""}>${label}</button>`).join("")}</nav>`;
   }
 
   function header(active) {

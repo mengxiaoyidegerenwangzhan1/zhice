@@ -15,8 +15,8 @@ body.fund-sketch-mode .app-topbar-inner {max-width:none;padding-left:56px;paddin
 .fund-page.fund-analysis-page .fund-identity-actions {top:28px;right:20px;gap:16px;}
 .fund-page.fund-analysis-page .fund-action-button {font-size:14px;padding:0;background:transparent;border:0;box-shadow:none;}
 .fund-page.fund-analysis-page .fund-action-button.is-saved {color:#6865a7;}
-.fund-page.fund-analysis-page .fund-tabs {position:relative;inset:auto;display:flex;align-items:stretch;width:auto;height:65px;gap:20px;margin-top:12px;border-bottom:1px solid #d9d9d9;overflow-x:auto;}
-.fund-page.fund-analysis-page .fund-tabs button {min-width:0;height:64px;flex:0 0 auto;padding:0 0 1px;font-size:16px;line-height:64px;font-weight:400;color:#555759;}
+.fund-page.fund-analysis-page .fund-tabs {position:relative;inset:auto;display:flex;align-items:flex-start;width:calc(100% + 40px);height:65px;gap:20px;margin:12px -20px 0;padding:0 20px;border-bottom:1px solid #d9d9d9;overflow-x:auto;}
+.fund-page.fund-analysis-page .fund-tabs button {min-width:0;height:64px;flex:0 0 auto;padding:0 0 3px;font-size:16px;line-height:61px;font-weight:400;color:#555759;}
 .fund-page.fund-analysis-page .fund-tabs button.is-active {font-weight:600;color:#333;}
 .fund-page.fund-analysis-page .fund-tabs button:after {height:3px;left:0;right:0;border-radius:4px 4px 0 0;}
 .fund-page.fund-analysis-page .fund-tabs button:focus-visible {outline:2px solid #6865a7;outline-offset:-3px;}
