@@ -1,0 +1,6 @@
+# Figwright runs on the same computer as the Figma desktop app.
+# Open this repository with a local Codex client and trust the project.
+[mcp_servers.figwright]
+command = "npx"
+args = ["-y", "@figwright/mcp@0.7.0"]
+startup_timeout_sec = 60
