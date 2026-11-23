@@ -489,6 +489,23 @@ async function svgFor(element) {
         if (!rectangle.width || !value.trim()) return;
         parts.push('<text x="' + (rectangle.x - bounds.x) + '" y="' + (rectangle.y - bounds.y + rectangle.height * 0.8) + '" fill="' + style.color + '" font-family="' + esc(style.fontFamily) + '" font-size="' + style.fontSize + '" font-weight="' + style.fontWeight + '">' + esc(value.trim()) + '</text>');
       };
+      if (node.parentElement.matches('.audit-shot-name-ellipsis')) {
+        const visibleBox = node.parentElement.getBoundingClientRect();
+        if (range.getBoundingClientRect().width > visibleBox.width) {
+          const available = Math.max(0, visibleBox.width - parseFloat(style.fontSize));
+          let end = 0;
+          for (let index = 1; index <= node.length; index++) {
+            range.setStart(node, 0);
+            range.setEnd(node, index);
+            if (range.getBoundingClientRect().width > available) break;
+            end = index;
+          }
+          range.setStart(node, 0);
+          range.setEnd(node, end);
+          addText(range.getBoundingClientRect(), node.data.slice(0, end) + '…');
+          return;
+        }
+      }
       if (range.getClientRects().length > 1) {
         // Group characters by their rendered line and keep its measured position.
         let line = null;
@@ -524,6 +541,24 @@ async function svgFor(element) {
       const size = Math.min(rectangle.width, rectangle.height);
       const left = x + (rectangle.width - size) / 2;
       const top = y + (rectangle.height - size) / 2;
+      if (node.closest('.audit-screenshot-table')) {
+        const imageMatch = style.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/);
+        const radius = parseFloat(style.borderTopLeftRadius);
+        parts.push('<g opacity="' + style.opacity + '">');
+        if (imageMatch) {
+          const response = await fetch(imageMatch[1]);
+          if (!response.ok) throw new Error('Missing checkbox asset');
+          parts.push(vectorMarkup(await response.text(), left, top, size, size, style.color));
+        } else if (node.indeterminate) {
+          const mark = getComputedStyle(node, '::after');
+          parts.push('<rect x="' + left + '" y="' + top + '" width="' + size + '" height="' + size + '" rx="' + radius + '" fill="' + style.backgroundColor + '"/>');
+          parts.push('<rect x="' + (left + parseFloat(mark.left)) + '" y="' + (top + parseFloat(mark.top)) + '" width="' + parseFloat(mark.width) + '" height="' + parseFloat(mark.height) + '" rx="' + parseFloat(mark.borderRadius) + '" fill="' + mark.backgroundColor + '"/>');
+        } else {
+          parts.push('<rect x="' + (left + .5) + '" y="' + (top + .5) + '" width="' + (size - 1) + '" height="' + (size - 1) + '" rx="' + (radius - .5) + '" fill="' + style.backgroundColor + '" stroke="' + style.borderTopColor + '"/>');
+        }
+        parts.push('</g>');
+        return;
+      }
       const selected = node.checked || node.indeterminate;
       const accent = node.disabled ? '#CBCBCB' : '#6865A7';
       const radius = Math.min(size / 2, parseFloat(style.borderTopLeftRadius) || 0);
@@ -631,6 +666,14 @@ async function svgFor(element) {
       const rule = parseFloat(atTop ? style.borderTopWidth : style.borderBottomWidth);
       if (rule) parts.push('<rect x="' + x + '" y="' + (atTop ? y : y + rectangle.height - rule) + '" width="' + rectangle.width + '" height="' + rule + '" fill="' + (atTop ? style.borderTopColor : style.borderBottomColor) + '"/>');
     }
+    if (node.matches('.audit-screenshot-table th, .audit-screenshot-table td')) {
+      const dividerColor = style.boxShadow.match(/rgba?\([^)]*\)/)?.[0];
+      if (style.boxShadow.includes('inset') && style.boxShadow.includes('-1px') && dividerColor) {
+        parts.push('<rect x="' + x + '" y="' + (y + rectangle.height - 1) + '" width="' + rectangle.width + '" height="1" fill="' + dividerColor + '"/>');
+      }
+      const rightBorder = parseFloat(style.borderRightWidth);
+      if (rightBorder) parts.push('<rect x="' + (x + rectangle.width - rightBorder) + '" y="' + y + '" width="' + rightBorder + '" height="' + rectangle.height + '" fill="' + style.borderRightColor + '"/>');
+    }
     if (node.matches('.audit-table tr')) {
       const rule = parseFloat(style.borderBottomWidth);
       if (rule) parts.push('<rect x="' + x + '" y="' + (y + rectangle.height - rule) + '" width="' + rectangle.width + '" height="' + rule + '" fill="' + style.borderBottomColor + '"/>');
@@ -649,14 +692,15 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css')).text())+(await(await fetch('audit-components.css?v=20261118-table-header-scope')).text())+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css?v=20261119-tabs54')).text())+(await(await fetch('audit-components.css?v=20261119-figma-tables')).text())+(c.html.includes('audit-table') ? await(await fetch('table-cases.css?v=20261119-table-row-hover')).text() : '')+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime,auditTableCaseRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();auditTableCaseRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf|png)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
-  if (file.endsWith('.ttf')) {
+  if (file.endsWith('.ttf') || file.endsWith('.png')) {
     const bytes = new Uint8Array(await response.arrayBuffer());
     let binary = '';
     for (const byte of bytes) binary += String.fromCharCode(byte);
-    out = out.replaceAll(file, 'data:font/ttf;base64,' + btoa(binary));
+    const mime = file.endsWith('.ttf') ? 'font/ttf' : 'image/png';
+    out = out.replaceAll(file, 'data:' + mime + ';base64,' + btoa(binary));
   } else {
     const text = (await response.text()).replace(/<script[\s\S]*?<\/script>/g, '');
     out = out.replaceAll(file, 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(text))));
@@ -832,8 +876,8 @@ function addIndividualActions(sample, name, specification, page) {
 
             if (name === '下划线 Tab（一级 Tab）') {
               content.innerHTML = '<dl class="component-rule-list">' + [
-                ['整组尺寸','默认 1328 × 65px，宽度填充容器'],
-                ['单项内容高度','64px'],['底部分割线','1px / #D9D9D9'],
+                ['整组尺寸','默认 1328 × 54px，宽度填充容器'],
+                ['单项高度','默认 / 移入 / 禁用 38px；选中 41px'],['顶部留白 / 文字下留白','12px / 16px'],['底部分割线','1px / #D9D9D9'],
                 ['文字','16px / PingFang SC；默认 400，选中 600'],
                 ['文字颜色','默认 #555759；移入 #6865A7；选中 #333333；禁用 #CBCBCB'],
                 ['左右内边距 / 项间距','20px / 20px'],

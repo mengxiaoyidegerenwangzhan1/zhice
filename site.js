@@ -3,15 +3,23 @@ const fund = snapshot.fund;
 const view = document.getElementById("route-view");
 const charts = [];
 const storageKey = "zhice-prototype-v2";
+const indexTrendEnd = "2026-10-31";
+const indexTrendPeriods = [
+  { key: "1y", label: "近1年", start: "2025-11-01", end: indexTrendEnd },
+  { key: "3y", label: "近3年", start: "2023-11-01", end: indexTrendEnd },
+  { key: "5y", label: "近5年", start: "2021-11-01", end: indexTrendEnd }
+];
 const defaults = {
   research: { period: "3y", benchmark: "fit", peer: "偏股混合型", industry: "sw1", lookThrough: false },
   screener: { query: "", criteria: {}, activeFundType: null, fundTypePopover: null, activeCompany: null, companyPopover: null, activeTagRoot: {}, tagPopover: {}, tagCascadePath: {}, perfModePopover: null, perfCondPopover: null, view: "overview", sort: "r1y", collapsed: false, selected: [], mainOnly: false, openGroups: { "基础分类": true } },
   compare: { mode: "funds", period: "3y", visible: snapshot.comparison.funds.map((item) => item.code) },
-  index: { query: "", tag: "全部", view: "cards", relation: "all" }
+  index: { query: "", tag: "全部", view: "cards", relation: "all", period: "3y" }
 };
 let state = loadState();
 let sectionObserver;
 let routeScrollHandler;
+let disposeCompanyView;
+let companyRouteGeneration = 0;
 
 function loadState() {
   try {
@@ -64,8 +72,10 @@ function absorbParams(route) {
     if (p.has("tag")) state.index.tag = p.get("tag");
     if (p.has("view")) state.index.view = p.get("view");
   }
-  if (route.segments[0] === "index" && route.segments.length > 1 && p.has("relation")) {
-    state.index.relation = p.get("relation");
+  if (route.segments[0] === "index" && route.segments.length > 1) {
+    if (p.has("relation")) state.index.relation = p.get("relation");
+    const selectedPeriod = p.get("period");
+    if (indexTrendPeriods.some(({ key }) => key === selectedPeriod)) state.index.period = selectedPeriod;
   }
   saveState();
 }
@@ -645,7 +655,7 @@ function indexBrowseTemplate() {
 function indexCards() { const rows=indexRows(); if(!rows.length)return `<div class="empty-result">${icon("search-x")}<strong>暂无匹配指数</strong><span>调整标签或搜索词后重试</span></div>`; return rows.map(i=>`<a class="index-record" href="#/index/${i.code}"><div><h2>${i.name}<small>${i.code}</small></h2><b class="${tone(i.change)}">${signed(i.change)}</b></div><p>${i.tags.map(t=>`<span>${t}</span>`).join("")}</p><dl><div><dt>跟踪ETF</dt><dd>${i.etfCount}只</dd></div><div><dt>相关产品</dt><dd>${i.relatedCount}只</dd></div><div><dt>规模</dt><dd>${i.size.toLocaleString()}亿</dd></div><div><dt>近3月资金流</dt><dd class="${tone(i.flow)}">${signed(i.flow,1,"亿")}</dd></div></dl></a>`).join(""); }
 function indexDetailTemplate() {
   const relation=state.index.relation; const rows=snapshot.indices.etfs.filter(i=>relation==='all'||i.relation===relation);
-  return `<div class="app-page index-detail-page"><a class="back-link" href="#/index">${icon("arrow-left")}返回指数列表</a>${pageHeader("INDEX PROFILE", "沪深300（000300）", "代表沪深市场规模大、流动性好的300只证券。", "收盘数据 · 2026-09-03")}<section class="index-hero"><div><span>近1年收益</span><strong class="is-rise">+11.03%</strong><small>同类宽基前 42%</small></div><div><span>指数规模</span><strong>4,218 亿</strong><small>相关ETF合计</small></div><div><span>跟踪产品</span><strong>48 只</strong><small>场内ETF</small></div><div><span>估值分位</span><strong>57%</strong><small>近10年</small></div></section><section class="route-section"><div class="section-line"><div><h2>指数走势与估值</h2><span>收盘数据 · 不做视觉平滑</span></div>${segmented("index-period", [["1y","近1年"],["3y","近3年"],["5y","近5年"]],"3y")}</div><div id="index-trend-chart" class="compare-main-chart" role="img" aria-label="沪深300指数走势与估值分位图"></div></section><section class="route-section"><div class="section-line"><div><h2>产品关系</h2><span>指数 → 场内ETF / 联接 / 增强 / 基准产品</span></div></div><div class="relation-flow"><strong>沪深300</strong><i></i><span>直接跟踪 ETF</span><span>ETF 联接</span><span>指数增强</span><span>业绩基准</span></div><div class="relation-tabs">${[["all","全部"],["场内ETF","场内ETF"],["联接基金","联接"],["指数增强","增强"]].map(([v,l])=>`<button data-relation="${v}" aria-pressed="${relation===v}">${l}</button>`).join("")}</div><div id="relation-table"><table class="app-table"><thead><tr><th>产品</th><th>关系</th><th>代码</th><th class="num">规模</th><th class="num">近1年</th><th class="num">跟踪误差</th></tr></thead><tbody>${rows.map(i=>`<tr><td><strong>${i.name}</strong></td><td><span class="relation-badge">${i.relation}</span></td><td>${i.code}</td><td class="num">${i.size.toFixed(1)}亿</td><td class="num is-rise">${signed(11.03+i.excess)}</td><td class="num">${i.tracking.toFixed(2)}%</td></tr>`).join("")}</tbody></table></div></section></div>`;
+  return `<div class="app-page index-detail-page"><a class="back-link" href="#/index">${icon("arrow-left")}返回指数列表</a>${pageHeader("INDEX PROFILE", "沪深300（000300）", "代表沪深市场规模大、流动性好的300只证券。", "收盘数据 · 2026-09-03")}<section class="index-hero"><div><span>近1年收益</span><strong class="is-rise">+11.03%</strong><small>同类宽基前 42%</small></div><div><span>指数规模</span><strong>4,218 亿</strong><small>相关ETF合计</small></div><div><span>跟踪产品</span><strong>48 只</strong><small>场内ETF</small></div><div><span>估值分位</span><strong>57%</strong><small>近10年</small></div></section><section class="route-section"><div class="section-line"><div><h2>指数走势与估值</h2><span>收盘数据 · 不做视觉平滑</span></div><div><div class="linked-time-widget" data-linked-time id="index-period"></div></div></div><div id="index-trend-chart" class="compare-main-chart" role="img" aria-label="沪深300指数走势与估值分位图"></div></section><section class="route-section"><div class="section-line"><div><h2>产品关系</h2><span>指数 → 场内ETF / 联接 / 增强 / 基准产品</span></div></div><div class="relation-flow"><strong>沪深300</strong><i></i><span>直接跟踪 ETF</span><span>ETF 联接</span><span>指数增强</span><span>业绩基准</span></div><div class="relation-tabs">${[["all","全部"],["场内ETF","场内ETF"],["联接基金","联接"],["指数增强","增强"]].map(([v,l])=>`<button data-relation="${v}" aria-pressed="${relation===v}">${l}</button>`).join("")}</div><div id="relation-table"><table class="app-table"><thead><tr><th>产品</th><th>关系</th><th>代码</th><th class="num">规模</th><th class="num">近1年</th><th class="num">跟踪误差</th></tr></thead><tbody>${rows.map(i=>`<tr><td><strong>${i.name}</strong></td><td><span class="relation-badge">${i.relation}</span></td><td>${i.code}</td><td class="num">${i.size.toFixed(1)}亿</td><td class="num is-rise">${signed(11.03+i.excess)}</td><td class="num">${i.tracking.toFixed(2)}%</td></tr>`).join("")}</tbody></table></div></section></div>`;
 }
 
 function renderHome() { view.innerHTML=homeTemplate(); bindSegmented("home-market-mode",()=>toast("市场视角已切换（效果交互）")); }
@@ -1199,14 +1209,66 @@ function renderCompare() {
   window.addEventListener('scroll',routeScrollHandler,{passive:true}); routeScrollHandler();
 }
 function renderIndexBrowse() { view.innerHTML=indexBrowseTemplate();document.getElementById('index-query').oninput=e=>{state.index.query=e.target.value;saveState();setParams({q:e.target.value});document.getElementById('index-results').innerHTML=indexCards();syncIcons()};document.querySelectorAll('[data-index-tag]').forEach(b=>b.onclick=()=>{state.index.tag=b.dataset.indexTag;saveState();setParams({tag:state.index.tag});renderIndexBrowse();syncIcons()});document.querySelectorAll('[data-index-view]').forEach(b=>b.onclick=()=>{state.index.view=b.dataset.indexView;saveState();setParams({view:state.index.view});renderIndexBrowse();syncIcons()});}
-function renderIndexDetail() { view.innerHTML=indexDetailTemplate();let o=baseOption(),labels=Array.from({length:20},(_,i)=>`${2025+Math.floor((i+2)/12)}-${String((i+2)%12+1).padStart(2,'0')}`),line=labels.map((_,i)=>+(7+i*.5+Math.sin(i*.8)*2.3).toFixed(1));chart('index-trend-chart',{...o,legend:{top:0,left:0,itemWidth:18,itemHeight:3,textStyle:{fontSize:10}},xAxis:{type:'category',boundaryGap:false,data:labels,axisLabel:{fontSize:9,interval:3}},yAxis:{type:'value',axisLabel:{formatter:'{value}%',fontSize:9},splitLine:{lineStyle:{color:C.soft}}},series:[{name:'沪深300',type:'line',showSymbol:false,data:line,lineStyle:{color:C.blue,width:2}},{name:'估值分位',type:'line',showSymbol:false,data:line.map((v,i)=>+(45+Math.sin(i*.45)*14).toFixed(1)),lineStyle:{color:C.orange,width:1.4,type:'dashed'}}]});document.querySelectorAll('[data-relation]').forEach(b=>b.onclick=()=>{state.index.relation=b.dataset.relation;saveState();setParams({relation:state.index.relation});renderIndexDetail();syncIcons()});bindSegmented('index-period',()=>toast('指数周期已切换（效果交互）'));}
+function indexTrendOption({ start, end }) {
+  const points = Array.from({ length: 20 }, (_, index) => ({
+    date: `${2025 + Math.floor((index + 2) / 12)}-${String((index + 2) % 12 + 1).padStart(2, "0")}-01`,
+    returnRate: +(7 + index * .5 + Math.sin(index * .8) * 2.3).toFixed(1),
+    valuation: +(45 + Math.sin(index * .45) * 14).toFixed(1)
+  })).filter(point => start <= point.date && point.date <= end);
+
+  return {
+    ...baseOption(),
+    legend: { top: 0, left: 0, itemWidth: 18, itemHeight: 3, textStyle: { fontSize: 10 } },
+    xAxis: {
+      type: "category", boundaryGap: false, data: points.map(point => point.date.slice(0, 7)),
+      axisLabel: { fontSize: 9, interval: Math.max(1, Math.floor(points.length / 6)) }
+    },
+    yAxis: { type: "value", axisLabel: { formatter: "{value}%", fontSize: 9 }, splitLine: { lineStyle: { color: C.soft } } },
+    series: [
+      { name: "沪深300", type: "line", showSymbol: false, data: points.map(point => point.returnRate), lineStyle: { color: C.blue, width: 2 } },
+      { name: "估值分位", type: "line", showSymbol: false, data: points.map(point => point.valuation), lineStyle: { color: C.orange, width: 1.4, type: "dashed" } }
+    ]
+  };
+}
+
+function renderIndexDetail() {
+  view.innerHTML = indexDetailTemplate();
+  const selectedPeriod = indexTrendPeriods.find(({ key }) => key === state.index.period) || indexTrendPeriods[1];
+  const trend = chart("index-trend-chart", indexTrendOption(selectedPeriod));
+  const periodControl = view.querySelector("#index-period");
+  window.ZhiceLinkedTime.mount(periodControl, () => ({
+    shortcuts: indexTrendPeriods,
+    showDate: false,
+    defaultShortcut: selectedPeriod.key,
+    min: indexTrendPeriods.at(-1).start,
+    max: indexTrendEnd,
+    end: indexTrendEnd
+  }));
+  periodControl.addEventListener("timerangechange", ({ detail }) => {
+    state.index.period = detail.selection;
+    saveState();
+    setParams({ period: detail.selection });
+    trend?.setOption(indexTrendOption(detail));
+  });
+  view.querySelectorAll("[data-relation]").forEach(button => button.onclick = () => {
+    state.index.relation = button.dataset.relation;
+    saveState();
+    setParams({ relation: state.index.relation });
+    disposeCharts();
+    renderIndexDetail();
+    syncIcons();
+  });
+}
 
 function updateNav(module) {
-  const navKey = ({ screener: "fund-research", fund: "fund-research", compare: "fund-research", "manager-compare": "fund-research", index: "fund-research" })[module] || module;
+  const navKey = ({ screener: "fund-research", fund: "fund-research", compare: "fund-research", company: "fund-research", "manager-compare": "fund-research", index: "fund-research" })[module] || module;
   document.querySelectorAll('[data-route-nav]').forEach(a=>{const active=a.dataset.routeNav===navKey;a.classList.toggle('is-active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   document.querySelectorAll('[data-route-leaf]').forEach(a=>a.classList.toggle('is-active',a.dataset.routeLeaf===module));
 }
 function renderRoute(preserveScroll=false) {
+  const routeGeneration = ++companyRouteGeneration;
+  disposeCompanyView?.();
+  disposeCompanyView = undefined;
   window.ManagerCompareView?.dispose();
   window.FundLayout?.dispose();
   window.FundResponsive?.dispose();
@@ -1215,8 +1277,24 @@ function renderRoute(preserveScroll=false) {
   const y=preserveScroll?scrollY:0; disposeCharts(); const route=parseRoute(); absorbParams(route); const module=route.segments[0]||'home'; updateNav(module); document.getElementById('route-progress').classList.add('is-running');
   document.body.classList.toggle('zc-compare-mode',module==='compare'||module==='manager-compare');
   document.body.classList.toggle('zc-manager-mode',module==='manager-compare');
+  document.body.classList.toggle('company-site-mode',module==='company');
+  if(module==='company') {
+    view.innerHTML = '<div class="app-page" role="status">正在加载公司详情…</div>';
+    import('./company-detail.js?v=20261123-shared-time').then(({mountCompanyDetail}) => {
+      if (routeGeneration !== companyRouteGeneration) return;
+      disposeCompanyView = mountCompanyDetail(view, {
+        initialTab: route.params.get('tab'),
+        onTabChange: tab => setParams({tab:tab === 'overview' ? null : tab}),
+        toast,
+      });
+    }).catch(error => {
+      if (routeGeneration !== companyRouteGeneration) return;
+      console.error('Company detail could not be loaded', error);
+      view.innerHTML = '<div class="app-page" role="status">公司详情加载失败，请刷新页面重试。</div>';
+    });
+  } else
   if(module==='home')renderHome(); else if(module==='screener')renderScreener(); else if(module==='fund')renderFund(); else if(module==='compare')renderCompare(); else if(module==='manager-compare')window.ManagerCompareView.render(view); else if(module==='index'&&route.segments[1])renderIndexDetail(); else if(module==='index')renderIndexBrowse(); else if(module==='research-tools')renderResearchTools(); else { location.hash='#/home'; return; }
-  syncIcons(); document.title=`${({home:'首页',screener:'基金筛选',fund:'基金分析',compare:'基金比较','manager-compare':'经理比较',index:'指数选基'})[module]} - 智策研究工作台`; requestAnimationFrame(()=>{if(preserveScroll)scrollTo(0,y);else if(!(module==='fund'&&route.params.get('anchor')))scrollTo(0,0);document.getElementById('route-progress').classList.remove('is-running')});
+  syncIcons(); document.title=`${({home:'首页',screener:'基金筛选',fund:'基金分析',compare:'基金比较','manager-compare':'经理比较',company:'公司详情',index:'指数选基'})[module]} - 智策研究工作台`; requestAnimationFrame(()=>{if(preserveScroll)scrollTo(0,y);else if(!(module==='fund'&&route.params.get('anchor')))scrollTo(0,0);document.getElementById('route-progress').classList.remove('is-running')});
 }
 window.addEventListener('hashchange',()=>renderRoute()); window.addEventListener('resize',()=>charts.forEach(c=>c.resize()));
 document.querySelectorAll('[data-soon]').forEach(btn=>btn.addEventListener('click',()=>toast(`「${btn.dataset.soon}」功能规划中，敬请期待`)));

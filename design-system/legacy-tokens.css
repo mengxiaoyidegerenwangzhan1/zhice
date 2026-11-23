@@ -92,16 +92,16 @@
         .select-control-rules { grid-template-columns: repeat(2, auto); }.control-example{position:relative}.legacy-menu{position:absolute;z-index:40;left:0;top:calc(100% + 8px);min-width:154px;padding:5px;border:1px solid #b9b8d8;border-radius:8px;background:#fff;box-shadow:0 0 12px #00000014}.legacy-menu button{display:block;width:100%;padding:7px 10px;border:0;border-radius:4px;text-align:left;background:#fff;color:#555759;font:inherit;white-space:nowrap;cursor:pointer}.legacy-menu button:hover,.legacy-menu button.selected{background:#f4f4fc;color:#6865a7}.legacy-cascade{display:flex;min-width:300px;gap:8px}.legacy-cascade>div{flex:1}.legacy-parent{border-right:1px solid #eaeaea;padding-right:8px}
 
 .fund-tabs-demo {
-  display:flex; width:100%; height:65px; min-height:65px;
-  align-items:flex-start; gap:20px; padding:0 20px;
+  display:flex; width:100%; height:54px; min-height:54px;
+  align-items:center; gap:20px; padding:12px 20px 0;
   border:0; border-bottom:1px solid #d9d9d9; border-radius:0;
   background:#fff; overflow-x:auto; box-sizing:border-box;
 }
 .fund-tab-demo {
   flex:0 0 auto; position:relative; min-width:0; width:auto;
-  height:64px; padding:0 0 3px; border:0; border-radius:0;
+  height:38px; padding:0 0 16px; border:0; border-radius:0;
   background:#fff; color:#555759;
-  font:400 16px/61px "PingFang SC","Microsoft YaHei",sans-serif;
+  font:400 16px/22px "PingFang SC","Microsoft YaHei",sans-serif;
   white-space:nowrap; cursor:pointer;
 }
 .fund-tab-demo::after {
@@ -109,7 +109,7 @@
   border-radius:4px 4px 0 0; background:#6865a7; transform:none; opacity:0;
 }
 .fund-tab-demo:hover { color:#6865a7; }
-.fund-tab-demo.is-active { color:#333; font-weight:600; }
+.fund-tab-demo.is-active { height:41px; padding-bottom:19px; color:#333; font-weight:600; }
 .fund-tab-demo.is-active::after { left:0; width:100%; height:3px; transform:none; border-radius:4px 4px 0 0; opacity:1; }
 .fund-tab-demo:disabled { color:#cbcbcb; cursor:not-allowed; }
 .fund-tab-demo:disabled::after { opacity:0; }

@@ -53,8 +53,8 @@
       const minimum = options.min || host.dataset.min || '1900-01-01';
       const maximum = options.max || host.dataset.max || '2100-12-31';
       const commonLabel = options.commonLabel || '共同任期';
-      const common = options.common || { start:'2025-08-25', end:today };
-      const firstShortcut = options.firstShortcut || { key:'inception', label:'成立以来' };
+      const common = options.common === undefined ? { start:'2025-08-25', end:today } : options.common;
+      const firstShortcut = options.shortcuts?.[0] || options.firstShortcut || { key:'inception', label:'成立以来' };
       const defaultShortcut = options.defaultShortcut || host.dataset.defaultShortcut || firstShortcut.key;
       const escape = value => String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
       const parse = value => {
@@ -87,7 +87,9 @@
         selected:restored ? host.dataset.ltSelection || null : null,moreLabel:restored ? host.dataset.ltLabel || '更多' : '更多',moreOpen:false,managerOpen:false,calendarOpen:false,
         months:[monthValue(today),monthValue(today)+1],views:[null,null],active:'start',previewEnd:'',revision:0,error:''
       };
-      const shortcuts = [firstShortcut,{key:'year',label:'近1年'},{key:'three-years',label:'近3年'}];
+      const shortcuts = options.shortcuts?.slice(0, 3) || [firstShortcut,{key:'year',label:'近1年'},{key:'three-years',label:'近3年'}];
+      const extraShortcuts = options.shortcuts?.slice(3) || [];
+      const hasMore = !options.shortcuts || extraShortcuts.length > 0 || options.customRange;
       host.innerHTML = '<div class="lt-controls"><div class="lt-quick"><div class="lt-bar" role="group" aria-label="快捷时间范围">' +
         shortcuts.map(({key,label}) => '<button type="button" data-lt-shortcut="' + escape(key) + '">' + escape(label) + '</button>').join('') +
         '<button type="button" class="lt-more-toggle" data-lt-more aria-expanded="false"><span data-lt-more-label>更多</span>' + icon('caret') + '</button></div>' +
@@ -101,6 +103,7 @@
       const get = selector => host.querySelector(selector);
       const getAll = selector => host.querySelectorAll(selector);
       get('.lt-quick').hidden = !hasShortcuts;
+      get('[data-lt-more]').hidden = !hasMore;
       get('.lt-date-wrap').hidden = options.showDate === false;
       const fields = {start:get('[data-lt-input="start"]'),end:get('[data-lt-input="end"]')};
 
@@ -190,14 +193,20 @@
         emitChange('clear');
       }
       function renderMore() {
+        const option = (key,label) => '<button type="button" data-lt-option="' + escape(key) + '" aria-pressed="' + (state.selected===key) + '" class="' + (state.selected===key?'is-selected':'') + '">' + escape(label) + '</button>';
+        if (options.shortcuts) {
+          const custom = options.customRange ? option('custom', '自定义') : '';
+          get('[data-lt-more-panel]').innerHTML = hasMore ? '<div class="lt-menu-group"><span class="lt-menu-heading">区间</span><div class="lt-option-grid lt-intervals">' +
+            extraShortcuts.map(({key,label}) => option(key,label)).join('') + custom + '</div></div>' : '';
+          return;
+        }
         const year = Number(anchor.slice(0,4));
         const selectedManager = managers.find(manager => state.selected === 'manager-' + manager.key);
-        const option = (key,label) => '<button type="button" data-lt-option="' + key + '" aria-pressed="' + (state.selected===key) + '" class="' + (state.selected===key?'is-selected':'') + '">' + escape(label) + '</button>';
         const managerRows = managers.map(manager => '<button type="button" class="lt-manager-row ' + (state.selected==='manager-'+manager.key?'is-selected':'') + '" aria-pressed="' + (state.selected==='manager-'+manager.key) + '" data-lt-manager="' + escape(manager.key) + '">' +
           icon('check') + '<span class="lt-manager-name">' + escape(manager.name) + '</span><span class="lt-manager-dates">' + escape(manager.start + ' – ' + (manager.endLabel || manager.end)) + '</span></button>').join('');
         const specialOptions = [
           managers.length ? '<button type="button" class="lt-manager-toggle ' + (state.managerOpen?'is-open ':'') + (selectedManager?'is-selected':'') + '" data-lt-manager-toggle aria-pressed="' + Boolean(selectedManager) + '" aria-expanded="' + state.managerOpen + '">' + (selectedManager?escape(selectedManager.name)+'任期':'经理任期') + icon('caret') + '</button>' : '',
-          firstShortcut.key==='common'?'':option('common',commonLabel),
+          !common || firstShortcut.key==='common'?'':option('common',commonLabel),
           allowInception && firstShortcut.key!=='inception'?option('inception','成立以来'):''
         ].join('');
         const specialGroup = specialOptions ? '<div class="lt-menu-group"><span class="lt-menu-heading">特殊区间</span><div class="lt-special-options">' +
@@ -301,10 +310,19 @@
         })();
       }
       function selectOption(key) {
+        if (options.shortcuts) {
+          const item = options.shortcuts.find(shortcut => shortcut.key === key);
+          if (item) return applyRange(item.start,item.end,key,shortcuts.includes(item)?'更多':item.label);
+          if (key === 'custom' && options.customRange) {
+            fields.start.focus({ preventScroll:true });
+            openCalendar();
+          }
+          return false;
+        }
         if (key==='inception' && allowInception) return applyRange(inception,anchor,key,firstShortcut.key==='inception'?'更多':'成立以来');
         if (key==='year') return applyRange(subtractMonths(anchor,12),anchor,key,'更多');
         if (key==='three-years') return applyRange(subtractMonths(anchor,36),anchor,key,'更多');
-        if (key==='common') return applyRange(common.start,common.end,key,firstShortcut.key==='common'?'更多':commonLabel);
+        if (key==='common' && common) return applyRange(common.start,common.end,key,firstShortcut.key==='common'?'更多':commonLabel);
         const months = {'month':1,'three-months':3,'six-months':6,'five-years':60};
         const names = {'month':'近1月','three-months':'近3月','six-months':'近6月','five-years':'近5年'};
         if (months[key]) return applyRange(subtractMonths(anchor,months[key]),anchor,key,names[key]);

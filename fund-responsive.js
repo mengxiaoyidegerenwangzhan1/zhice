@@ -61,6 +61,14 @@
     label.style.font = getComputedStyle(title).font;
     document.body.append(label);
     const titleWidth = label.getBoundingClientRect().width;
+    let naturalStarsWidth = 0;
+    if (stars) {
+      const starStyle = getComputedStyle(stars);
+      label.textContent = stars.textContent;
+      label.style.font = starStyle.font;
+      label.style.letterSpacing = starStyle.letterSpacing;
+      naturalStarsWidth = label.getBoundingClientRect().width;
+    }
     label.remove();
     const style = getComputedStyle(header);
     const room = header.clientWidth - number(style.paddingLeft) - number(style.paddingRight);
@@ -68,8 +76,12 @@
     const actionGap = number(getComputedStyle(actions).columnGap);
     const actionWidth = actionChildren.reduce((sum, child) => sum + child.offsetWidth, 0) + Math.max(0, actionChildren.length - 1) * actionGap;
     const titleRow = header.querySelector('.fund-title-row');
-    const titleGap = number(getComputedStyle(titleRow).gap);
-    const starsWidth = stars?.scrollWidth || 0;
+    const titleRowGap = number(getComputedStyle(titleRow).gap);
+    const compact = header.closest('.fund-analysis-page')?.classList.contains('is-header-compact');
+    const narrow = window.matchMedia('(max-width:800px)').matches;
+    header.classList.toggle('is-stars-collapsed', Boolean(compact && (narrow || titleWidth + naturalStarsWidth + titleRowGap + actionWidth + 24 > room)));
+    const starsWidth = stars && getComputedStyle(stars).display !== 'none' ? naturalStarsWidth : 0;
+    const titleGap = starsWidth ? titleRowGap : 0;
     header.style.setProperty('--fund-identity-actions-width', actionWidth + 'px');
     header.classList.toggle('is-actions-wrapped', titleWidth + starsWidth + titleGap + actionWidth + 24 > room);
   }
@@ -92,7 +104,7 @@
     // Fixed descendants inherit CSS zoom; convert viewport pixels back to their local pixels.
     page.style.setProperty('--fund-fixed-left', cardLeft / actualScale + 'px');
     page.style.setProperty('--fund-fixed-width', cardWidth / actualScale + 'px');
-    page.style.setProperty('--fund-fixed-top', (navBottom + 16) / actualScale + 'px');
+    page.style.setProperty('--fund-fixed-top', navBottom / actualScale + 'px');
     layoutIdentity(page.querySelector('.fund-identity-panel'));
     page.querySelectorAll('.fund-panel-head').forEach(layoutHeading);
     const chartWidth = Math.round(cardWidth * 10) / 10;

@@ -1,0 +1,233 @@
+.zc-dialog,
+.zc-dialog * {
+  box-sizing: border-box;
+}
+
+.zc-dialog {
+  --zc-dialog-width: 520px;
+  --zc-dialog-inset: 24px;
+  --zc-dialog-primary: #6865a7;
+  --zc-dialog-primary-hover: #7774b3;
+  --zc-dialog-line: #eee;
+  --zc-dialog-control-line: rgba(234, 234, 234, .85);
+  --zc-dialog-focus-line: #b9b8d8;
+  --zc-dialog-error: #f26173;
+  width: var(--zc-dialog-width);
+  max-width: calc(100% - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 12px rgba(0, 0, 0, .08);
+  color: #333;
+  font: 400 14px/20px "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+dialog.zc-dialog {
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  overflow: auto;
+}
+
+dialog.zc-dialog::backdrop {
+  background: var(--zc-dialog-backdrop, #25314945);
+}
+
+.zc-dialog[hidden] {
+  display: none;
+}
+
+.zc-dialog form {
+  margin: 0;
+}
+
+.zc-dialog .zc-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px var(--zc-dialog-inset) 12px;
+  border-bottom: 1px solid var(--zc-dialog-line);
+}
+
+.zc-dialog .zc-dialog-title {
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.zc-dialog .zc-dialog-close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #999;
+  font: 400 16px/18px Arial, sans-serif;
+  cursor: pointer;
+}
+
+.zc-dialog-close svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.zc-dialog-close:not(:has(svg))::before {
+  position: absolute;
+  inset: 2px 0;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  content: "";
+}
+
+.zc-dialog .zc-dialog-close:hover {
+  color: var(--zc-dialog-primary);
+}
+
+.zc-dialog .zc-dialog-body {
+  display: grid;
+  gap: 20px;
+  padding: 16px var(--zc-dialog-inset);
+}
+
+.zc-dialog .zc-dialog-field {
+  min-width: 0;
+}
+
+.zc-dialog .zc-dialog-label {
+  display: block;
+  margin: 0 0 8px;
+  color: #333;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.zc-dialog .zc-dialog-control {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 5px 12px;
+  border: 1px solid var(--zc-dialog-control-line);
+  border-radius: 99px;
+  outline: none;
+  background-color: #fff;
+  box-shadow: none;
+  color: #333;
+  font: inherit;
+}
+
+.zc-dialog select.zc-dialog-control {
+  padding-inline-end: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='m2 4 4 4 4-4' stroke='%23999' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.zc-dialog textarea.zc-dialog-control {
+  height: 100px;
+  min-height: 100px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  line-height: 20px;
+  resize: vertical;
+}
+
+.zc-dialog .zc-dialog-control::placeholder {
+  color: #999;
+  opacity: 1;
+}
+
+.zc-dialog .zc-dialog-control:is(:hover, :focus) {
+  border-color: var(--zc-dialog-focus-line);
+}
+
+.zc-dialog .zc-dialog-control[aria-invalid="true"] {
+  border-color: var(--zc-dialog-error);
+}
+
+.zc-dialog .zc-dialog-control:disabled {
+  border-color: var(--zc-dialog-control-line);
+  background-color: #f7f8fa;
+  color: #cbcbcb;
+  cursor: not-allowed;
+}
+
+.zc-dialog .zc-dialog-error {
+  margin: 4px 0 0;
+  color: var(--zc-dialog-error);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.zc-dialog .zc-dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 12px var(--zc-dialog-inset) 16px;
+  border-top: 1px solid var(--zc-dialog-line);
+}
+
+.zc-dialog .zc-dialog-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 70px;
+  height: 34px;
+  padding: 0 20px;
+  border: 1px solid var(--zc-dialog-control-line);
+  border-radius: 99px;
+  background: #fff;
+  color: #666;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.zc-dialog .zc-dialog-button:hover {
+  background: #f2f3f5;
+  color: #333;
+}
+
+.zc-dialog .zc-dialog-button--primary {
+  min-width: 68px;
+  border: 0;
+  background: var(--zc-dialog-primary);
+  color: #fff;
+  font-weight: 500;
+}
+
+.zc-dialog .zc-dialog-button--primary:hover {
+  background: var(--zc-dialog-primary-hover);
+  color: #fff;
+}
+
+.zc-dialog .zc-dialog-button:disabled {
+  background: #f4f4fc;
+  color: var(--zc-dialog-primary);
+  cursor: not-allowed;
+}
+
+.zc-dialog :is(.zc-dialog-button, .zc-dialog-close):focus-visible {
+  outline: 2px solid var(--zc-dialog-primary);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .zc-dialog {
+    --zc-dialog-inset: 20px;
+  }
+}

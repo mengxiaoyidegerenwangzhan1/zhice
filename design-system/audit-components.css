@@ -215,4 +215,4 @@
 .audit-table-variant-label { margin:0 0 8px; color:#666; font:400 12px/18px "PingFang SC","Microsoft YaHei",sans-serif; }
 .audit-table-titled .audit-side-title-column { width:120px; }
 .audit-table-titled .audit-titled-field-column { width:160px; }
-.audit-table-titled .audit-side-title { vertical-align:middle; color:#333; font-size:14px; line-height:20px; font-weight:400; }
+.audit-table-titled .audit-side-title { vertical-align:middle; font-weight:400; }

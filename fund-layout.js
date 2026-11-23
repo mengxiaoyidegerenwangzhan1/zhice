@@ -34,6 +34,18 @@
       button?.focus({preventScroll:true});
     }
 
+    const revealActiveTab = () => {
+      if (!tabs || tabs.scrollWidth <= tabs.clientWidth || getComputedStyle(tabs).overflowX !== 'auto') return;
+      const selected = tabs.querySelector('[aria-selected="true"]');
+      if (!selected) return;
+      const inset = parseFloat(getComputedStyle(tabs).paddingLeft) || 0;
+      const left = selected.offsetLeft;
+      const right = left + selected.offsetWidth;
+      if (left < tabs.scrollLeft + inset) tabs.scrollLeft = Math.max(0, left - inset);
+      else if (right > tabs.scrollLeft + tabs.clientWidth - inset) tabs.scrollLeft = right - tabs.clientWidth + inset;
+    };
+    const revealFrame = requestAnimationFrame(revealActiveTab);
+
     const spacer = document.createElement('div');
     spacer.className = 'fund-identity-space';
     header.before(spacer);
@@ -41,6 +53,7 @@
     const measure = () => {
       if (!compact) expandedHeight = header.offsetHeight;
       if (compact) spacer.style.height = expandedHeight + 'px';
+      revealActiveTab();
     };
     const update = () => {
       const shouldCompact = window.scrollY > page.offsetTop + 110;
@@ -75,7 +88,7 @@
         });
       });
     });
-    cleanup = () => { window.removeEventListener('scroll', update); window.removeEventListener('resize', measure); observer.disconnect(); };
+    cleanup = () => { cancelAnimationFrame(revealFrame); window.removeEventListener('scroll', update); window.removeEventListener('resize', measure); observer.disconnect(); };
   }
   window.FundLayout = {mount, dispose: () => {cleanup(); cleanup = () => {};}};
 })();

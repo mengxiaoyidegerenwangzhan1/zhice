@@ -13,10 +13,18 @@
   state.bond.distribution = '债券种类';
   const reportDates = ['2026-09-30', '2026-06-30', '2026-03-31', '2025-12-31', '2025-09-30', '2025-06-30', '2025-03-31'];
   const stockDistributions = ['行业分布 - 申万行业分类', '行业分布 - 中信行业分类', '行业分布 - 中证行业分类', '行业分布 - 证监会行业分类', '板块分布'];
+  const assetColors = Object.freeze({
+    股票: '#889ffa',
+    基金: '#ceb2ee',
+    银行存款: '#f0a89d',
+    固定收益: '#b0b5f7',
+    可转换债券: '#74c0da',
+    其他资产: '#f4bd84',
+  });
   const assetRows = [
-    ['股票', '#889ffa', 88.72, null], ['基金', '#ceb2ee', null, 89.93],
-    ['银行存款', '#f0a89d', 9.36, 4.14], ['固定收益', '#b0b5f7', 0.43, 5.81],
-    ['可转换债券', '#74c0da', 0.11, null], ['其他资产', '#f4bd84', 1.38, 0.12],
+    ['股票', 88.72, null], ['基金', null, 89.93],
+    ['银行存款', 9.36, 4.14], ['固定收益', 0.43, 5.81],
+    ['可转换债券', 0.11, null], ['其他资产', 1.38, 0.12],
   ];
   const industryRows = [
     ['电子', 16.90, '#ccbde6'], ['机械设备', 13.92, '#7ebaa2'], ['电力设备', 11.11, '#a6c8d3'],
@@ -92,8 +100,8 @@
   }
 
   function dataRows(key) {
-    if (key === 'asset') return assetRows.map(([name, color, first, second]) => ({ name, color, values: [first, second] }));
-    if (key === 'bond') return [{ name: '可转换债券', color: '#74c0da', values: [0.02, 0.15] }];
+    if (key === 'asset') return assetRows.map(([name, first, second]) => ({ name, color: assetColors[name], values: [first, second] }));
+    if (key === 'bond') return [{ name: '可转换债券', color: assetColors.可转换债券, values: [0.02, 0.15] }];
     const rows = industryRows.map(([name, value, color], index) => ({ name, color, values: [index === 3 ? null : value, comparisonIndustryValues[index]] }));
     const grouping = classificationGroups[state.stock.distribution];
     if (!grouping) return rows;
@@ -394,5 +402,5 @@
     canvas.toBlob(blob => { if (blob) download(`${filename}.png`, blob, 'image/png'); }, 'image/png');
   }
 
-  window.CompareAllocationView = { render, mount, exportTableImage };
+  window.CompareAllocationView = { render, mount, exportTableImage, assetColors };
 })();

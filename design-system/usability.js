@@ -40,14 +40,15 @@
   function visitComponentHash() {
     let id = location.hash.slice(1);
     if (id === 'component-date' || id === 'component-quick') id = 'component-time-range';
-    if (!id.startsWith('component-')) return;
+    const isTableCase = id.startsWith('table-case-');
+    if (!id.startsWith('component-') && !isTableCase) return;
     const component = document.getElementById(id);
     if (!component) return;
     document.getElementById('visual-tab-components').click();
     requestAnimationFrame(() => {
       window.scrollTo({ top: window.scrollY + component.getBoundingClientRect().top - scrollOffset(), behavior: 'instant' });
       navigationScrollY = window.scrollY;
-      highlightComponent(component.id);
+      highlightComponent(isTableCase ? 'component-table' : component.id);
       if (arrivalAnimation) arrivalAnimation.cancel();
       arrivalAnimation = component.animate([
         { backgroundColor: '#eeedf8' },

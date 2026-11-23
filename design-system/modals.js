@@ -112,7 +112,7 @@
 
   const section = document.createElement('article');
   section.className = 'component-spec'; section.dataset.catalogId = 'modal'; section.id = 'component-modal';
-  section.innerHTML = '<div class="original-spec-heading"><h3>弹窗</h3></div><section class="individual-component"><div class="individual-component-heading"><h4>表单弹窗 · 新建定时任务</h4><div class="actions"><button type="button" data-modal-action="svg">复制 SVG</button><button type="button" data-modal-action="spec">查看规范</button><button type="button" data-modal-action="code">查看代码</button><a href="https://www.figma.com/design/rTKeLXF81fJZFEsIIjZWXp?node-id=610-84006" target="_blank" rel="noreferrer">Figma 源组件</a></div></div>' + demoMarkup() + '</section>';
+  section.innerHTML = '<div class="original-spec-heading"><h3>弹窗</h3></div><section class="individual-component"><div class="individual-component-heading"><h4>通用表格</h4><div class="actions"><button type="button" data-modal-action="svg">复制 SVG</button><button type="button" data-modal-action="spec">查看规范</button><button type="button" data-modal-action="code">查看代码</button><a href="https://www.figma.com/design/rTKeLXF81fJZFEsIIjZWXp?node-id=610-84006" target="_blank" rel="noreferrer">Figma 源组件</a></div></div>' + demoMarkup() + '</section>';
   document.getElementById('content').append(section);
   taskModalRuntime(section); styleComponentActions();
   section.addEventListener('click', async event => {

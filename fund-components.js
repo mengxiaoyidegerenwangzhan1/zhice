@@ -305,18 +305,8 @@ function viewSwitchRuntime(root = document) {
   let periodCleanups = [];
   function bindPeriodPresentation(host) {
     let frame = 0;
-    const pruneUnavailableSpecial = () => {
-      // A single-fund analysis has no comparison overlap or manager selection.
-      // The canonical demo supplies a common-period fallback when common is null.
-      host.querySelector('[data-lt-option="common"]')?.remove();
-      host.querySelectorAll('.lt-menu-group').forEach(group => {
-        const specials = group.querySelector('.lt-special-options');
-        if (specials && !specials.children.length) group.remove();
-      });
-    };
     const positionPanels = () => {
       frame = 0;
-      pruneUnavailableSpecial();
       host.querySelectorAll('.lt-more-panel,.lt-calendar').forEach(panel => {
         if (panel.hidden || !panel.getClientRects().length) return;
         panel.style.translate = 'none';
@@ -328,23 +318,27 @@ function viewSwitchRuntime(root = document) {
       });
     };
     const schedule = () => { if (!frame) frame = requestAnimationFrame(positionPanels); };
-    const onClick = () => { pruneUnavailableSpecial(); schedule(); };
     const observer = new MutationObserver(schedule);
-    pruneUnavailableSpecial();
     observer.observe(host, {childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});
-    host.addEventListener('click', onClick);
+    host.addEventListener('click', schedule);
     host.addEventListener('focusin', schedule);
     window.addEventListener('resize', schedule, {passive:true});
     window.addEventListener('scroll', schedule, {passive:true,capture:true});
     periodCleanups.push(() => {
       observer.disconnect();
-      host.removeEventListener('click',onClick);host.removeEventListener('focusin',schedule);
+      host.removeEventListener('click',schedule);host.removeEventListener('focusin',schedule);
       window.removeEventListener('resize',schedule);window.removeEventListener('scroll',schedule,true);
       if (frame) cancelAnimationFrame(frame);
     });
   }
   function mountPeriods(root) {
     periodCleanups.forEach(cleanup=>cleanup());periodCleanups=[];
+    const today = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+    root.querySelectorAll('[data-fund-fixed-period]').forEach(host => {
+      const { fundFixedPeriod: label, start } = host.dataset;
+      const end = host.dataset.end || today;
+      window.ZhiceLinkedTime?.mount(host, () => ({ shortcuts:[{key:'fixed',label,start,end}], showDate:false, min:start, max:end, end }));
+    });
     root.querySelectorAll('.fund-panel').forEach(panel=>{
       const period = [...panel.querySelectorAll('select')].find(input=>/^(?:成立以来|近[一二三五六十12356]+[年月周日]|今年以来|共同时段)$/.test(input.selectedOptions[0]?.textContent.trim()));
       const oldRange=panel.querySelector('.fund-date-range');
@@ -352,11 +346,11 @@ function viewSwitchRuntime(root = document) {
       const text=period?.selectedOptions[0]?.textContent.trim() || '成立以来';
       const defaultKey=({'近1年':'year','近3年':'three-years','近1月':'month','近3月':'three-months','近6月':'six-months','今年以来':'year-to-date'})[text] || 'inception';
       const extent=window.FundChartUI?.extent(panel) || chartExtent(panel);
-      const anchor=extent?.end || new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Shanghai',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+      const anchor=extent?.end || today;
       const host=document.createElement('div');host.className='linked-time-widget fund-linked-time';host.dataset.linkedTime='';host.dataset.defaultShortcut=defaultKey;
-      const target=period?.closest('label') || oldRange;
+      const target=period?.closest('label') || period || oldRange;
       target.replaceWith(host);oldRange?.remove();
-      window.ZhiceLinkedTime?.mount(host,()=>({inception:'2001-12-18',min:'2001-12-18',max:anchor,end:anchor,managers:[],common:{start:'2001-12-18',end:anchor},firstShortcut:{key:'inception',label:'成立以来'}}));
+      window.ZhiceLinkedTime?.mount(host,()=>({inception:'2001-12-18',min:'2001-12-18',max:anchor,end:anchor,managers:[],common:null,firstShortcut:{key:'inception',label:'成立以来'}}));
       bindPeriodPresentation(host);
       const initial=host.linkedTimeApi?.getState().committed;
       if(initial?.start && initial?.end)window.FundChartUI?.applyRange?.(panel,initial.start,initial.end);

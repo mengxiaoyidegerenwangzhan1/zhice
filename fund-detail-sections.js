@@ -9,6 +9,7 @@ function table(headers, rows, nums = []) {
   return `<div class="fund-table-wrap"><table class="fund-table"><thead><tr>${headers.map((h,i)=>`<th${numeric.has(i)?' class="is-num"':''}>${escape(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr${row[0]==='合计'?' class="is-total-row"':''}>${row.map((v,i)=>`<td${numeric.has(i)?' class="is-num"':''}>${/^[-]\d/.test(String(v))?`<span class="is-fall">${escape(v)}</span>`:escape(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 function select(label, values = []) { return `<label class="fund-select"><span class="sr-only">${escape(label)}</span><select aria-label="${escape(label)}">${[label,...values].map(v=>`<option>${escape(v)}</option>`).join('')}</select></label>`; }
+const fixedPeriod = (label, start, end = '') => `<div class="linked-time-widget fund-linked-time" data-linked-time data-fund-fixed-period="${escape(label)}" data-start="${start}" data-end="${end}"></div>`;
 const scope = () => `<div class="fund-scope-pills" role="group" aria-label="持仓范围"><button type="button" class="is-on">全部持仓</button><button type="button">前十大重仓</button></div>`;
 const panel = (title, body, controls = '', klass = '') => `<section class="fund-panel ${klass}"><header class="fund-panel-head"><div><h2>${title}</h2></div>${controls?`<div class="fund-panel-controls">${controls}</div>`:''}</header>${body}</section>`;
 const graph = (key, title, height=320) => `<section class="fund-chart-block">${title?`<h3>${title}</h3>`:''}<div class="fund-chart fund-source-chart" data-source-chart="${key}" role="img" aria-label="${escape(title||key)}" style="height:${height}px;min-height:${height}px">${sourceVectors[key]}</div></section>`;
@@ -38,7 +39,7 @@ function manager() {
     ['嘉实农业产业股票','混合型','2017-02-03','--','29.29%'],['创金合信医疗保健股票C','股票型','2017-02-03','2019-12-03','21.80%'],['前海开源中证大农业指数增强','混合型','2017-02-03','--','18.62%'],['宝盈品牌消费股票A','股票型','2017-02-03','2018-12-03','21.80%'],['汇添富中证生物科技指数A','混合型','2017-02-03','2019-12-03','18.62%']
   ],[4]);
   const profile=`<section class="fund-chart-block"><div class="fund-manager-profile"><img src="./assets/fund-manager-avatar.png" alt="基金经理杨浩"><div><h3>杨浩</h3><p>智君评级　3年　5年</p><p>任职回报　<span class="is-rise">243.50%</span></p><p>任职时间　2015-08-15 至今</p></div></div><h3>个人经历</h3><p style="line-height:1.9;color:#666">${biography}</p></section>`;
-  const performance=`<section class="fund-chart-block"><div class="fund-split-head">${switcher('manager-performance',['基金经理指数','旗下基金业绩'])}${select('管理以来')}</div><div data-detail-pane="manager-performance" data-detail-index="0">${graph('manager-index','',360)}</div><div data-detail-pane="manager-performance" data-detail-index="1" hidden>${products}</div></section>`;
+  const performance=`<section class="fund-chart-block"><div class="fund-split-head">${switcher('manager-performance',['基金经理指数','旗下基金业绩'])}${fixedPeriod('管理以来','2015-08-15')}</div><div data-detail-pane="manager-performance" data-detail-index="0">${graph('manager-index','',360)}</div><div data-detail-pane="manager-performance" data-detail-index="1" hidden>${products}</div></section>`;
   const history=`${pair(graph('manager-history','',330),`<section class="fund-chart-block"><h3>杨浩</h3>${table(['任职信息','数据'],[['任职时间','2015-08-29至今'],['任职天数','1858天'],['任职回报','201.29%']],[1])}</section>`)}<p class="fund-chart-note">注：基金成立时间2013-05-13</p>`;
   return panel('现任基金经理',pair(profile,performance),switcher('manager-person',['郑晓辉','刘睿聪']))+panel('历任基金经理',history);
 }
@@ -56,7 +57,7 @@ function company() {
   const sourceRanks=['--','2019-12-03','--','2018-12-03','2019-12-03'];
   const sourceScales=['29.29%','21.80%','18.62%','21.80%','18.62%'];
   return panel('基金公司概览',facts)
-    +panel('规模变化',pair(graph('company-history','',350),`<section class="fund-chart-block">${history}</section>`),`${select('全部类型',['股票型','混合型','债券型'])}${select('最近5年')}`)
+    +panel('规模变化',pair(graph('company-history','',350),`<section class="fund-chart-block">${history}</section>`),`${select('全部类型',['股票型','混合型','债券型'])}${fixedPeriod('近5年','2016-01-01','2020-12-31')}`)
     +panel('旗下产品结构',table(['基金类型','规模占比','基金数量','基金个数排名','规模合计（亿元）','规模排名'],types.map((name,i)=>[name,weights[i],sourceCounts[i]||'--',sourceRanks[i]||'--',sourceScales[i]||'--',sourceScales[i]||'--']),[1,2,3,4,5]));
 }
 

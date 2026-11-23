@@ -1,0 +1,315 @@
+/* The table catalog and its standalone HTML exports share these styles. */
+#component-table .audit-table-examples {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:40px;
+  min-width:0;
+  max-width:100%;
+}
+.audit-case-example,
+.audit-case-example * { box-sizing:border-box; }
+.audit-case-example {
+  min-width:0;
+  max-width:100%;
+  color:#333;
+  font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+#component-table .audit-case-example,
+#component-table .audit-case-example + .audit-case-example {
+  margin:0;
+  padding:0;
+  border:0;
+}
+#component-table .audit-table-examples > .individual-component + .individual-component {
+  padding-top:0;
+  border-top:0;
+}
+#component-table .audit-table-examples .individual-component-heading {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px 16px;
+  margin:0 0 16px;
+}
+#component-table .audit-table-examples .individual-component-heading > :is(h3,h4) {
+  margin:0;
+  color:#333;
+  font:500 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+#component-table #table-case-comprehensive .individual-component-heading { margin-bottom:20px; }
+#component-table #table-case-comprehensive .individual-component-heading > :is(h3,h4),
+#component-table .audit-table-group-title {
+  color:#333;
+  font:500 20px/28px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+#component-table .audit-table-group-title { margin:0 0 32px; }
+#component-table #table-case-numeric { margin-top:40px; }
+.audit-case-example .audit-table-scroll,
+#component-table .audit-case-example .audit-table-scroll {
+  position:static;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  height:auto;
+  max-height:none;
+  margin:0;
+  padding:0;
+  overflow-x:auto;
+  background:#fff;
+  border:0;
+  border-radius:0;
+}
+.audit-case-example .audit-screenshot-table {
+  width:100%;
+  min-width:860px;
+  margin:0;
+  border:0;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+  background:#fff;
+  color:#333;
+  font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+.audit-case-example .audit-table-case-comprehensive { min-width:980px; }
+.audit-case-example .audit-screenshot-table tr { border:0; }
+.audit-case-example .audit-screenshot-table th,
+.audit-case-example .audit-screenshot-table td {
+  position:static;
+  height:45px;
+  padding:12px 12px 13px;
+  border:0;
+  border-radius:0;
+  background:#fff;
+  box-shadow:inset 0 -1px 0 #eaeaea;
+  color:inherit;
+  font:inherit;
+  font-weight:400;
+  text-align:left;
+  vertical-align:middle;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+.audit-case-example .audit-screenshot-table thead th {
+  color:#999;
+  background:#fff;
+  font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+@media (hover:hover) {
+  .audit-case-example .audit-screenshot-table tbody tr:hover:not(:has(> [rowspan]:hover)) > :is(th,td):not([rowspan]) {
+    background-color:#fafafa;
+  }
+}
+.audit-case-example .audit-screenshot-table th[scope="row"],
+.audit-case-example .audit-screenshot-table th[scope="rowgroup"],
+.audit-case-example .audit-screenshot-table .audit-field-heading { padding-inline:10px; }
+.audit-case-example .audit-screenshot-table .audit-row-heading {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+  margin:0;
+  padding:0;
+  color:inherit;
+  font:inherit;
+}
+.audit-case-example .audit-screenshot-table :is(.audit-level-1,.audit-level-2) .audit-row-heading { margin-left:0; }
+.audit-case-example .audit-screenshot-table .audit-row-label { display:block; min-width:0; }
+.audit-case-example .audit-screenshot-table .audit-shot-root,
+.audit-case-example .audit-screenshot-table .audit-shot-second,
+.audit-case-example .audit-screenshot-table .audit-level-1 {
+  color:#333;
+  font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+.audit-case-example .audit-screenshot-table .audit-shot-third,
+.audit-case-example .audit-screenshot-table .audit-level-2 {
+  color:#666;
+  font:400 12px/17px "PingFang SC","Microsoft YaHei",sans-serif;
+}
+.audit-case-example .audit-screenshot-table .audit-shot-third > th,
+.audit-case-example .audit-screenshot-table .audit-shot-third > td {
+  height:41px;
+  padding-block-end:12px;
+  box-shadow:none;
+}
+.audit-case-example .audit-screenshot-table .audit-shot-wrap-row > :is(th,td) { height:65px; }
+.audit-case-example .audit-screenshot-table .audit-shot-third.audit-shot-wrap-row > :is(th,td) { height:58px; }
+.audit-case-example .audit-screenshot-table .audit-third-group-end > :is(th,td) {
+  height:42px;
+  padding-block-end:13px;
+  box-shadow:inset 0 -1px 0 #eaeaea;
+}
+.audit-case-example .audit-screenshot-table .audit-third-group-end.audit-shot-wrap-row > :is(th,td) { height:59px; }
+.audit-case-example .audit-table-case-folded .audit-shot-second > th[scope="row"] { padding-inline-start:28px; }
+.audit-case-example .audit-table-case-folded .audit-shot-third > th[scope="row"] { padding-inline-start:46px; }
+.audit-case-example .audit-screenshot-table .audit-shot-name-wrap {
+  display:block;
+  min-width:0;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.audit-case-example .audit-screenshot-table .audit-shot-name-ellipsis {
+  display:block;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.audit-case-example .audit-screenshot-table .audit-number {
+  color:#333;
+  font-family:Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-variant-numeric:tabular-nums;
+  text-align:right;
+  white-space:nowrap;
+}
+.audit-case-example .audit-screenshot-table thead .audit-number,
+.audit-case-example .audit-screenshot-table thead .audit-number-heading {
+  color:#999;
+  font:400 14px/20px "PingFang SC","Microsoft YaHei",sans-serif;
+  text-align:right;
+}
+.audit-case-example .audit-table-case-comprehensive .audit-number,
+.audit-case-example .audit-table-case-comprehensive thead th { text-align:left; }
+.audit-case-example .audit-screenshot-table .audit-value-positive { color:#bf3a61; }
+.audit-case-example .audit-screenshot-table .audit-value-negative { color:#36b397; }
+.audit-case-example .audit-screenshot-table .audit-value-zero,
+.audit-case-example .audit-screenshot-table .audit-value-neutral { color:#333; }
+.audit-case-example .audit-screenshot-table .audit-value-missing {
+  color:#333;
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+  font-weight:400;
+}
+.audit-case-example .audit-screenshot-table .audit-total .audit-number { font-weight:500; }
+.audit-case-example .audit-screenshot-table .audit-total th,
+.audit-case-example .audit-screenshot-table .audit-total .audit-row-heading {
+  font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+  font-weight:500;
+}
+.audit-case-example .audit-screenshot-table .audit-total .audit-value-missing { font-weight:400; }
+.audit-case-example .audit-screenshot-table .audit-checkbox-column,
+.audit-case-example .audit-screenshot-table .audit-checkbox-cell {
+  width:38px;
+  min-width:38px;
+  max-width:38px;
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox-cell { text-align:center; }
+.audit-case-example .audit-screenshot-table .audit-checkbox {
+  appearance:none;
+  display:block;
+  position:relative;
+  width:14px;
+  height:14px;
+  margin:0 auto;
+  padding:0;
+  border:1px solid #dcdcdc;
+  border-radius:4px;
+  background:#fff center / 14px 14px no-repeat;
+  cursor:pointer;
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox:checked {
+  border:0;
+  background-image:url("assets/table-reference/25ea2.svg");
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox-alternate:checked {
+  background-image:url("assets/table-reference/0b96b.svg");
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox:indeterminate {
+  border:0;
+  background:#6865a7;
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox::before,
+.audit-case-example .audit-screenshot-table .audit-checkbox::after {
+  content:none;
+  display:none;
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox:indeterminate::after {
+  content:"";
+  display:block;
+  position:absolute;
+  inset:6.44px auto auto 3px;
+  width:8px;
+  height:1.2px;
+  border:0;
+  border-radius:2px;
+  background:#fff;
+  transform:none;
+}
+.audit-case-example .audit-screenshot-table .audit-checkbox:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
+.audit-case-example .audit-screenshot-table .audit-checkbox:disabled { opacity:.4; cursor:not-allowed; }
+.audit-case-example .audit-screenshot-table button.audit-row-heading {
+  appearance:none;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+}
+.audit-case-example .audit-screenshot-table .audit-row-heading img {
+  display:block;
+  flex:0 0 14px;
+  width:14px;
+  height:14px;
+}
+.audit-case-example .audit-screenshot-table button.audit-row-heading[aria-expanded="true"] img { transform:none; }
+.audit-case-example .audit-screenshot-table button.audit-row-heading[aria-expanded="true"] .audit-arrow-closed,
+.audit-case-example .audit-screenshot-table button.audit-row-heading[aria-expanded="false"] .audit-arrow-open { display:none; }
+.audit-case-example .audit-screenshot-table button.audit-row-heading[data-row-toggle="reference-fold-last"] { gap:6px; }
+.audit-case-example .audit-screenshot-table button.audit-row-heading:hover { color:#6865a7; }
+.audit-case-example .audit-screenshot-table button:focus-visible,
+.audit-case-example .audit-table-scroll:focus-visible { outline:2px solid #6865a7; outline-offset:-2px; }
+.audit-case-example .audit-screenshot-table .audit-table-rating {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  min-width:0;
+  vertical-align:middle;
+}
+.audit-case-example .audit-screenshot-table .audit-table-rating img {
+  display:block;
+  flex:none;
+  width:14.8px;
+  height:14.8px;
+}
+.audit-case-example .audit-screenshot-table .audit-table-link {
+  color:#6078d9;
+  text-decoration:none;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.audit-case-example .audit-screenshot-table .audit-table-link:hover { text-decoration:underline; }
+.audit-case-example .audit-screenshot-table .audit-table-link:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
+.audit-case-example .audit-table-case-double-title .audit-double-rowgroup {
+  border-right:1px solid #eaeaea;
+  box-shadow:inset 0 -1px 0 #eaeaea;
+  color:#333;
+  font-weight:400;
+}
+.audit-case-example .audit-table-case-double-title .audit-number-heading {
+  height:65px;
+  vertical-align:top;
+}
+.audit-case-example .audit-table-case-double-title .audit-double-row-label { color:#666; }
+.audit-case-example .audit-screenshot-table tr[hidden] { display:none; }
+
+/* Figma's 1286px proportions, with flexible text columns and horizontal overflow at smaller widths. */
+.audit-case-example .audit-table-case-comprehensive col:nth-child(3) { width:12.053%; }
+.audit-case-example .audit-table-case-comprehensive col:nth-child(5) { width:16.641%; }
+.audit-case-example .audit-table-case-comprehensive col:nth-child(6) { width:16.719%; }
+.audit-case-example .audit-table-case-row-title .audit-field-column { width:118px; }
+.audit-case-example :is(.audit-table-case-bottom-total,.audit-table-case-folded,.audit-table-case-double-title) .audit-field-column { width:124px; }
+.audit-case-example .audit-table-case-double-title .audit-data-column { width:calc((100% - 248px) / 12); }
+@media(max-width:650px) {
+  #component-table .audit-table-examples .individual-component-heading { align-items:flex-start; }
+  #component-table .audit-table-examples .actions { flex-wrap:wrap; margin-left:0; }
+}
