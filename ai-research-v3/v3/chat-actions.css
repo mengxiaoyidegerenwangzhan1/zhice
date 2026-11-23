@@ -1,0 +1,60 @@
+.nav-primary .nav-chat-row > .nav-chat {
+  padding-inline-start: 34px;
+}
+.nav-primary .nav-chat-row:is(:hover, :has(:focus-visible), :has(:popover-open)) > .nav-chat {
+  background: #fff;
+}
+.nav-primary .nav-recent-chat-row:is(:hover, :has(:focus-visible), :has(:popover-open)) > .nav-recent:not(.current) {
+  background: #f7f7f7;
+}
+
+.nav-primary .nav-chat-menu {
+  width: 182px;
+  max-width: calc(100vw - 8px);
+  max-height: calc(100dvh - 8px);
+  overflow: auto;
+  padding: 9px;
+  border-color: #e8e8e8;
+  border-radius: 16px;
+  background: white;
+  color: #404040;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 7%);
+}
+.nav-primary .nav-chat-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding-inline: 12px;
+  font-size: 14px;
+  line-height: 20px;
+  border-radius: 12px;
+}
+.nav-chat-menu button img { width: 16px; height: 16px; }
+.nav-chat-menu button span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nav-chat-menu .nav-submenu-arrow {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  margin-inline-start: auto;
+  border-block-start: 1px solid #999;
+  border-inline-end: 1px solid #999;
+  transform: rotate(45deg);
+}
+.nav-primary .nav-chat-menu button:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  background: #f2f2f2;
+}
+.nav-chat-menu .nav-menu-section {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  margin-top: 2px;
+  padding-inline: 8px;
+  color: #999;
+  font-size: 14px;
+  line-height: 20px;
+}
+.nav-primary .nav-chat-menu .nav-menu-danger { color: #ea4a39; }
+.nav-chat-destinations {
+  overscroll-behavior: contain;
+}

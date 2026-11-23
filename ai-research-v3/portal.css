@@ -1,0 +1,235 @@
+/* Research chat and its open tool share the workspace. */
+#work .rc-business {
+  /* A 1440px canvas has 1224px beside the navigation: 640px for chat and 584px for the tool. */
+  --feature-size: clamp(320px, var(--function-w, calc(100% * 584 / 1224)), min(50%, calc(100% - 360px), 1200px));
+}
+#work #rc-page-assistant {
+  container: research-view / inline-size;
+  order: 0;
+  position: relative;
+  inset: auto;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+  box-shadow: none;
+  background: white;
+  border: 0;
+  z-index: auto;
+}
+#work #rc-page-assistant .rc-thread { background: white; }
+#work #rc-page-assistant .rc-thread-head { padding-inline: 14px; }
+#work #rc-page-assistant .rc-thread-head > .rc-view-title {font-size:16px}
+#work #rc-page-assistant .rc-messages {
+  padding-inline: max(20px, calc((100% - 850px) / 2));
+}
+#work #rc-page-assistant .rc-question { background: #f6f6fa; }
+#work #rc-page-assistant .rc-compose-foot { max-width: 1100px; }
+/* The split view uses the same research home, with spacing based on the middle pane. */
+#work #rc-page-assistant .rc-welcome {
+  padding:clamp(28px, 6vh, 64px) clamp(16px, 4cqi, 36px) 32px;
+}
+#work #rc-page-assistant .rc-welcome-inner {max-width: 800px;}
+#work #rc-page-assistant .rc-greeting {margin-bottom:clamp(28px, 5vh, 54px)}
+#work #rc-page-assistant .rc-home-tools .rc-entry-tools {flex:1;column-gap:12px}
+#work #rc-page-assistant .rc-home-tools .rc-shortcuts {display:contents}
+#work #rc-page-assistant .rc-topics {gap:8px}
+@container research-view (max-width: 600px) {
+  #work #rc-page-assistant .rc-greeting h1 {font-size:24px}
+  #work #rc-page-assistant .rc-research-sail {height:48px}
+  #work #rc-page-assistant .rc-topics {gap:6px}
+  #work #rc-page-assistant .rc-topics button {padding-inline:9px}
+  #work #rc-page-assistant .rc-thread-head > .rc-view-title {font-size:14px}
+}
+#work #rc-function-pane {
+  order: 1;
+  flex: 0 0 var(--feature-size);
+  width: var(--feature-size);
+  border-inline-start: 1px solid var(--nav-line);
+}
+#work .pane-divider[data-resize="function"] {
+  inset-inline: auto calc(var(--feature-size) - 4.5px);
+}
+.workspace.rc-function-expanded #work #rc-function-pane {
+  flex: 1 1 100%;
+  width: 100%;
+  border: 0;
+}
+.workspace.rc-function-expanded #work :is(#rc-page-assistant, .pane-divider[data-resize="function"]) { display:none; }
+.workspace.rc-function-expanded #work .rc-function-head { padding-left: 48px; }
+
+#work button.portal-toggle,
+.research-portal button.portal-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 28px;
+  width: auto;
+  flex: none;
+  padding: 0 12px;
+  border: 1px solid #e6e6ea;
+  border-radius: 999px;
+  background: white;
+  color: #333;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+}
+#work button.portal-toggle { margin-inline-start: 12px; }
+#work .rc-function-actions .portal-toggle { display: none; }
+#work button.portal-toggle:hover,
+#work button.portal-toggle[aria-expanded="true"],
+.research-portal button.portal-toggle:hover,
+.research-portal button.portal-toggle[aria-expanded="true"] {
+  border-color: #d6d5f1;
+  background: #f6f6ff;
+  color: #6865a7;
+}
+.portal-toggle > i, .portal-group-toggle > i { display: none; }
+.portal-toggle::after,
+.portal-group-toggle::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border: solid currentColor;
+  border-width: 1.2px 1.2px 0 0;
+  transform: rotate(45deg);
+}
+.portal-toggle[aria-expanded="true"]::after,
+.portal-group-toggle[aria-expanded="true"]::after {
+  transform: translateY(-1.5px) rotate(135deg);
+}
+
+#portal-catalog {
+  --portal-fill: #fafaff;
+  --portal-line: #e9e9ee;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--portal-fill);
+  color: #333;
+  font-size: 14px;
+  line-height: 20px;
+}
+.portal-docked #portal-catalog {
+  position: relative;
+  flex: 0 0 216px;
+  width: 216px;
+  border-inline-start: 1px solid var(--portal-line);
+}
+.portal-docked #work [data-portal-toggle] { display: none; }
+.portal-dropdown #portal-catalog {
+  position:absolute;
+  top:var(--portal-top);
+  right:var(--portal-right);
+  z-index:7;
+  width:min(216px,calc(100% - 16px));
+  max-height:calc(100% - var(--portal-top) - 12px);
+  border:1px solid var(--portal-line);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 6px 24px #25234214;
+}
+.portal-dropdown .portal-header { display:none; }
+.portal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: none;
+  gap: 8px;
+  height: 58px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--portal-line);
+}
+.portal-header :is(h2, strong) {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+}
+.portal-scroll {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #d5d4df transparent;
+}
+.portal-scroll { padding: 5px 20px 16px; }
+.portal-section { min-width: 0; padding-block: 10px; }
+.portal-section + .portal-section { border-top: 1px solid var(--portal-line); }
+.portal-section :is(.portal-group-toggle, .portal-leaf) {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.portal-section-title {
+  padding: 5px 0;
+  margin: 0 0 4px;
+  color: #787983;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+}
+.portal-section .portal-group-toggle {
+  width: 100%;
+  min-height: 39px;
+  justify-content: space-between;
+  padding: 6px 10px 6px 8px;
+  border-radius: 7px;
+}
+.portal-group-toggle::after { color: #84848b; }
+.portal-leaves { display: grid; gap: 3px; margin: 1px 8px 5px; }
+.portal-section .portal-leaf {
+  width: 100%;
+  min-height: 31px;
+  padding: 5px 12px 5px 16px;
+  border-radius: 18px;
+  color: #54545c;
+}
+.portal-section .portal-group-toggle:hover, .portal-section .portal-leaf:hover { background: #f0f0f8; }
+.portal-section .portal-leaf[aria-current="page"] {
+  color: var(--nav-accent);
+  background: white;
+  box-shadow: 0 2px 6px #3230560c;
+  font-weight: 500;
+}
+#portal-catalog button:focus-visible { outline: 2px solid var(--nav-accent); outline-offset: -2px; }
+
+@container (max-width: 700px) {
+  #work:not(.is-maximized) .rc-function-actions .portal-toggle { display:inline-flex; margin:0; }
+  #work:not(.is-maximized) #rc-function-pane {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    width: 100%;
+    border-inline-start: 0;
+  }
+  .workspace.nav-collapsed #work #rc-function-pane .rc-function-head { padding-left: 52px; }
+  #work .pane-divider[data-resize="function"] { display: none; }
+}
+@media (max-width: 760px) {
+  .portal-docked #portal-catalog {
+    position: absolute;
+    inset: 0 0 0 auto;
+    z-index: 7;
+    width: min(216px, 88vw);
+    box-shadow: -5px 0 20px #29274712;
+  }
+}
+@container (max-width: 480px) {
+  #work .rc-toolbar { gap: 4px; padding-inline: 8px; }
+  #work button.portal-toggle { margin-inline-start: 2px; padding-inline: 8px; font-size: 13px; }
+  #work .rc-thread-head { padding-inline: 8px; }
+}

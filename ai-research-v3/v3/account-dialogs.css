@@ -1,0 +1,3 @@
+.account-dialog .zc-modal-body { overflow-y: auto; }
+.account-dialog .account-help { margin: 0; padding-inline-start: 1.2em; }
+.account-dialog .account-help li + li { margin-top: 12px; }

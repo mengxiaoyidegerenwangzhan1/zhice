@@ -1,0 +1,109 @@
+/* Search keeps its keyboard-driven results list inside the shared dialog shell. */
+html[data-prototype="v3"] #study-search {
+  width: min(var(--zc-modal-width, 520px), calc(100vw - 32px));
+  height: min(468px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  border: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 12px rgb(0 0 0 / 8%);
+  color: #333;
+  font: 400 14px/20px "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+html[data-prototype="v3"] #study-search::backdrop { background: rgb(28 27 43 / 22%); }
+html[data-prototype="v3"] #study-search .zc-modal-header { flex: none; }
+html[data-prototype="v3"] #study-search .search-close {
+  width: 18px;
+  height: 22px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #999;
+}
+html[data-prototype="v3"] #study-search .search-close:hover { color: #6865a7; }
+html[data-prototype="v3"] #study-search .search-content {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+html[data-prototype="v3"] #study-search .search-bar {
+  flex: none;
+  min-height: 0;
+  padding: 0;
+}
+html[data-prototype="v3"] #study-search .search-field {
+  height: 32px;
+  padding: 5px 12px;
+  border: 1px solid rgb(234 234 234 / 85%);
+  border-radius: 99px;
+  font: inherit;
+}
+html[data-prototype="v3"] #study-search .search-field:is(:hover,:focus) { border-color: #b9b8d8; }
+html[data-prototype="v3"] #study-search .search-field::placeholder { color: #999; }
+html[data-prototype="v3"] #study-search .search-filters { padding: 10px 0 0; }
+html[data-prototype="v3"] #study-search .search-filters button { border-radius: 99px; }
+html[data-prototype="v3"] #study-search-results { padding: 0; }
+html[data-prototype="v3"] #study-search .search-group-title { padding-inline: 8px; }
+html[data-prototype="v3"] #study-search .search-option { padding-inline: 8px; }
+html[data-prototype="v3"] #study-search .search-status-visible { top: 50%; }
+
+/* Fund choices apply immediately in a nonmodal popover anchored to the add field. */
+html[data-prototype="v3"] #work .fc-root .fc-picker {
+  width: min(320px, calc(100cqw - 18px), calc(100vw - 24px));
+  max-height: min(420px, 65dvh);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 12px rgb(0 0 0 / 8%);
+  overflow: hidden;
+}
+html[data-prototype="v3"] #work .fc-root .fc-picker .zc-modal-header { flex: none; }
+html[data-prototype="v3"] #work .fc-root .fc-picker h3 {
+  justify-content: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: #333;
+  font-size: 16px;
+  line-height: 22px;
+}
+html[data-prototype="v3"] #work .fc-root .fc-picker .zc-modal-close {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 22px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #999;
+}
+html[data-prototype="v3"] #work .fc-root .fc-picker .zc-modal-close:hover { color: #6865a7; }
+html[data-prototype="v3"] #work .fc-root .fc-picker .zc-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+html[data-prototype="v3"] #work .fc-root .fc-picker .fc-search-field {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 5px 12px;
+  border: 1px solid rgb(234 234 234 / 85%);
+  border-radius: 99px;
+  color: #999;
+}
+html[data-prototype="v3"] #work .fc-root .fc-search-field:is(:hover,:focus-within) { border-color: #b9b8d8; }
+html[data-prototype="v3"] #work .fc-root .fc-search-field input { padding: 0; color: #333; font-size: 14px; line-height: 20px; }
+html[data-prototype="v3"] #work .fc-root .fc-search-field input::placeholder { color: #999; }
+html[data-prototype="v3"] #work .fc-root [data-fc-results] { overflow-y: auto; overscroll-behavior: contain; }
+html[data-prototype="v3"] #work .fc-root [data-fc-results] button { font-size: 14px; }

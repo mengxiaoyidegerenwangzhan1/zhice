@@ -1,0 +1,134 @@
+:is(.nav-action-row, .nav-chat-row) {
+  position: relative;
+}
+.nav-row-tools {
+  position: absolute;
+  inset-inline-end: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  pointer-events: none;
+}
+.nav-row-tools > button {
+  opacity: 0;
+  pointer-events: none;
+}
+:is(.nav-action-row, .nav-chat-row):is(:hover, :has(:focus-visible), :has(:popover-open)) > .nav-row-tools > button {
+  opacity: 1;
+  pointer-events: auto;
+}
+.nav-primary .nav-chat-row > .nav-row {
+  padding-inline-end: 49px;
+}
+.nav-primary .nav-folder-row > .nav-project {
+  padding-inline-end: 67px;
+}
+.nav-row-tools > .nav-pin-toggle[aria-pressed="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.nav-primary .nav-folder-row:is(:hover, :has(:focus-visible), :has(:popover-open)) > .nav-project:not(.current) {
+  background: transparent;
+}
+.nav-primary .nav-row-tool {
+  width: 18px;
+  height: 28px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+}
+.nav-row-tool img {
+  width: 12px;
+  height: 12px;
+}
+.nav-primary .nav-row-tool:is(:hover, :active) {
+  background: transparent;
+}
+.nav-sidebar-tooltip {
+  position: fixed;
+  z-index: 100;
+  margin: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #111;
+  color: #fff;
+  font-size: 13px;
+  line-height: 18px;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgb(0 0 0 / 12%);
+  pointer-events: none;
+}
+.nav-primary .nav-row-menu {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-width: 112px;
+  padding: 4px;
+  border: 1px solid var(--nav-line);
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 4px 16px #1a1b291a;
+}
+.nav-primary .nav-row-menu button {
+  display: block;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 5px;
+  text-align: start;
+}
+.nav-primary .nav-row-menu button:is(:hover,:focus-visible) {
+  background: #f5f5f8;
+}
+/* Use the menu icon color (#404040) with the original pin artwork. */
+.nav-row-menu img[src$="/nav-pin-default.png"] {
+  filter: brightness(0) invert(25.1%);
+}
+.nav-primary .nav-folder-menu {
+  width: 180px;
+  max-width: calc(100vw - 8px);
+  padding: 9px;
+  border-color: #e8e8e8;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 7%);
+  color: #404040;
+}
+.nav-primary .nav-folder-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding-inline: 12px;
+  font-size: 14px;
+  line-height: 20px;
+  border-radius: 12px;
+}
+.nav-folder-menu button img {
+  width: 16px;
+  height: 16px;
+}
+.nav-primary .nav-folder-menu button:is(:hover, :focus-visible) {
+  background: #f2f2f2;
+}
+.nav-primary .nav-folder-menu .nav-menu-danger {
+  position: relative;
+  margin-top: 17px;
+  color: #ea4a39;
+}
+.nav-folder-menu .nav-menu-danger::before {
+  content: '';
+  position: absolute;
+  inset-inline: 4px;
+  top: -9px;
+  height: 1px;
+  background: #efefef;
+}
+@media (hover: none), (pointer: coarse) {
+  :is(.nav-action-row, .nav-chat-row) > .nav-row-tools {
+    inset-inline-end: 5px;
+  }
+  .nav-primary .nav-row-tools > .nav-row-tool { width: 24px; opacity: 1; pointer-events: auto; }
+  .nav-primary .nav-folder-row > .nav-project { padding-inline-end: 81px; }
+  .nav-primary .nav-chat-row > .nav-row { padding-inline-end: 57px; }
+}

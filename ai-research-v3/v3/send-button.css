@@ -1,0 +1,7 @@
+[data-prototype="v3"] #work .rc-composer .rc-send:not(:disabled) {
+  background: transparent url("../icons/ai-send-enabled.png") center / contain no-repeat;
+}
+
+[data-prototype="v3"] #work .rc-composer .rc-send:not(:disabled) > :is(img, svg) {
+  display: none;
+}

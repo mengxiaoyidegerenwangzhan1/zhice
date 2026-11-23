@@ -1,0 +1,93 @@
+/* Functional workspaces keep the research tool mounted while its conversation opens. */
+#work .rc-business {--effective-ai-width:min(var(--ai-w,400px),calc(100% - 520px));height:100%;display:flex;position:relative;overflow:hidden;color:#2c2e34}
+#work .rc-business-page {display:flex;flex-direction:column;min-width:0;min-height:0;flex:1;background:#fff}
+#work .rc-business-body {flex:1;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+#work .rc-generic-page {padding:24px}
+#work .rc-function-head {--tab-line:#ebebeb;position:relative;height:58px;flex:none;display:flex;align-items:center;gap:14px;padding:0 14px;border-bottom:1px solid var(--tab-line);background:#fff}
+#work .rc-function-head h1 {min-width:0;font-family:inherit;font-size:16px;font-weight:500;line-height:22px;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#333;margin:0}
+#work .rc-function-actions {margin-left:auto;display:flex;align-items:center;gap:10px;flex:none}
+#work .rc-business-nav {flex:none}
+#work .rc-function-head button {border:0;border-radius:6px;background:transparent;display:inline-grid;place-items:center;width:30px;height:32px;padding:0;color:#333b46}
+#work .rc-function-head button:hover {background:#f4f4f7}
+#work .rc-function-head button[data-assistant="toggle"] {width:auto;height:28px;padding:0 12px;border-radius:16px;border:1px solid #dcdde8;font-size:13px;color:#615d97;font-weight:500}
+#work .rc-function-head button[data-assistant="toggle"][aria-expanded="true"] {background:#f4f3ff;color:#6059bb;border-color:#d6d3fa}
+#work .rc-workspace-pages {display:flex;align-items:stretch;align-self:stretch;flex:1;min-width:0;gap:8px}
+#work .rc-workspace-pages .rc-parent-title {align-self:center;flex:0 0 auto;max-width:45%;min-width:0}
+#work .rc-function-head .rc-workspace-home {display:flex;justify-content:flex-start;box-sizing:border-box;width:100%;padding-inline:8px;font:inherit;color:#333}
+#work .rc-workspace-strip {--tab-top-inset:8px;flex:1;min-width:0;display:flex;align-items:flex-end;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;overscroll-behavior-x:contain;padding:0 8px;margin-bottom:-1px}
+#work .rc-workspace-strip::-webkit-scrollbar {display:none}
+/* The outline meets the bottom border; the label and close button share the header's centerline. */
+#work .rc-workspace-item {position:relative;box-sizing:border-box;display:flex;align-items:center;gap:3px;height:calc(100% - var(--tab-top-inset));flex:none;max-width:188px;padding:0 6px calc(var(--tab-top-inset) + 1px) 12px;border:1px solid transparent;border-radius:12px 12px 0 0}
+#work .rc-workspace-item:not(.is-active):hover {background:#f8f8fa}
+#work .rc-workspace-item:not(.is-active)+.rc-workspace-item:not(.is-active)::before {content:"";position:absolute;left:-1px;top:13px;width:1px;height:16px;background:var(--tab-line)}
+#work .rc-workspace-item.is-active {z-index:1;border-color:var(--tab-line);border-bottom-color:white;background:white}
+#work .rc-workspace-item.is-active::before,#work .rc-workspace-item.is-active::after {content:"";position:absolute;pointer-events:none;bottom:-1px;width:9px;height:9px}
+#work .rc-workspace-item.is-active::before {right:100%;background:radial-gradient(circle at 0 0,transparent 7.5px,var(--tab-line) 8px 8.7px,white 9px)}
+#work .rc-workspace-item.is-active::after {left:100%;background:radial-gradient(circle at 100% 0,transparent 7.5px,var(--tab-line) 8px 8.7px,white 9px)}
+#work .rc-function-head .rc-workspace-open {display:flex;align-items:center;justify-content:flex-start;min-width:0;width:auto;height:100%;font:inherit;font-size:14px;line-height:20px;color:#666;text-align:left}
+#work .rc-function-head .rc-workspace-open:hover {background:transparent}
+#work .is-active .rc-workspace-open {color:#121212;font-weight:500}
+#work .rc-tab-caption {display:flex;align-items:baseline;max-width:100%;min-width:0;white-space:nowrap}
+#work .rc-tab-stem {overflow:hidden;text-overflow:ellipsis}
+#work .rc-tab-suffix {flex:none}
+#work .rc-function-head .rc-workspace-close {width:20px;height:24px;flex:none;color:#797981;opacity:0;pointer-events:none}
+#work .rc-workspace-item:is(.is-active,:hover,:focus-within) .rc-workspace-close {opacity:1;pointer-events:auto}
+#work .rc-function-head .rc-workspace-close:hover {background:#efeff3}
+#work .rc-workspace-pages button:focus-visible {outline:2px solid #8986b7;outline-offset:-2px}
+#work .rc-business-assistant {flex:0 0 var(--effective-ai-width);width:var(--effective-ai-width);min-width:0;max-width:100%;height:100%;border-left:1px solid #e8e9ee;background:#f8f8fb;z-index:2}
+#work .pane-divider[data-resize="ai"] {right:calc(var(--effective-ai-width) - 4.5px)}
+#work .rc-business-assistant[hidden]+.pane-divider {display:none}
+#work .rc-business-assistant .rc-thread {background:#f8f8fb}
+#work .rc-business-assistant .rc-thread-head {position:relative;height:58px;padding-inline:12px;border-color:#e9eaee}
+#work .rc-business-assistant .rc-thread-head > .rc-view-title {font-weight:600}
+#work .rc-business-assistant .rc-messages {gap:28px;padding:24px 20px;scrollbar-width:thin}
+#work .rc-business-assistant .rc-question {color:#333;background:white;border-radius:17px;max-width:94%;font-size:14px;line-height:21px;padding:7px 13px}
+#work .rc-business-assistant .rc-compose-foot {width:100%;padding:8px 20px 20px}
+#work .rc-business-assistant .rc-follow-composer {padding:12px 12px 8px;border:1px solid #e2e4f4;border-radius:15px;box-shadow:0 5px 12px #3534560b}
+#work .rc-follow-composer textarea {resize:none;font-size:14px;line-height:21px;padding:0;min-height:42px}
+#work .rc-follow-composer .rc-entry-tools {flex:1;gap:10px;flex-wrap:nowrap}
+#work .rc-follow-composer .rc-tool-divider {background:#e9eaed}
+#work .rc-follow-shortcuts,#work .rc-task-inline-rest {display:inline-flex;flex-wrap:wrap;align-items:center;gap:12px}
+#work .rc-follow-shortcuts img {width:14px;height:14px}
+#work .rc-follow-shortcuts [aria-pressed="true"] {color:#6865a7;background:#f2f1fc}
+#work .rc-follow-composer .rc-send {flex:none;align-self:flex-end}
+#work .rc-follow-composer .rc-composer-tools {gap:8px}
+#work .rc-task-overflow {display:none;position:relative}
+#work .rc-task-overflow>button img {width:9px}
+#work .rc-tasks-menu {display:grid;gap:2px;position:absolute;z-index:5;bottom:calc(100% + 6px);right:0;min-width:145px;border:1px solid #e5e5eb;border-radius:10px;background:white;box-shadow:0 5px 20px #22223a14;padding:5px}
+#work .rc-tasks-menu button {padding:6px 8px}
+#work .rc-business-assistant .rc-task-inline-rest {display:none}
+#work .rc-business-assistant .rc-task-overflow {display:inline-flex}
+#work .rc-business-assistant .rc-compose-foot .rc-entry-tools button {font-size:13px}
+#work .rc-metric-answer {width:100%;min-width:0;flex:none;color:#303239;font-size:14px;line-height:1.65}
+#work .rc-metric-answer h2 {font-size:15px;font-weight:600;line-height:1.6;margin:0 0 7px}
+#work .rc-metric-answer p {margin:0 0 12px}
+#work .rc-metric-answer small {display:block;color:#797b83;margin-top:9px;font-size:12px;line-height:18px}
+#work .rc-metric-table {overflow:hidden;border:1px solid #e4e5ea;border-radius:7px;background:white}
+#work .rc-metric-table table {width:100%;border-collapse:collapse;font-size:13px;line-height:19px}
+#work .rc-metric-table th {background:#f7f8fa;font-weight:500}
+#work .rc-metric-table th,#work .rc-metric-table td {text-align:left;padding:7px 9px}
+#work .rc-metric-table tr+tr,#work .rc-metric-table tbody {border-top:1px solid #ebebef}
+#work .rc-metric-table tr>:last-child {text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#work .rc-fund-dot {display:inline-block;width:3px;height:15px;margin-right:7px;border-radius:2px;vertical-align:-3px}
+#work .rc-business-assistant .rc-summary-panel {width:min(304px,calc(100vw - 70px))}
+.workspace.rc-function-expanded #work {visibility:visible}
+#work .rc-function-head button img,#work .rc-thread-head [data-assistant] img {width:18px;height:18px}
+.workspace.nav-collapsed #work .rc-business-nav {visibility:hidden}
+@container (max-width:860px) {
+  #work .rc-business-assistant {position:absolute;inset:0 0 0 auto;width:min(var(--ai-w,400px),100%);box-shadow:-6px 2px 28px #24263d16}
+  #work .pane-divider[data-resize="ai"] {display:none}
+}
+@container (max-width:720px) {
+  #work .rc-follow-composer .rc-task-inline-rest {display:none}
+  #work .rc-follow-composer .rc-task-overflow {display:inline-flex}
+}
+@container (max-width:420px) {
+  #work .rc-business-assistant {width:100%}
+  #work .rc-business-assistant .rc-compose-foot {padding:8px 12px 14px}
+  #work .rc-function-head {padding-inline:8px;gap:6px}
+  #work .rc-function-head h1 {font-size:15px}
+  #work .rc-workspace-pages {gap:2px}
+  #work .rc-workspace-item {max-width:132px;padding-left:8px;padding-right:3px}
+  #work .rc-function-actions {gap:4px}
+}

@@ -1,0 +1,8 @@
+.nav-project-dialog .zc-modal-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+#nav-project-dialog-confirmation {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

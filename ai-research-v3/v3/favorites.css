@@ -1,0 +1,65 @@
+.nav-research-heading .nav-all-tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+.portal-from-sidebar .portal-favorite-row,
+.nav-primary .nav-favorite-row {
+  position: relative;
+  min-width: 0;
+}
+.portal-from-sidebar .portal-favorite-row > .portal-leaf {
+  width: 100%;
+  padding-inline: 24px 36px;
+}
+.portal-from-sidebar .portal-favorite-row:is(:hover, :focus-within) > .portal-leaf {
+  background: white;
+}
+.nav-primary .nav-favorite-row:is(:hover, :has(:focus-visible)) > .nav-leaf:not(.current) {
+  background: white;
+}
+.portal-from-sidebar .portal-heart {
+  position: absolute;
+  inset-inline-end: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+}
+.portal-from-sidebar .portal-heart img {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+.portal-from-sidebar [data-manage-favorites] .portal-heart,
+.portal-from-sidebar .portal-heart[aria-pressed="true"],
+.portal-from-sidebar .portal-heart:focus-visible,
+.portal-from-sidebar .portal-favorite-row:hover .portal-heart {
+  opacity: 1;
+  pointer-events: auto;
+}
+.nav-primary .nav-add-favorite {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 8px 6px 36px;
+  border-radius: 50px;
+  color: var(--nav-accent);
+  line-height: 20px;
+}
+.nav-primary .nav-add-favorite:hover {
+  background: white;
+}
+@media (any-hover: none) {
+  .portal-from-sidebar .portal-heart {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}

@@ -1,0 +1,78 @@
+.fund-pages {--fp-ink:#292b30;--fp-dim:#72757d;--fp-line:#e8e9ed;--fp-brand:#6865a7;container:fund-page / inline-size;min-width:0;color:var(--fp-ink);font-size:14px}
+.fund-pages[data-fund-page="基金筛选"] {padding-inline:20px}
+.fund-pages button,.fund-pages input,.fund-pages select {font-family:inherit}
+.fp-content {display:flex;align-items:flex-start;gap:16px;min-width:0}
+.fp-main {flex:1;min-width:0}
+.fp-filters,.fp-metrics,.fp-table-box {border:1px solid var(--fp-line);background:white;border-radius:14px}
+.fp-filters {flex:0 0 clamp(174px,20%,232px);padding:16px;min-width:0}
+.fp-section-title {display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.fp-section-title h3 {font-size:16px;line-height:24px;margin:0}
+.fp-iconbtn {border:1px solid var(--fp-line);background:white;color:var(--fp-dim);border-radius:5px;width:24px;height:24px;line-height:1;font-size:20px}
+.fp-search {display:flex;align-items:center;gap:7px;border:1px solid #d9dbe1;border-radius:7px;padding:0 8px;height:33px;background:#fff}
+.fp-search:focus-within {border-color:var(--fp-brand);box-shadow:0 0 0 2px #6865a715}
+.fp-search svg {height:14px;width:14px;flex:none;fill:none;stroke:#898c95;stroke-width:1.5;stroke-linecap:round}
+.fp-search input {appearance:none;outline:none;width:100%;min-width:0;border:0;background:transparent;font-size:12px;color:var(--fp-ink)}
+.fp-search input::placeholder {color:#90939c}
+.fp-filter-title {font-weight:600;margin:18px 0 12px;padding-top:17px;border-top:1px solid var(--fp-line)}
+.fp-muted,.fp-footnote {color:var(--fp-dim);font-size:12px}
+.fp-type-list {display:flex;flex-wrap:wrap;gap:7px 6px;margin:9px 0 24px}
+.fp-type-list button,.fp-filter-opener {border:1px solid #dfe0e5;background:white;border-radius:16px;padding:4px 11px;font-size:12px;color:#565960;line-height:18px}
+.fp-type-list button[aria-pressed="true"] {background:#f0effa;color:#504d91;border-color:#b9b6db}
+.fp-reset,.fp-selected-status button,.fp-empty button {color:var(--fp-brand);border:0;background:transparent;padding:0;font-size:13px}
+.fp-filter-opener {margin-bottom:10px}
+.fp-metrics {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:18px 4px;margin-bottom:14px}
+.fp-metrics>div {display:flex;flex-direction:column;gap:8px;padding:0 16px}
+.fp-metrics>div+div {border-left:1px solid var(--fp-line)}
+.fp-metrics span {font-size:12px;color:var(--fp-dim)}
+.fp-metrics b {font:600 23px/1.2 Roboto,system-ui,sans-serif;letter-spacing:-.4px}
+.fp-metrics small {font:400 12px/1.3 "PingFang SC",sans-serif;margin-left:4px;color:var(--fp-dim)}
+.fp-table-box {overflow:hidden}
+.fp-table-head {padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.fp-results,.fp-actions,.fp-sort,.fp-selected-status {display:flex;align-items:center;gap:6px}
+.fp-results {font-size:13px;white-space:nowrap}
+.fp-results strong {font:600 16px/1 Roboto,system-ui,sans-serif}
+.fp-actions {gap:10px}
+.fp-sort {color:var(--fp-dim);font-size:12px}
+.fp-sort select {font-size:12px;border:1px solid var(--fp-line);border-radius:7px;padding:5px 20px 5px 8px;color:#42444b;background-color:white;max-width:120px}
+.fp-analyze {border:0;border-radius:16px;background:var(--fp-brand);padding:6px 12px;color:white;font-size:13px;font-weight:500;white-space:nowrap}
+.fp-analyze:disabled {background:#eeedf3;color:#aaa8b9;cursor:default}
+.fp-selected-status {font-size:12px;color:var(--fp-dim);border-top:1px solid var(--fp-line);padding:8px 16px;gap:12px;background:#fbfaff}
+.fp-selected-status .fp-compare {padding:4px 10px;border-radius:14px;background:#eeedf8;color:#514d8e;font-weight:500}
+.fp-selected-status .fp-compare:disabled {color:#9896a4;cursor:default}
+.fp-table-box .fp-fund-name:hover,.fp-table-box .fp-fund-name:focus-visible {text-decoration:underline}
+.fp-scroll {overflow:auto;max-width:100%;scrollbar-width:thin;overscroll-behavior-x:contain}
+.fund-pages .fp-table-box table {width:100%;min-width:580px;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fp-table-box th,.fp-table-box td {padding:11px 10px;line-height:20px;text-align:left;border-bottom:1px solid var(--fp-line);font-weight:400}
+.fp-table-box thead {background:#f7f8fa;color:#666973}
+.fp-table-box thead th {font-size:12px;font-weight:500}
+.fp-table-box td:first-child {padding-right:1px;width:30px;text-align:center}
+.fp-table-box tbody tr:last-child>* {border-bottom:0}
+.fp-table-box input[type="checkbox"] {width:14px;height:14px;accent-color:var(--fp-brand);vertical-align:middle;cursor:pointer}
+.fp-table-box tr.fp-selected {background:#f8f7ff}
+.fp-table-box .fp-digit {text-align:right;font-variant-numeric:tabular-nums}
+.fp-table-box .fp-fund-name {color:#504d88;background:transparent;border:0;padding:0;font-weight:500;text-align:left;font-size:13px}
+.fp-table-box tbody th small {display:block;color:#858792;font:400 11px/15px Roboto,system-ui,sans-serif}
+.fp-table-box .fp-detail td {text-align:left;color:var(--fp-dim);font-size:12px;padding:9px 16px 9px 45px;background:#fafafd}
+.fp-detail strong {color:var(--fp-ink);font-weight:500}
+.fp-rise {color:#b43b47}.fp-fall {color:#3b7e5b}
+.fp-empty {padding:38px 12px;text-align:center;color:var(--fp-dim);display:grid;justify-items:center;gap:10px}
+.fp-footnote {padding:9px 3px}
+@container fund-page (max-width:780px) {
+  .fp-content {flex-direction:column;gap:12px}
+  .fp-filters,.fp-main {width:100%}
+  .fp-filters {flex-basis:auto;display:grid;grid-template-columns:minmax(100px,1fr) minmax(80px,1fr);align-items:center;gap:9px 12px;padding:12px}
+  .fp-section-title {margin:0}
+  .fp-filter-title,.fp-muted {display:none}
+  .fp-type-list {grid-column:1 / -1;margin:0}
+  .fp-reset {justify-self:start}
+}
+@container fund-page (max-width:460px) {
+  .fp-table-head {padding:11px 12px}
+  .fp-actions {gap:6px}
+  .fp-sort {font-size:0}
+  .fp-metrics {padding:12px 0}
+  .fp-metrics>div {padding:0 9px}
+  .fp-metrics b {font-size:17px}
+  .fp-metrics small {font-size:10px}
+  .fp-filters {grid-template-columns:1fr}
+}

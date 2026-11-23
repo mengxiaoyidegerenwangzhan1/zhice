@@ -1,0 +1,53 @@
+.nav-primary .nav-favorite-grip {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  width: 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  padding-inline-start: 12px;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+}
+.nav-favorite-row:is(:hover, :has(:focus-visible), .is-dragged) .nav-favorite-grip {
+  opacity: 1;
+  pointer-events: auto;
+}
+.nav-favorites-list.is-reordering,
+.nav-favorites-list.is-reordering * {
+  cursor: grabbing;
+  user-select: none;
+}
+.nav-favorite-row.is-dragged > .nav-leaf {
+  opacity: .55;
+}
+.nav-favorite-row[data-drop-edge]::after {
+  content: '';
+  position: absolute;
+  inset-inline: 8px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--nav-accent);
+  pointer-events: none;
+}
+.nav-favorite-row[data-drop-edge='before']::after {
+  top: -3px;
+}
+.nav-favorite-row[data-drop-edge='after']::after {
+  bottom: -3px;
+}
+@media (hover: none) {
+  .nav-primary .nav-favorite-grip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.nav-favorite-row:only-child .nav-favorite-grip {
+  display: none;
+}
