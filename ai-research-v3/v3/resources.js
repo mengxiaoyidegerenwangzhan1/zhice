@@ -178,6 +178,7 @@
     }
   }
   window.addEventListener("resize", positionPreview);
+  window.addEventListener("study-pane-resized", positionPreview);
   window.addEventListener("study-resources-updated", refresh);
   window.studyResources = {close:closePanel, openFile, renderFiles:(host, fileTab) => render(host, "all", false, fileTab)};
 })();

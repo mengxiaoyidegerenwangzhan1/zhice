@@ -12,6 +12,10 @@
   const clamp = (value,min,max) => Math.min(max, Math.max(min, Math.round(value)));
   let drag = null;
 
+  function direction(name) {
+    return name === "function" && workspace.dataset.conversationPosition === "right" ? 1 : panes[name].direction;
+  }
+
   function limits(name) {
     const pane = panes[name];
     let max = pane.max;
@@ -79,7 +83,7 @@
 
   function move(event) {
     if (!drag || event.pointerId !== drag.pointer) return;
-    const delta = (event.clientX-drag.startX) * drag.scale * panes[drag.name].direction;
+    const delta = (event.clientX-drag.startX) * drag.scale * direction(drag.name);
     const next = clamp(drag.width+delta, drag.min, drag.max);
     if (next === drag.lastWidth) return;
     drag.lastWidth = next;
@@ -111,7 +115,7 @@
     let next = document.getElementById(pane.id).offsetWidth;
     if (event.key === "Home") next = min;
     else if (event.key === "End") next = max;
-    else next += (event.key === "ArrowRight" ? 1 : -1) * pane.direction * 16;
+    else next += (event.key === "ArrowRight" ? 1 : -1) * direction(name) * 16;
     setWidth(name,clamp(next,min,max));
     save(name);
   });
@@ -126,6 +130,11 @@
   });
 
   window.studyPaneResize = {sync};
+  window.addEventListener("study-layout-change", event => {
+    finish(event);
+    sync();
+    window.dispatchEvent(new Event("study-pane-resized"));
+  });
   const observer = new ResizeObserver(sync);
   observer.observe(workspace);
   observer.observe(work);

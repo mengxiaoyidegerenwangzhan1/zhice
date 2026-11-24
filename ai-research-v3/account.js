@@ -10,6 +10,21 @@
   ];
   const icon = path => '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + path + '</svg>';
   const isV3 = document.documentElement.dataset.prototype === 'v3';
+  const workspace = document.getElementById('workspace');
+  const layoutStorageKey = 'zhice.navlab.v3.conversation-position';
+  let conversationPosition = 'center';
+  function applyConversationPosition(value) {
+    const position = value === 'right' ? 'right' : 'center';
+    if (workspace.dataset.conversationPosition === position) return;
+    workspace.dataset.conversationPosition = position;
+    window.dispatchEvent(new Event('study-layout-change'));
+  }
+  if (isV3) {
+    try {
+      if (localStorage.getItem(layoutStorageKey) === 'right') conversationPosition = 'right';
+    } catch {}
+    applyConversationPosition(conversationPosition);
+  }
   let section = 'menu';
   function setName(value) {
     nameNode.textContent = value;
@@ -43,6 +58,19 @@
     panel.querySelector('[data-section="' + id + '"]').focus({ preventScroll: true });
   }
   const helpContent = '<ul class="account-help"><li>从「发起研究」选一个任务，或直接输入问题。</li><li>点击侧栏顶部的搜索，可查找聊天记录和功能导航。</li></ul>';
+  function layoutOptions() {
+    const choices = [
+      ['center', '会话区居中 · 内容区居右'],
+      ['right', '会话区居右 · 内容区居中']
+    ];
+    return '<section class="account-layout" aria-labelledby="account-layout-title">'+
+      '<h3 id="account-layout-title">调整会话区、内容区展示顺序</h3><p id="account-layout-hint">选择会话区和内容区的排列方式</p>'+
+      '<fieldset class="account-layout-options" aria-label="会话区和内容区排列方式" aria-describedby="account-layout-hint">'+
+      choices.map(([value, label]) => '<label class="account-layout-option">'+
+        '<span class="account-layout-option-heading"><span>'+label+'</span><input type="radio" name="conversation-position" value="'+value+'"'+(conversationPosition === value ? ' checked' : '')+'></span>'+
+        '<span class="account-layout-thumbnail" data-position="'+value+'" aria-hidden="true"><span class="account-layout-nav"></span><span class="account-layout-chat"></span><span class="account-layout-content"></span></span></label>').join('')+
+      '</fieldset></section>';
+  }
   function openSectionDialog(id, title) {
     if (document.querySelector('dialog.account-dialog[open]')) return;
     close();
@@ -50,8 +78,9 @@
     dialog.className = 'zc-modal account-dialog';
     dialog.setAttribute('aria-labelledby', 'account-dialog-title');
     const settings = id === 'settings';
+    dialog.classList.toggle('account-settings', settings);
     const content = settings
-      ? '<div class="zc-modal-field"><label class="zc-modal-label" for="account-name">显示名称</label><input class="zc-modal-control" id="account-name" maxlength="24" autocomplete="off" required aria-describedby="account-name-error" autofocus><p id="account-name-error" class="zc-modal-error" hidden>请输入显示名称</p></div>'
+      ? '<div class="zc-modal-field"><label class="zc-modal-label" for="account-name">显示名称</label><input class="zc-modal-control" id="account-name" maxlength="24" autocomplete="off" required aria-describedby="account-name-error" autofocus><p id="account-name-error" class="zc-modal-error" hidden>请输入显示名称</p></div>'+layoutOptions()
       : helpContent;
     const actions = settings
       ? '<button class="zc-modal-button zc-modal-secondary" type="button" data-dismiss>取消</button><button class="zc-modal-button" type="submit">保存</button>'
@@ -59,7 +88,7 @@
     dialog.innerHTML = '<form class="zc-modal-form" novalidate><header class="zc-modal-header"><h2 id="account-dialog-title" class="zc-modal-title">'+title+'</h2>'+
       '<button class="zc-modal-close" type="button" data-dismiss aria-label="关闭'+title+'"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor"/><path d="m6 6 6 6m0-6-6 6" stroke="currentColor" stroke-linecap="round"/></svg></button></header>'+
       '<div class="zc-modal-body">'+content+'</div><footer class="zc-modal-footer">'+actions+'</footer></form>';
-    const input = dialog.querySelector('input');
+    const input = dialog.querySelector('#account-name');
     if (input) {
       input.value = nameNode.textContent;
       const submit = dialog.querySelector('[type="submit"]');
@@ -76,9 +105,15 @@
         event.preventDefault();
         if (!validate()) { input.focus(); return; }
         saveName(input.value.trim());
+        conversationPosition = dialog.querySelector('[name="conversation-position"]:checked').value;
+        applyConversationPosition(conversationPosition);
+        try { localStorage.setItem(layoutStorageKey, conversationPosition); } catch {}
         dialog.close();
       });
     }
+    dialog.addEventListener('change', event => {
+      if (event.target.matches('[name="conversation-position"]')) applyConversationPosition(event.target.value);
+    });
     dialog.addEventListener('click', event => {
       if (event.target.closest('[data-dismiss]')) { dialog.close(); return; }
       if (event.target !== dialog) return;
@@ -93,6 +128,7 @@
       }
     });
     dialog.addEventListener('close', () => {
+      if (settings) applyConversationPosition(conversationPosition);
       dialog.remove();
       const handle = document.getElementById('nav-handle');
       const visible = trigger.getClientRects().length && getComputedStyle(trigger).visibility !== 'hidden';
