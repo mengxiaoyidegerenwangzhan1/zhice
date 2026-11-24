@@ -171,3 +171,15 @@
   height:calc(100% - var(--pt-tab-top-inset));
   padding-block:0 calc(var(--pt-tab-top-inset) + 1px);
 }
+
+/* Use the same exported 2x PNG controls in all content-pane headers. */
+.workspace #work .rc-function-head :is([data-action="maximize"],[data-action="close-feature"]) > img,
+.workspace > #pane-tabs-panel .pt-bar :is(.pt-max,.pt-dismiss) > img,
+.workspace > #resource-panel .rv-header .rv-tool > img,
+#resource-preview .rv-header .rv-tool > img {
+  display:block;
+  width:18px;
+  height:18px;
+  object-fit:contain;
+  flex:none;
+}

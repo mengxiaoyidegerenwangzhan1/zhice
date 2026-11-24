@@ -50,7 +50,14 @@
   function tool(type,label,activate,cls=type) {
     const item = button('rv-tool rv-'+cls,label,activate);
     item.dataset.rvFocus = cls;
-    item.append(icon(type));
+    if (type === 'maximize' || type === 'restore' || type === 'close') {
+      const image = document.createElement('img');
+      image.src = './icons/ai-pane-' + type + '.png';
+      image.alt = '';
+      image.width = image.height = 18;
+      image.draggable = false;
+      item.append(image);
+    } else item.append(icon(type));
     return item;
   }
   function fileButton(file, options) {

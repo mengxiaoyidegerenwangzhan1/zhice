@@ -161,7 +161,10 @@
   const esc = (value) => String(value).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const root = () => document.getElementById("work");
   const asset = (name) => '<img src="./icons/'+name+'" alt="" draggable="false">';
-  const paneSizeIcon = expanded => expanded ? icon("restore") : asset("work-maximize.svg");
+  const paneSizeIcon = expanded => hasResourcePanel
+    ? asset(expanded ? "ai-pane-restore.png" : "ai-pane-maximize.png")
+    : expanded ? icon("restore") : asset("work-maximize.svg");
+  const paneCloseIcon = () => hasResourcePanel ? asset("ai-pane-close.png") : icon("close");
   function fileControl() {
     const mark = hasResourcePanel ? '<img src="./icons/ai-attach-file.png" width="18" height="18" alt="" draggable="false">' : '<i aria-hidden="true"></i>';
     return '<button class="rc-plus" type="button" data-action="attach" aria-label="添加附件" title="添加附件">'+mark+'</button><input class="rc-file-input" type="file" multiple hidden>';
@@ -824,7 +827,7 @@
     const space = spaces.get(current.page);
     const tabs = window.studyWorkspaceTabs.header(current.page,space.tabs,space.active.id);
     const panel = space.tabs.length ? ' role="tabpanel" aria-label="'+esc(space.active.label)+'"' : '';
-    const close='<button type="button" class="rc-feature-close" data-action="close-feature" aria-label="关闭功能页" title="关闭功能页">'+icon("close")+'</button>';
+    const close='<button type="button" class="rc-feature-close" data-action="close-feature" aria-label="关闭功能页" title="关闭功能页">'+paneCloseIcon()+'</button>';
     const maximize='<button type="button" data-action="maximize" aria-label="放大功能页" title="放大功能页">'+paneSizeIcon(false)+'</button>';
     return '<div class="rc-business"><aside id="rc-page-assistant" class="rc-business-assistant" aria-label="AI 对话"></aside>'+
       '<section id="rc-function-pane" class="rc-business-page" aria-label="'+esc(current.page)+'功能页"><header class="rc-function-head">'+tabs+'<div class="rc-function-actions">'+portalButton()+compactSwitch("chat")+maximize+close+'</div></header>'+
@@ -1380,6 +1383,7 @@
   });
   window.researchCanvas={
     paneSizeIcon,
+    paneCloseIcon,
     resourceContext,
     renderResourceFile,
     openResource,

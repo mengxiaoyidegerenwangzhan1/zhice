@@ -105,7 +105,8 @@
       });
       expand.innerHTML = window.researchCanvas.paneSizeIcon(maximized);
       expand.dataset.focus = "maximize";
-      const collapse = button("pt-tool pt-dismiss","收起标签页","close",()=>dismiss());
+      const collapse = button("pt-tool pt-dismiss","收起标签页",null,()=>dismiss());
+      collapse.innerHTML = window.researchCanvas.paneCloseIcon();
       stripHeader.replaceChildren(strip,add,expand,collapse);
       barSignature = signature;
       if (focused) [...stripHeader.querySelectorAll("[data-focus]")].find(el=>el.dataset.focus===focused)?.focus({preventScroll:true});
