@@ -120,3 +120,54 @@
 @container (max-width:279px) {
   #work #rc-page-assistant { min-width:0; }
 }
+
+/* One shared vertical centerline for every workspace header. */
+.workspace {
+  --zc-header-height:58px;
+  --zc-header-center:calc((var(--zc-header-height) - 1px) / 2);
+  --pt-header-height:var(--zc-header-height);
+}
+.workspace:not(.nav-collapsed) > #primary-nav .nav-brand {
+  height:var(--zc-header-height);
+  align-items:center;
+  border-bottom:1px solid transparent;
+}
+.workspace > #nav-handle {
+  top:calc(var(--zc-header-center) - 16px);
+}
+.workspace #work :is(.rc-toolbar,.rc-thread-head,.rc-function-head),
+.workspace > #pane-tabs-panel > .pt-bar,
+.workspace > #resource-panel .rv-header,
+.workspace > #portal-catalog .portal-header {
+  height:var(--zc-header-height);
+  align-items:center;
+  padding-block:0;
+}
+.workspace #work .rc-welcome {
+  height:calc(100% - var(--zc-header-height));
+}
+.workspace #work :is(.rc-tool-start,.rc-tool-end,.rc-content-head,.rc-thread-actions,.rc-function-actions),
+.workspace > #pane-tabs-panel .pt-select,
+.workspace > #resource-panel .rv-tools {
+  align-items:center;
+}
+.workspace #work :is(.rc-toolbar,.rc-thread-head) > .rc-view-title {
+  align-self:center;
+  line-height:22px;
+}
+.workspace #work .rc-tab-caption {
+  align-items:center;
+}
+/* Keep the tab outline attached to the bottom border, but center the label,
+   icon and close control on the same axis as the rest of the header. */
+.workspace #work .rc-workspace-item {
+  padding-block:0 calc(var(--tab-top-inset) + 1px);
+}
+.workspace #work .rc-workspace-item:not(.is-active) + .rc-workspace-item:not(.is-active)::before {
+  top:calc((100% - var(--tab-top-inset) - 1px - 16px) / 2);
+}
+.workspace > #pane-tabs-panel .pt-tab {
+  --pt-tab-top-inset:6px;
+  height:calc(100% - var(--pt-tab-top-inset));
+  padding-block:0 calc(var(--pt-tab-top-inset) + 1px);
+}
