@@ -24,13 +24,12 @@
   font-variant-numeric: tabular-nums;
   transform: translateY(1px);
 }
+/* Use the supplied 2x Figma export for the empty tab state. */
+.pane-tabs-icon:has([data-empty]) {
+  background-image: url("../icons/ai-pane-tabs-add.png");
+}
 .pane-tabs-icon [data-empty] {
-  width: 8px;
-  height: 8px;
-  transform: none;
-  font-size: 0;
-  background: linear-gradient(currentColor, currentColor) center / 100% 1.4px no-repeat,
-              linear-gradient(currentColor, currentColor) center / 1.4px 100% no-repeat;
+  display: none;
 }
 .pane-tabs-icon [data-digits="2"] { font-size: 9px; }
 .pane-tabs-icon [data-digits="3"] { font-size: 7px; }
