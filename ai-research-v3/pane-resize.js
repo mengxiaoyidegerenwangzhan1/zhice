@@ -42,6 +42,10 @@
   const storageKey = name => widthPrefix + name;
   const clamp = (value,min,max) => Math.min(max, Math.max(min, Math.round(value)));
   let drag = null;
+  // Remember the preferred widths of the functional areas, never their
+  // temporary rendered sizes. The conversation uses the remaining space.
+  // CSS clamps these preferences on smaller screens without changing storage.
+  const preferred = {nav:null, function:null};
 
   function direction(name) {
     return name === "function" && workspace.dataset.conversationPosition === "right" ? 1 : panes[name].direction;
@@ -74,26 +78,44 @@
     }
   }
 
-  function setWidth(name, value) {
-    workspace.style.setProperty(panes[name].property, value+"px");
+  function renderWidth(name,value) {
+    const property=panes[name].property;
+    if(value===null)workspace.style.removeProperty(property);
+    else workspace.style.setProperty(property,value+"px");
+  }
+  function notify() {
     sync();
     window.dispatchEvent(new Event("study-pane-resized"));
   }
-  function save(name) {
-    const value = parseInt(workspace.style.getPropertyValue(panes[name].property), 10);
-    if (Number.isFinite(value)) {
-      try { localStorage.setItem(storageKey(name), String(value)); } catch {}
-    }
+  function setWidth(name,value) {
+    renderWidth(name,value);
+    notify();
   }
-  for (const [name,pane] of Object.entries(panes)) {
-    try {
-      const saved = localStorage.getItem(storageKey(name));
-      const width = Number(saved);
-      if (saved !== null && Number.isFinite(width) && width > 0) {
-        workspace.style.setProperty(pane.property, clamp(width,pane.min,pane.max)+"px");
+  function restoreSavedWidths() {
+    for(const [name,pane] of Object.entries(panes)) {
+      try {
+        const stored=localStorage.getItem(storageKey(name));
+        const value=Number(stored);
+        preferred[name]=stored!==null && Number.isFinite(value) && value>0
+          ? clamp(value,pane.min,pane.max) : null;
+      } catch {
+        // Storage can be unavailable in private or restricted environments.
+        // Keep this session's last committed preferences in memory.
       }
-    } catch {}
+      renderWidth(name,preferred[name]);
+    }
+    notify();
   }
+  function commitWidth(name,value) {
+    const pane=panes[name];
+    preferred[name]=value===null?null:clamp(value,pane.min,pane.max);
+    try {
+      if(preferred[name]===null)localStorage.removeItem(storageKey(name));
+      else localStorage.setItem(storageKey(name),String(preferred[name]));
+    } catch {}
+    setWidth(name,preferred[name]);
+  }
+  restoreSavedWidths();
 
   function handleAt(event) {
     return event.target.closest?.("[data-resize]");
@@ -105,8 +127,11 @@
     const target=paneElement(name,handle);
     if(!target)return;
     const width = target.offsetWidth;
+    const bounds=limits(name,handle);
+    if(bounds.max<=bounds.min)return;
     drag = {handle,name,pointer:event.pointerId,startX:event.clientX,width,lastWidth:width,
-      scale:workspace.offsetWidth/workspace.getBoundingClientRect().width,...limits(name,handle)};
+      originalPreference:preferred[name], direction:direction(name),
+      scale:workspace.offsetWidth/workspace.getBoundingClientRect().width};
     event.preventDefault();
     handle.focus({preventScroll:true});
     handle.setPointerCapture(event.pointerId);
@@ -116,57 +141,77 @@
 
   function move(event) {
     if (!drag || event.pointerId !== drag.pointer) return;
-    const delta = (event.clientX-drag.startX) * drag.scale * direction(drag.name);
-    const next = clamp(drag.width+delta, drag.min, drag.max);
+    const delta = (event.clientX-drag.startX) * drag.scale * drag.direction;
+    const {min,max}=limits(drag.name,drag.handle);
+    const next = clamp(drag.width+delta,min,max);
     if (next === drag.lastWidth) return;
     drag.lastWidth = next;
     setWidth(drag.name,next);
   }
   function finish(event) {
     if (!drag || (event.pointerId != null && event.pointerId !== drag.pointer)) return;
-    if (event.type === "pointerup") move(event);
-    const {handle,name,pointer,width,lastWidth} = drag;
-    drag = null;
-    if (handle.hasPointerCapture(pointer)) handle.releasePointerCapture(pointer);
+    const completed=event.type==="pointerup";
+    if(completed)move(event);
+    const {handle,name,pointer,width,lastWidth,originalPreference}=drag;
+    const actual=paneElement(name,handle)?.offsetWidth;
+    drag=null;
+    if(handle.hasPointerCapture(pointer))handle.releasePointerCapture(pointer);
     handle.classList.remove("is-resizing");
     workspace.classList.remove("is-resizing");
-    if (lastWidth !== width) save(name);
+    // Only a completed, effective user drag changes the saved preference.
+    // Cancelled drags, clicks, or dragging back to the start restore the
+    // original preference (which can be wider than a constrained viewport).
+    if(completed && lastWidth!==width && Number.isFinite(actual) && actual!==width) {
+      commitWidth(name,actual);
+    } else {
+      setWidth(name,originalPreference);
+    }
   }
   document.addEventListener("pointermove", move);
   document.addEventListener("pointerup", finish);
   document.addEventListener("pointercancel", finish);
   document.addEventListener("lostpointercapture", finish);
   window.addEventListener("blur", finish);
+  window.addEventListener("resize", finish);
 
   workspace.addEventListener("keydown", event => {
     const handle = handleAt(event);
     if (!handle || !["ArrowLeft","ArrowRight","Home","End"].includes(event.key)) return;
     event.preventDefault();
     const name = handle.dataset.resize;
-    const pane = panes[name];
     const {min,max} = limits(name,handle);
-    let next = paneElement(name,handle).offsetWidth;
+    const current=paneElement(name,handle)?.offsetWidth;
+    if(!Number.isFinite(current))return;
+    let next=current;
     if (event.key === "Home") next = min;
     else if (event.key === "End") next = max;
     else next += (event.key === "ArrowRight" ? 1 : -1) * direction(name) * 16;
-    setWidth(name,clamp(next,min,max));
-    save(name);
+    next=clamp(next,min,max);
+    if(next===current)return;
+    commitWidth(name,next);
   });
   workspace.addEventListener("dblclick", event => {
     const handle = handleAt(event);
     if (!handle) return;
     const name = handle.dataset.resize;
-    workspace.style.removeProperty(panes[name].property);
-    try { localStorage.removeItem(storageKey(name)); } catch {}
-    sync();
-    window.dispatchEvent(new Event("study-pane-resized"));
+    if(drag)finish({type:"reset"});
+    commitWidth(name,null);
   });
 
   window.studyPaneResize = {sync};
   window.addEventListener("study-layout-change", event => {
     finish(event);
-    sync();
-    window.dispatchEvent(new Event("study-pane-resized"));
+    notify();
+  });
+  window.addEventListener("study-view",finish);
+  window.addEventListener("pageshow",event=>{
+    finish(event);
+    restoreSavedWidths();
+  });
+  window.addEventListener("storage",event=>{
+    if(event.key!==null && !Object.keys(panes).some(name=>event.key===storageKey(name)))return;
+    finish(event);
+    restoreSavedWidths();
   });
   const observer = new ResizeObserver(sync);
   observer.observe(workspace);
@@ -174,6 +219,9 @@
   for(const id of ["pane-tabs-panel","resource-panel","primary-nav"]){
     const panel=document.getElementById(id);if(panel)observer.observe(panel);
   }
-  for(const event of ["study-pane-tabs-visibility","study-resources-visibility"])window.addEventListener(event,()=>queueMicrotask(sync));
+  for(const event of ["study-pane-tabs-visibility","study-resources-visibility"])window.addEventListener(event,e=>{
+    finish(e);
+    queueMicrotask(sync);
+  });
   sync();
 }());
