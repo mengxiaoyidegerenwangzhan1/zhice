@@ -325,3 +325,6 @@
 .pt-file-detail .rc-allocation-table tr > :nth-child(-n+3),
 .pt-file-detail .rc-metric-table tr > :last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .pt-file-detail .rc-fund-dot { display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; }
+
+/* Original 2x design exports: keep their transparent padding and native proportions. */
+.pt-select .pt-design-icon { display: block; width: 18px; height: 18px; object-fit: contain; flex: none; }

@@ -34,7 +34,15 @@
     el.className = cls;
     el.title = name;
     el.setAttribute("aria-label", name);
-    if (icon) el.append(svg(icon));
+    if (icon === "new" || icon === "files") {
+      const image = document.createElement("img");
+      image.src = "./icons/" + (icon === "new" ? "ai-tab-new.png" : "ai-tab-files.png");
+      image.alt = "";
+      image.setAttribute("aria-hidden", "true");
+      image.width = image.height = 18;
+      image.className = "pt-design-icon";
+      el.append(image);
+    } else if (icon) el.append(svg(icon));
     el.addEventListener("click",run);
     return el;
   }
