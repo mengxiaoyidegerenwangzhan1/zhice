@@ -25,15 +25,39 @@
     } catch {}
     applyConversationPosition(conversationPosition);
   }
+  const titleStorageKey = 'zhice.nav-profile-title.'+(document.documentElement.dataset.prototype || 'v1');
+  const titleNode = isV3 ? document.createElement('small') : null;
+  if (titleNode) {
+    titleNode.className = 'account-profile-title';
+    titleNode.hidden = true;
+    nameNode.after(titleNode);
+  }
+  const avatarNode = trigger.querySelector('.nav-avatar');
+  const defaultAvatar = avatarNode?.textContent || '';
+  const defaultName = nameNode.textContent;
   let section = 'menu';
   function setName(value) {
     nameNode.textContent = value;
-    trigger.setAttribute('aria-label', value + '，账户菜单');
-    trigger.title = value + ' · 账户菜单';
+    const profileTitle = titleNode?.textContent || '';
+    const description = value + (profileTitle ? '，'+profileTitle : '');
+    trigger.setAttribute('aria-label', description + '，账户菜单');
+    trigger.title = description + ' · 账户菜单';
+    if (isV3 && avatarNode) avatarNode.textContent = value === defaultName ? defaultAvatar : (Array.from(value.trim())[0] || defaultAvatar);
   }
   let name = nameNode.textContent;
   try { name = localStorage.getItem(storageKey) || name; } catch {}
+  if (titleNode) {
+    try { titleNode.textContent = localStorage.getItem(titleStorageKey) || ''; } catch {}
+    titleNode.hidden = !titleNode.textContent;
+  }
   setName(name);
+  function saveProfileTitle(value) {
+    if (!titleNode) return;
+    titleNode.textContent = value;
+    titleNode.hidden = !value;
+    try { localStorage.setItem(titleStorageKey, value); } catch {}
+    setName(nameNode.textContent);
+  }
   function saveName(value) {
     setName(value);
     try { localStorage.setItem(storageKey, value); } catch {}
@@ -79,23 +103,49 @@
     dialog.setAttribute('aria-labelledby', 'account-dialog-title');
     const settings = id === 'settings';
     dialog.classList.toggle('account-settings', settings);
-    const content = settings
-      ? '<div class="zc-modal-field"><label class="zc-modal-label" for="account-name">显示名称</label><input class="zc-modal-control" id="account-name" maxlength="24" autocomplete="off" required aria-describedby="account-name-error" autofocus><p id="account-name-error" class="zc-modal-error" hidden>请输入显示名称</p></div>'+layoutOptions()
-      : helpContent;
-    const actions = settings
-      ? '<button class="zc-modal-button zc-modal-secondary" type="button" data-dismiss>取消</button><button class="zc-modal-button" type="submit">保存</button>'
-      : '<button class="zc-modal-button" type="button" data-dismiss>关闭</button>';
-    dialog.innerHTML = '<form class="zc-modal-form" novalidate><header class="zc-modal-header"><h2 id="account-dialog-title" class="zc-modal-title">'+title+'</h2>'+
-      '<button class="zc-modal-close" type="button" data-dismiss aria-label="关闭'+title+'"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor"/><path d="m6 6 6 6m0-6-6 6" stroke="currentColor" stroke-linecap="round"/></svg></button></header>'+
-      '<div class="zc-modal-body">'+content+'</div><footer class="zc-modal-footer">'+actions+'</footer></form>';
-    const input = dialog.querySelector('#account-name');
-    if (input) {
-      input.value = nameNode.textContent;
-      const submit = dialog.querySelector('[type="submit"]');
+    const dismiss = '<button class="zc-modal-close" type="button" data-dismiss aria-label="关闭'+title+'"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor"/><path d="m6 6 6 6m0-6-6 6" stroke="currentColor" stroke-linecap="round"/></svg></button>';
+    if (settings) {
+      const personIcon = icon('<circle cx="12" cy="8" r="3.5"/><path d="M4.5 21v-2a7.5 7.5 0 0 1 15 0v2"/>');
+      const preferencesIcon = icon('<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2" fill="#f5f5f7"/><circle cx="16" cy="12" r="2" fill="#f5f5f7"/><circle cx="10" cy="18" r="2" fill="#f5f5f7"/>');
+      dialog.innerHTML = '<form class="zc-modal-form" novalidate>'+
+        '<aside class="account-settings-nav"><h2 id="account-dialog-title" class="zc-modal-title">设置</h2>'+
+        '<div class="account-settings-tabs" role="tablist" aria-label="设置分类">'+
+        '<button type="button" id="account-tab-profile" role="tab" data-settings-tab="profile" aria-selected="true" aria-controls="account-pane-profile">'+personIcon+'<span>账号</span></button>'+
+        '<button type="button" id="account-tab-preferences" role="tab" data-settings-tab="preferences" aria-selected="false" aria-controls="account-pane-preferences" tabindex="-1">'+preferencesIcon+'<span>偏好</span></button></div></aside>'+
+        '<div class="account-settings-main"><header class="account-settings-head"><h3>账号</h3>'+dismiss+'</header>'+
+        '<div class="zc-modal-body account-settings-body">'+
+        '<section class="account-settings-pane" id="account-pane-profile" role="tabpanel" aria-labelledby="account-tab-profile">'+
+        '<div class="zc-modal-field"><label class="zc-modal-label" for="account-name">姓名</label><input class="zc-modal-control" id="account-name" maxlength="24" autocomplete="off" required aria-describedby="account-name-error" placeholder="请输入姓名"><p id="account-name-error" class="zc-modal-error" hidden>请输入姓名</p></div>'+
+        '<div class="zc-modal-field"><label class="zc-modal-label" for="account-profile-title">头衔</label><input class="zc-modal-control" id="account-profile-title" maxlength="24" autocomplete="off" placeholder="例如：基金研究员（选填）"></div>'+
+        '</section><section class="account-settings-pane" id="account-pane-preferences" role="tabpanel" aria-labelledby="account-tab-preferences" hidden>'+layoutOptions()+'</section></div>'+
+        '<footer class="zc-modal-footer"><button class="zc-modal-button zc-modal-secondary" type="button" data-dismiss>取消</button><button class="zc-modal-button" type="submit">保存</button></footer></div></form>';
+      const input = dialog.querySelector('#account-name');
+      const profileTitle = dialog.querySelector('#account-profile-title');
       const error = dialog.querySelector('#account-name-error');
+      const tabs = [...dialog.querySelectorAll('[data-settings-tab]')];
+      input.value = nameNode.textContent;
+      profileTitle.value = titleNode?.textContent || '';
+      function selectTab(key, focus=false) {
+        tabs.forEach(tab => {
+          const selected = tab.dataset.settingsTab === key;
+          tab.setAttribute('aria-selected', String(selected));
+          tab.tabIndex = selected ? 0 : -1;
+          dialog.querySelector('#account-pane-'+tab.dataset.settingsTab).hidden = !selected;
+          if (selected && focus) tab.focus({preventScroll:true});
+        });
+        dialog.querySelector('.account-settings-head h3').textContent = key === 'profile' ? '账号' : '偏好';
+      }
+      tabs.forEach(tab => tab.addEventListener('click', () => selectTab(tab.dataset.settingsTab)));
+      dialog.querySelector('[role="tablist"]').addEventListener('keydown', event => {
+        if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)) return;
+        const index = tabs.indexOf(document.activeElement);
+        if (index < 0) return;
+        event.preventDefault();
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length-1 : (index + (['ArrowRight','ArrowDown'].includes(event.key) ? 1 : -1) + tabs.length) % tabs.length;
+        selectTab(tabs[next].dataset.settingsTab, true);
+      });
       function validate() {
         const blank = !input.value.trim();
-        submit.disabled = blank;
         error.hidden = !blank;
         input.setAttribute('aria-invalid', String(blank));
         return !blank;
@@ -103,13 +153,17 @@
       input.addEventListener('input', validate);
       dialog.querySelector('form').addEventListener('submit', event => {
         event.preventDefault();
-        if (!validate()) { input.focus(); return; }
+        if (!validate()) { selectTab('profile'); input.focus(); return; }
         saveName(input.value.trim());
+        saveProfileTitle(profileTitle.value.trim());
         conversationPosition = dialog.querySelector('[name="conversation-position"]:checked').value;
         applyConversationPosition(conversationPosition);
         try { localStorage.setItem(layoutStorageKey, conversationPosition); } catch {}
         dialog.close();
       });
+    } else {
+      dialog.innerHTML = '<form class="zc-modal-form" novalidate><header class="zc-modal-header"><h2 id="account-dialog-title" class="zc-modal-title">'+title+'</h2>'+dismiss+'</header>'+
+        '<div class="zc-modal-body">'+helpContent+'</div><footer class="zc-modal-footer"><button class="zc-modal-button" type="button" data-dismiss>关闭</button></footer></form>';
     }
     dialog.addEventListener('change', event => {
       if (event.target.matches('[name="conversation-position"]')) applyConversationPosition(event.target.value);
@@ -136,7 +190,7 @@
     }, {once:true});
     document.body.append(dialog);
     dialog.showModal();
-    if (input) input.select();
+    if (settings) dialog.querySelector('[aria-selected="true"]').focus({preventScroll:true});
   }
   function showSection(id) {
     const entry = options.find(([key]) => key === id);

@@ -2,7 +2,63 @@
 .account-dialog .account-help { margin: 0; padding-inline-start: 1.2em; }
 .account-dialog .account-help li + li { margin-top: 12px; }
 
-.account-settings { --zc-modal-width: 640px; }
+.account-settings { --zc-modal-width: 760px; overflow: hidden; }
+.account-settings > .zc-modal-form {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  height: min(432px, calc(100dvh - 32px));
+  min-height: 0;
+  overflow: hidden;
+}
+.account-settings-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 12px;
+  background: #f5f5f7;
+  border-right: 1px solid #eee;
+  min-width: 0;
+}
+.account-settings-nav > h2 { padding: 0 8px; }
+.account-settings-tabs { display: grid; gap: 4px; }
+.account-settings-tabs > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #333;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.account-settings-tabs > button svg { width: 16px; height: 16px; flex: none; }
+.account-settings-tabs > button:hover { background: #ebebef; }
+.account-settings-tabs > button[aria-selected="true"] { background: #eae9f1; color: #6865a7; font-weight: 500; }
+.account-settings-tabs > button:focus-visible { outline: 2px solid #6865a7; outline-offset: 2px; }
+.account-settings-main { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.account-settings-head { display: flex; align-items: center; justify-content: space-between; flex: none; gap: 16px; padding: 20px 24px 16px; }
+.account-settings-head h3 { margin: 0; font-size: 16px; font-weight: 600; line-height: 22px; }
+.account-settings-body { flex: 1; padding-top: 4px; min-height: 0; overflow-y: auto; }
+.account-settings-pane { display: grid; align-content: start; gap: 20px; min-width: 0; }
+.account-settings-pane[hidden] { display: none; }
+.account-settings .account-layout { padding: 0; background: transparent; }
+.account-settings .account-layout > p { margin-bottom: 16px; }
+.account-settings .account-layout-option { padding: 12px; border-color: #eaeaea; }
+.account-settings .account-layout-option:has(input:checked) { border-color: #aaa7d0; }
+.account-settings .account-layout-thumbnail { height: 116px; }
+.nav-identity .identity-text :is(strong, .account-profile-title) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 640px) {
+  .account-settings > .zc-modal-form { grid-template-columns: minmax(0,1fr); grid-template-rows: auto minmax(0,1fr); height: min(570px,calc(100dvh - 32px)); }
+  .account-settings-nav { gap: 10px; border-right: 0; border-bottom: 1px solid #eee; padding: 16px; }
+  .account-settings-tabs { display: flex; gap: 8px; }
+  .account-settings-tabs > button { width: auto; min-width: 88px; justify-content: center; }
+  .account-settings-head { padding: 16px 20px 12px; }
+}
 .account-layout {
   min-width: 0;
   padding: 16px;
