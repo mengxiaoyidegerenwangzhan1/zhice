@@ -19,11 +19,39 @@
     workspace.dataset.conversationPosition = position;
     window.dispatchEvent(new Event('study-layout-change'));
   }
-  if (isV3) {
+  function readSavedConversationPosition() {
     try {
-      if (localStorage.getItem(layoutStorageKey) === 'right') conversationPosition = 'right';
-    } catch {}
+      const saved = localStorage.getItem(layoutStorageKey);
+      return saved === 'right' || saved === 'center' ? saved : 'center';
+    } catch {
+      return conversationPosition;
+    }
+  }
+  function saveConversationPosition(value) {
+    conversationPosition = value === 'right' ? 'right' : 'center';
+    try { localStorage.setItem(layoutStorageKey, conversationPosition); } catch {}
     applyConversationPosition(conversationPosition);
+  }
+  function restoreSavedConversationPosition() {
+    if (!isV3) return;
+    const previous = conversationPosition;
+    conversationPosition = readSavedConversationPosition();
+    const settings = document.querySelector('dialog.account-settings[open]');
+    const selection = settings?.querySelector('[name="conversation-position"]:checked');
+    // Keep a user's unsaved preview intact if another browser tab changes its settings.
+    if (selection && selection.value !== previous) return;
+    if (settings) {
+      const savedRadio = settings.querySelector('[name="conversation-position"][value="'+conversationPosition+'"]');
+      if (savedRadio) savedRadio.checked = true;
+    }
+    applyConversationPosition(conversationPosition);
+  }
+  if (isV3) {
+    restoreSavedConversationPosition();
+    window.addEventListener('pageshow', restoreSavedConversationPosition);
+    window.addEventListener('storage', event => {
+      if (event.key === layoutStorageKey || event.key === null) restoreSavedConversationPosition();
+    });
   }
   const titleStorageKey = 'zhice.nav-profile-title.'+(document.documentElement.dataset.prototype || 'v1');
   const titleNode = isV3 ? document.createElement('small') : null;
@@ -88,7 +116,7 @@
       ['right', '会话区居右 · 内容区居中']
     ];
     return '<section class="account-layout" aria-labelledby="account-layout-title">'+
-      '<h3 id="account-layout-title">调整会话区、内容区展示顺序</h3><p id="account-layout-hint">选择会话区和内容区的排列方式</p>'+
+      '<h3 id="account-layout-title">调整会话区、内容区展示顺序</h3><p id="account-layout-hint">选择会话区和内容区的排列方式，保存后将沿用上次选择。</p>'+
       '<fieldset class="account-layout-options" aria-label="会话区和内容区排列方式" aria-describedby="account-layout-hint">'+
       choices.map(([value, label]) => '<label class="account-layout-option">'+
         '<span class="account-layout-option-heading"><span>'+label+'</span><input type="radio" name="conversation-position" value="'+value+'"'+(conversationPosition === value ? ' checked' : '')+'></span>'+
@@ -102,6 +130,7 @@
     dialog.className = 'zc-modal account-dialog';
     dialog.setAttribute('aria-labelledby', 'account-dialog-title');
     const settings = id === 'settings';
+    if (settings) restoreSavedConversationPosition();
     dialog.classList.toggle('account-settings', settings);
     const dismiss = '<button class="zc-modal-close" type="button" data-dismiss aria-label="关闭'+title+'"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor"/><path d="m6 6 6 6m0-6-6 6" stroke="currentColor" stroke-linecap="round"/></svg></button>';
     if (settings) {
@@ -156,9 +185,7 @@
         if (!validate()) { selectTab('profile'); input.focus(); return; }
         saveName(input.value.trim());
         saveProfileTitle(profileTitle.value.trim());
-        conversationPosition = dialog.querySelector('[name="conversation-position"]:checked').value;
-        applyConversationPosition(conversationPosition);
-        try { localStorage.setItem(layoutStorageKey, conversationPosition); } catch {}
+        saveConversationPosition(dialog.querySelector('[name="conversation-position"]:checked').value);
         dialog.close();
       });
     } else {
