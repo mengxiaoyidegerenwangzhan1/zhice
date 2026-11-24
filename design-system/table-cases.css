@@ -196,49 +196,7 @@
   max-width:38px;
 }
 .audit-case-example .audit-screenshot-table .audit-checkbox-cell { text-align:center; }
-.audit-case-example .audit-screenshot-table .audit-checkbox {
-  appearance:none;
-  display:block;
-  position:relative;
-  width:14px;
-  height:14px;
-  margin:0 auto;
-  padding:0;
-  border:1px solid #dcdcdc;
-  border-radius:4px;
-  background:#fff center / 14px 14px no-repeat;
-  cursor:pointer;
-}
-.audit-case-example .audit-screenshot-table .audit-checkbox:checked {
-  border:0;
-  background-image:url("assets/table-reference/25ea2.svg");
-}
-.audit-case-example .audit-screenshot-table .audit-checkbox-alternate:checked {
-  background-image:url("assets/table-reference/0b96b.svg");
-}
-.audit-case-example .audit-screenshot-table .audit-checkbox:indeterminate {
-  border:0;
-  background:#6865a7;
-}
-.audit-case-example .audit-screenshot-table .audit-checkbox::before,
-.audit-case-example .audit-screenshot-table .audit-checkbox::after {
-  content:none;
-  display:none;
-}
-.audit-case-example .audit-screenshot-table .audit-checkbox:indeterminate::after {
-  content:"";
-  display:block;
-  position:absolute;
-  inset:6.44px auto auto 3px;
-  width:8px;
-  height:1.2px;
-  border:0;
-  border-radius:2px;
-  background:#fff;
-  transform:none;
-}
-.audit-case-example .audit-screenshot-table .audit-checkbox:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
-.audit-case-example .audit-screenshot-table .audit-checkbox:disabled { opacity:.4; cursor:not-allowed; }
+.audit-case-example .audit-screenshot-table .audit-checkbox { margin:0 auto; }
 .audit-case-example .audit-screenshot-table button.audit-row-heading {
   appearance:none;
   display:flex;

@@ -30,6 +30,15 @@
 }
 
 .company-holdings-controls .company-actions { flex: none; }
+.company-holdings-period-controls { max-width: 100%; }
+.company-holdings-shortcuts.linked-time-widget {
+  flex: none;
+  flex-wrap: wrap;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  min-height: 32px;
+}
 
 .company-holdings-split {
   display: grid;
@@ -188,6 +197,8 @@
 
 @media (max-width: 560px) {
   .company-holdings-controls { gap: 8px; }
+  .company-holdings-period-controls { justify-content: flex-start; margin-inline-start: 0; }
+  .company-holdings-shortcuts.lt-bar > button { padding-inline: 8px; }
   .company-holdings-panel .company-holdings-head .company-dropdown { width: auto; }
   .company-holdings-subhead .company-holdings-dates .lt-calendar { left: 0; right: auto; }
   .company-holdings-snapshot { grid-template-columns: minmax(0, 1fr); }

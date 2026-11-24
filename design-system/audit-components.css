@@ -192,22 +192,15 @@
 .audit-table .audit-checkbox-column { width:40px; }
 .audit-table .audit-checkbox-cell { width:40px; padding:12px; text-align:left; }
 .audit-checkbox {
-  appearance:none; display:block; position:relative; width:14px; height:14px;
-  margin:0; padding:0; border:1px solid #999; border-radius:4px;
-  background:#fff; cursor:pointer; flex:none; box-sizing:border-box;
+  appearance:none; display:block; width:14px; height:14px;
+  margin:0; padding:0; border:0; border-radius:4px;
+  background:transparent url("assets/table-reference/checkbox-unchecked.png") center / 14px 14px no-repeat;
+  cursor:pointer; flex:none; box-sizing:border-box;
 }
-.audit-checkbox:checked, .audit-checkbox:indeterminate { background:#6865a7; border-color:#6865a7; }
-.audit-checkbox:checked::after {
-  content:""; position:absolute; left:3px; top:1px; width:4px; height:7px;
-  border:solid #fff; border-width:0 1.5px 1.5px 0; transform:rotate(45deg); box-sizing:border-box;
-}
-.audit-checkbox:indeterminate::after {
-  content:""; position:absolute; left:3px; top:5px; width:6px; height:2px;
-  border:0; background:#fff; transform:none;
-}
+.audit-checkbox:checked { background-image:url("assets/table-reference/checkbox-checked.png"); }
+.audit-checkbox:indeterminate { background-image:url("assets/table-reference/checkbox-indeterminate.png"); }
 .audit-checkbox:focus-visible { outline:2px solid #6865a7; outline-offset:2px; }
-.audit-checkbox:disabled { border-color:#cbcbcb; background:#f7f8fa; cursor:not-allowed; }
-.audit-checkbox:disabled:checked, .audit-checkbox:disabled:indeterminate { background:#cbcbcb; }
+.audit-checkbox:disabled { opacity:.4; cursor:not-allowed; }
 .audit-table .audit-level-detail .audit-row-heading { margin-left:54px; }
 .audit-table-combination, .audit-titled-examples { min-width:0; max-width:100%; }
 .audit-titled-examples { display:grid; gap:16px; margin-top:12px; }

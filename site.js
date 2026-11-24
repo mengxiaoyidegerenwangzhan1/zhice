@@ -1280,7 +1280,7 @@ function renderRoute(preserveScroll=false) {
   document.body.classList.toggle('company-site-mode',module==='company');
   if(module==='company') {
     view.innerHTML = '<div class="app-page" role="status">正在加载公司详情…</div>';
-    import('./company-detail.js?v=20261123-shared-time').then(({mountCompanyDetail}) => {
+    import('./company-detail.js?v=20261124-asset-years').then(({mountCompanyDetail}) => {
       if (routeGeneration !== companyRouteGeneration) return;
       disposeCompanyView = mountCompanyDetail(view, {
         initialTab: route.params.get('tab'),

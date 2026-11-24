@@ -15,7 +15,7 @@ function auditTableCases() {
     ['尺寸', '原稿宽 1286px。普通单行 45px，两行 65px，含 1px 分隔线。普通单元格上下及左右 12px，行标题左右 10px'],
     ['缺失与空白', '缺失值为 PingFang SC Regular（400）的 --，颜色 #333333。示例中的空单元格保留为空']
   ];
-  const selectionRule = ['多选框', '列宽 38px，控件 14 × 14px，圆角 4px。未选为白底、#DCDCDC 描边，已选及半选为 #6865A7 底、白色符号。表头支持全选、取消和半选'];
+  const selectionRule = ['多选框', '列宽 38px，控件 14 × 14px，圆角 4px。未选为透明底、#DCDCDC 描边。已选为 #6865A7 底、白色对勾，未全选用白色横线。表头支持全选和取消全选'];
 
   function wrapper(key, html) {
     return '<div class="audit-case-example" data-audit-case="' + key + '"><div class="audit-table-scroll">' + html + '</div></div>';
@@ -23,8 +23,8 @@ function auditTableCases() {
   function selectHeader(half) {
     return '<th scope="col" class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-select-all aria-label="全选当前表格"' + (half ? ' data-indeterminate' : '') + '></th>';
   }
-  function selectCell(key, checked, alternateMark = false) {
-    return '<td class="audit-checkbox-cell"><input class="audit-checkbox' + (alternateMark ? ' audit-checkbox-alternate' : '') + '" type="checkbox" data-audit-row-select="' + key + '" aria-label="选择当前行"' + (checked ? ' checked' : '') + '></td>';
+  function selectCell(key, checked) {
+    return '<td class="audit-checkbox-cell"><input class="audit-checkbox" type="checkbox" data-audit-row-select="' + key + '" aria-label="选择当前行"' + (checked ? ' checked' : '') + '></td>';
   }
   function cols(checkbox, fieldCount, dataCount) {
     return '<colgroup>' + (checkbox ? '<col class="audit-checkbox-column">' : '')
@@ -84,7 +84,7 @@ function auditTableCases() {
       ['样式', '五颗评分星各 14.8px，间距 4px。链接为 #6078D9。内容列及对应表头统一左对齐']
     ], '支持单行选择与表头全选；长名称分别展示换行和省略规则。');
 
-  const numericRows = Array.from({length: 3}, (_, index) => '<tr class="audit-shot-body">' + selectCell('reference-numeric-' + index, index !== 1, index === 2)
+  const numericRows = Array.from({length: 3}, (_, index) => '<tr class="audit-shot-body">' + selectCell('reference-numeric-' + index, index !== 1)
     + values(['3222.00万元', '3222.00万元', '--', ''], false) + '</tr>');
   const numeric = result('numeric', '纯数字表格',
     table('numeric', 'audit-table-numeric audit-table-selectable', cols(true, 0, 4), selectHeader(true) + fundHeaders(), numericRows), [

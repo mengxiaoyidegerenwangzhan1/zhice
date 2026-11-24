@@ -221,9 +221,10 @@
       function openCalendar(active = 'start') {
         const changedField = state.active !== active;
         if (!state.calendarOpen) {
-          state.draft = {...state.committed};
+          const editableDate = value => parse(value) ? clamp(value) : '';
+          state.draft = { start:editableDate(state.committed.start), end:editableDate(state.committed.end) };
           const currentMonth = monthValue(clamp(anchor));
-          state.months = [state.committed.start?monthValue(state.committed.start):currentMonth,state.committed.end?monthValue(state.committed.end):currentMonth];
+          state.months = [state.draft.start?monthValue(state.draft.start):currentMonth,state.draft.end?monthValue(state.draft.end):currentMonth];
           state.views = [null,null];
         }
         if (changedField) {

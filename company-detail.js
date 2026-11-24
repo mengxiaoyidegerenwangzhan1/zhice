@@ -7,7 +7,7 @@ import {
 import { mountPagination } from './components/pagination.js?v=20261123';
 import {
   holdingChartData, holdingDefaults, holdingListCsv, holdingListSnapshot, holdingRangeControl, holdingTimeOptions, renderCompanyHoldings, renderHoldingStock,
-} from './company-holdings.js?v=20261123-holdings-time';
+} from './company-holdings.js?v=20261124-asset-years';
 import { mountHoldingCharts } from './company-holdings-charts.js?v=20261123-holdings-axis';
 
 const tabs = [
@@ -598,6 +598,8 @@ export function mountCompanyDetail(container, { initialTab = 'overview', onTabCh
     if (!Object.hasOwn(defaults, key)) return;
     state[key] = key.endsWith('PageSize') ? Number(value) : value;
     if (key === 'ratingMode') state.rating = value === 'manager' ? '5' : 'all';
+    if (key === 'holdingAssetPeriod') state.holdingAssetRange = null;
+    if (key === 'holdingIndustryPeriod') state.holdingIndustryRange = null;
     if (key === 'masterOnly' || key === 'fundPageSize') {
       state.fundPage = 1;
       state.fundMenuOpen = false;
@@ -721,9 +723,8 @@ export function mountCompanyDetail(container, { initialTab = 'overview', onTabCh
     if (state[periodKey] === period && state[rangeKey]?.start === range?.start && state[rangeKey]?.end === range?.end) return;
     state[periodKey] = period;
     state[rangeKey] = range;
-    const focus = detail.source === 'shortcut' ? `[data-holdings-range="${key}"] .lt-bar > .is-selected` : undefined;
     queueMicrotask(() => {
-      if (root.isConnected && state.tab === 'holdings') renderContent(focus);
+      if (root.isConnected && state.tab === 'holdings') renderContent();
     });
   }
 

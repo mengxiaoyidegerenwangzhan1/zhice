@@ -723,33 +723,20 @@
 .company-fund-option-check input {
   flex: 0 0 14px;
   appearance: none;
-  display: grid;
-  place-content: center;
+  display: block;
   width: 14px;
   height: 14px;
   margin: 0;
-  border: 1px solid #c7c7d1;
-  border-radius: 3px;
-  background: white;
+  border: 0;
+  border-radius: 4px;
+  background: transparent url("../design-system/assets/table-reference/checkbox-unchecked.png") center / 14px 14px no-repeat;
   cursor: pointer;
 }
-.company-fund-option-check input:is(:checked, :indeterminate) {
-  border-color: var(--app-blue);
-  background: var(--app-blue);
+.company-fund-option-check input:checked {
+  background-image: url("../design-system/assets/table-reference/checkbox-checked.png");
 }
-.company-fund-option-check input:is(:checked, :indeterminate)::before { content: ""; }
-.company-fund-option-check input:checked::before {
-  width: 6px;
-  height: 4px;
-  border-inline-start: 1.5px solid white;
-  border-block-end: 1.5px solid white;
-  transform: translateY(-1px) rotate(-45deg);
-}
-.company-fund-option-check input:indeterminate::before {
-  width: 7px;
-  height: 1.5px;
-  border-radius: 1px;
-  background: white;
+.company-fund-option-check input:indeterminate {
+  background-image: url("../design-system/assets/table-reference/checkbox-indeterminate.png");
 }
 .company-fund-branch {
   display: flex;

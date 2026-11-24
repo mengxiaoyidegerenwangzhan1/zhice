@@ -15,15 +15,15 @@ const industryColors = {
 const breakdowns = {
   assets: {
     title: '大类资产分布', categoryLabel: '资产', history: assetHistory,
-    periods: [['4', '近4季度'], ['8', '近8季度'], ['all', '全部']],
+    periods: [1, 2, 3, 5].map(years => [String(years), `近${years}年`, 12 * years]),
     dateKey: 'holdingAssetDate', periodKey: 'holdingAssetPeriod', rangeKey: 'holdingAssetRange',
-    defaultPeriod: '4',
+    defaultPeriod: '1',
   },
   industry: {
     title: '股票行业分布', categoryLabel: '申万一级行业', history: industryHistory,
-    periods: [['3', '近1年'], ['5', '近2年'], ['6', '近3年']],
+    periods: [2, 3, 5].map(years => [String(years), `近${years}年`, 12 * years]),
     dateKey: 'holdingIndustryDate', periodKey: 'holdingIndustryPeriod', rangeKey: 'holdingIndustryRange',
-    defaultPeriod: '6',
+    defaultPeriod: '3',
   },
 };
 const stockTitle = '股票持仓详情';
@@ -33,43 +33,40 @@ const stockColumns = [
 ];
 
 export const holdingDefaults = {
-  holdingAssetDate: assetHistory.at(-1).date, holdingAssetPeriod: '4', holdingAssetRange: null,
-  holdingIndustryDate: industryHistory.at(-1).date, holdingIndustryPeriod: '6', holdingIndustryRange: null,
+  holdingAssetDate: assetHistory.at(-1).date, holdingAssetPeriod: breakdowns.assets.defaultPeriod, holdingAssetRange: null,
+  holdingIndustryDate: industryHistory.at(-1).date, holdingIndustryPeriod: '3', holdingIndustryRange: null,
   holdingIndustryScope: 'all', holdingStockDate: stockReportDates[0],
   holdingPage: 1, holdingPageSize: 10, holdingSort: '', holdingSortDirection: 'asc',
 };
 
-function presetRange(history, period) {
-  const amount = period === 'all' ? history.length : Number(period);
-  return { start: history.slice(-amount)[0].date, end: history.at(-1).date };
+function presetRange({ history, periods, defaultPeriod }, period) {
+  const end = history.at(-1).date;
+  const [year, month] = end.split('-').map(Number);
+  const [, , months] = periods.find(([key]) => key === period) ?? periods.find(([key]) => key === defaultPeriod);
+  const start = new Date(Date.UTC(year, month - months, 0)).toISOString().slice(0, 10);
+  return { start, end };
 }
 
-function breakdownRange(state, { history, periodKey, rangeKey, defaultPeriod }) {
+function breakdownRange(state, breakdown) {
+  const { periodKey, rangeKey } = breakdown;
   const period = state[periodKey];
   if (period === 'custom' && state[rangeKey]) return state[rangeKey];
-  return presetRange(history, period === 'custom' ? defaultPeriod : period);
+  return presetRange(breakdown, period);
 }
 
 export function holdingTimeOptions(key) {
-  const { history, periods, defaultPeriod } = breakdowns[key];
-  return {
-    min: history[0].date,
-    max: history.at(-1).date,
-    end: history.at(-1).date,
-    defaultShortcut: defaultPeriod,
-    shortcuts: periods.map(([key, label]) => ({ key, label, ...presetRange(history, key) })),
-    customRange: true,
-  };
+  const { history } = breakdowns[key];
+  const end = history.at(-1).date;
+  return { min: history[0].date, max: end, end };
 }
 
-export function holdingRangeControl(key, { start, end, selection }) {
-  const { periods, periodKey, rangeKey, defaultPeriod } = breakdowns[key];
-  const preset = periods.find(([value]) => value === selection)?.[0];
-  const manual = !preset && start && end;
+export function holdingRangeControl(key, { start, end }) {
+  const { periodKey, rangeKey, defaultPeriod } = breakdowns[key];
+  const manual = start && end;
   return {
     periodKey,
     rangeKey,
-    period: preset || (manual ? 'custom' : defaultPeriod),
+    period: manual ? 'custom' : defaultPeriod,
     range: manual ? { start, end } : null,
   };
 }
@@ -144,11 +141,12 @@ function distributionTable(key, label, { categories, colors, values, changes }) 
 }
 
 function holdingBreakdown(key, state, config, { dropdown, actions }) {
-  const { title, categoryLabel, history, dateKey, periodKey } = breakdowns[key];
+  const { title, categoryLabel, history, periods, dateKey, periodKey } = breakdowns[key];
   const assets = key === 'assets';
   const dates = history.map(({ date }) => [date, date]).reverse();
   const scope = assets ? '' : dropdown('holdingIndustryScope', state.holdingIndustryScope,
     [['all', '申万一级行业'], ['top10', '前十大行业']], { label: '分布' });
+  const period = state[periodKey];
   return `<section class="company-panel company-holdings-panel ${assets ? 'company-holdings-asset' : 'company-holdings-industry'}" aria-label="${title}">
     <div class="company-panel-head company-holdings-head">
       <h2>${assets ? assetTitle() : title}</h2>
@@ -168,9 +166,14 @@ function holdingBreakdown(key, state, config, { dropdown, actions }) {
       <div class="company-holdings-trend">
         <div class="company-holdings-subhead">
           <h3>${assets ? title + '变化' : categoryLabel + '分布变化'}</h3>
-          <div class="linked-time-widget company-holdings-dates" data-linked-time data-holdings-range="${key}"
-            data-lt-state="committed" data-lt-start="${config.range.start}" data-lt-end="${config.range.end}"
-            data-lt-selection="${state[periodKey] === 'custom' ? '' : state[periodKey]}"></div>
+          <div class="company-holdings-controls company-holdings-period-controls">
+            <div class="linked-time-widget lt-bar company-holdings-shortcuts" role="group" aria-label="快捷时段">
+              ${periods.map(([value, label]) => `<button type="button" data-company-choice="${periodKey}" data-value="${value}"
+                aria-pressed="${value === period}"${value === period ? ' class="is-selected"' : ''}>${label}</button>`).join('')}
+            </div>
+            <div class="linked-time-widget company-holdings-dates" data-linked-time data-holdings-range="${key}"
+              data-shortcuts="false" data-lt-state="committed" data-lt-start="${config.range.start}" data-lt-end="${config.range.end}"></div>
+          </div>
         </div>
         <div class="company-holdings-area" data-holdings-chart="${key}-trend" role="img" aria-label="${title}变化堆叠面积图"></div>
       </div>

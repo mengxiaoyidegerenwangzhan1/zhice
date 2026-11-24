@@ -541,23 +541,16 @@ async function svgFor(element) {
       const size = Math.min(rectangle.width, rectangle.height);
       const left = x + (rectangle.width - size) / 2;
       const top = y + (rectangle.height - size) / 2;
-      if (node.closest('.audit-screenshot-table')) {
-        const imageMatch = style.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/);
-        const radius = parseFloat(style.borderTopLeftRadius);
-        parts.push('<g opacity="' + style.opacity + '">');
-        if (imageMatch) {
-          const response = await fetch(imageMatch[1]);
-          if (!response.ok) throw new Error('Missing checkbox asset');
-          parts.push(vectorMarkup(await response.text(), left, top, size, size, style.color));
-        } else if (node.indeterminate) {
-          const mark = getComputedStyle(node, '::after');
-          parts.push('<rect x="' + left + '" y="' + top + '" width="' + size + '" height="' + size + '" rx="' + radius + '" fill="' + style.backgroundColor + '"/>');
-          parts.push('<rect x="' + (left + parseFloat(mark.left)) + '" y="' + (top + parseFloat(mark.top)) + '" width="' + parseFloat(mark.width) + '" height="' + parseFloat(mark.height) + '" rx="' + parseFloat(mark.borderRadius) + '" fill="' + mark.backgroundColor + '"/>');
-        } else {
-          parts.push('<rect x="' + (left + .5) + '" y="' + (top + .5) + '" width="' + (size - 1) + '" height="' + (size - 1) + '" rx="' + (radius - .5) + '" fill="' + style.backgroundColor + '" stroke="' + style.borderTopColor + '"/>');
+      if (node.classList.contains('audit-checkbox')) {
+        const imageUrl = style.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/)?.[1];
+        if (imageUrl) {
+          const response = await fetch(imageUrl);
+          if (!response.ok) throw new Error('多选框图片读取失败');
+          const bytes = new Uint8Array(await response.arrayBuffer());
+          const data = btoa(String.fromCharCode(...bytes));
+          parts.push('<image x="' + left + '" y="' + top + '" width="' + size + '" height="' + size + '" opacity="' + style.opacity + '" href="data:image/png;base64,' + data + '"/>');
+          return;
         }
-        parts.push('</g>');
-        return;
       }
       const selected = node.checked || node.indeterminate;
       const accent = node.disabled ? '#CBCBCB' : '#6865A7';
@@ -692,7 +685,7 @@ async function svgFor(element) {
   return '<svg xmlns="' + namespace + '" width="' + Math.ceil(bounds.width) + '" height="' + Math.ceil(bounds.height) + '" viewBox="0 0 ' + Math.ceil(bounds.width) + ' ' + Math.ceil(bounds.height) + '">' + parts.join('') + '</svg>';
 }
 
-async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css?v=20261119-tabs54')).text())+(await(await fetch('audit-components.css?v=20261119-figma-tables')).text())+(c.html.includes('audit-table') ? await(await fetch('table-cases.css?v=20261119-table-row-hover')).text() : '')+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime,auditTableCaseRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();auditTableCaseRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf|png)/g)].map(m=>m[0]))];for (const file of files) {
+async function makeCode(c){if(c.page==='time')return window.ZhiceLinkedTime.exportCode(c.html);const css='*{box-sizing:border-box}body{font:14px/1.6 "PingFang SC",sans-serif;color:#333}button{font:inherit;cursor:pointer}button:disabled{cursor:not-allowed}'+(await(await fetch('design-tokens.css')).text())+(await(await fetch('component-tokens.css')).text())+(await(await fetch('legacy-tokens.css?v=20261119-tabs54')).text())+(await(await fetch('audit-components.css?v=20261124-table-checkbox')).text())+(c.html.includes('audit-table') ? await(await fetch('table-cases.css?v=20261124-table-checkbox')).text() : '')+'\n/* '+(await(await fetch('assets/audit/Roboto-OFL.txt')).text())+' */';let out='<!doctype html>\n<html lang="zh-CN"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+c.name+'</title><style>'+css+'\nbody{margin:32px}#export{display:inline-flex}#export:has(.audit-table){display:block}</style><div id="export">'+c.html+'</div><script>const esc='+esc.toString()+';const fmt='+fmt.toString()+';'+[parseLocalDate,todayDate,dateBounds,monthNumber,setCalendarMonth,calendar,panel,initCalendar,drawCalendar,updateCalendarRange,closeCalendarOptions,showSelect,closeDatePicker,openDatePicker,dateRuntime,quickRuntime,legacyRuntime,runtime,auditRuntime,auditTableCaseRuntime].map(f=>f.toString()).join('\n')+';document.querySelectorAll(".z-calendar").forEach(drawCalendar);runtime();auditRuntime();auditTableCaseRuntime();<\/script></html>';const files=[...new Set([...out.matchAll(/assets\/(?:[\w-]+\/)*[\w-]+\.(?:svg|ttf|png)/g)].map(m=>m[0]))];for (const file of files) {
   const response = await fetch(file);
   if (!response.ok) throw new Error('Missing export asset');
   if (file.endsWith('.ttf') || file.endsWith('.png')) {
