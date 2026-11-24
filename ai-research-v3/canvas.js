@@ -439,11 +439,17 @@
     return '<button type="button" class="portal-toggle" data-portal-toggle aria-controls="portal-catalog" aria-expanded="'+expanded+'">投研网站<i aria-hidden="true"></i></button>';
   }
   function sidebarToggle() {
+    if (hasResourcePanel) return '<span class="rc-nav-spacer" aria-hidden="true"></span>';
     return '<button type="button" class="rc-thread-nav" data-action="nav" aria-label="切换侧边栏" title="切换侧边栏">'+asset("ai-sidebar-open.png")+'</button>';
+  }
+  function compactSwitch(target) {
+    if (!hasResourcePanel || current.mode!=="page") return "";
+    const isChat=target==="chat";
+    return '<button type="button" class="rc-compact-switch" data-action="compact-'+target+'" aria-label="'+(isChat?"切换到AI对话":"切换到投研内容")+'">'+(isChat?"对话":"内容")+'</button>';
   }
   function researchHeaderTools() {
     return sidebarToggle()+
-      (current.thread ? '<button type="button" data-action="compose" aria-label="发起新研究" title="发起新研究">'+asset("ai-compose.png")+'</button>' : "");
+      (current.thread ? '<button type="button" data-action="compose" aria-label="发起新研究" title="发起新研究">'+asset("ai-compose.png")+'</button>' : "")+compactSwitch("content");
   }
   function resourceTrigger() {
     return '<button type="button" class="rc-resource-trigger" data-resource-trigger aria-label="资料" aria-controls="resource-panel" aria-expanded="false"><img width="18" height="18" src="./icons/ai-resources.png" alt="" draggable="false"></button>';
@@ -577,6 +583,7 @@
     const file=findResource(value);
     if (!file) return false;
     if (current.mode==="page") {
+      document.getElementById("workspace").dataset.compactView="chat";
       if (current.thread!==file.threadTitle || current.maximized) {
         current.thread=file.threadTitle;
         current.maximized=false;
@@ -820,9 +827,9 @@
     const close='<button type="button" class="rc-feature-close" data-action="close-feature" aria-label="关闭功能页" title="关闭功能页">'+icon("close")+'</button>';
     const maximize='<button type="button" data-action="maximize" aria-label="放大功能页" title="放大功能页">'+paneSizeIcon(false)+'</button>';
     return '<div class="rc-business"><aside id="rc-page-assistant" class="rc-business-assistant" aria-label="AI 对话"></aside>'+
-      '<section id="rc-function-pane" class="rc-business-page" aria-label="'+esc(current.page)+'功能页"><header class="rc-function-head">'+tabs+'<div class="rc-function-actions">'+portalButton()+maximize+close+'</div></header>'+
+      '<section id="rc-function-pane" class="rc-business-page" aria-label="'+esc(current.page)+'功能页"><header class="rc-function-head">'+tabs+'<div class="rc-function-actions">'+portalButton()+compactSwitch("chat")+maximize+close+'</div></header>'+
       '<div class="rc-business-body" id="rc-feature-panel"'+panel+'>'+businessContent()+'</div></section>'+
-      '<div class="pane-divider" data-resize="function" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="rc-function-pane" aria-label="调整功能页宽度" aria-valuemin="320" aria-valuemax="612" aria-valuenow="584" title="拖动调整功能页宽度，双击恢复默认"></div></div>';
+      '<div class="pane-divider" data-resize="function" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="rc-function-pane" aria-label="调整功能页宽度" aria-valuemin="480" aria-valuemax="944" aria-valuenow="584" title="拖动调整功能页宽度，双击恢复默认"></div></div>';
   }
   function fundOverview(fund) {
     const period = fund.period || "近1年";
@@ -848,8 +855,9 @@
     const list=refs.querySelector(".rc-quick-list");
     const available=refs.getBoundingClientRect().width;
     let layout="inline";
-    if(form.clientWidth<=360 || available<50) layout="hidden";
-    else if(form.clientWidth<600 || list.getBoundingClientRect().width>available) layout="more";
+    const paneWidth=form.closest("#rc-page-assistant")?.clientWidth || root().clientWidth;
+    if(paneWidth<400 || available<50) layout="hidden";
+    else if(paneWidth<600 || list.getBoundingClientRect().width>available) layout="more";
     if(refs.dataset.layout===layout) return;
     const hadFocus=refs.contains(document.activeElement);
     const menu=refs.querySelector(".rc-tasks-menu");
@@ -1064,7 +1072,15 @@
         host.focus({preventScroll:true});
         return;
       }
-      if(action==="maximize"){current.maximized=!current.maximized;syncMaximize();refreshPanel();return;}
+      if(action==="compact-chat" || action==="compact-content"){
+        const workspace=document.getElementById("workspace");
+        workspace.dataset.compactView=action==="compact-chat"?"chat":"content";
+        window.studyPaneResize?.sync();
+        const focusTarget=workspace.querySelector(action==="compact-chat"?"#rc-page-assistant textarea":"#rc-function-pane [data-action='compact-chat']");
+        focusTarget?.focus({preventScroll:true});
+        return;
+      }
+      if(action==="maximize"){current.maximized=!current.maximized;document.getElementById("workspace").dataset.compactView="content";syncMaximize();refreshPanel();return;}
       if(action==="extra-tasks"){
         const menu=el.nextElementSibling;
         if(!menu.hidden) closePopup(menu,true);
@@ -1265,7 +1281,7 @@
     const subject=ctx.funds.length===1?ctx.funds[0].name:"所选的 "+ctx.funds.length+(ctx.page==="指数行情"?" 个指数":" 只基金");
     respond("分析"+subject+"的区间收益。",[],"",ctx);
     // On small screens the feature fills the workspace; bring the answer into view.
-    if(root().clientWidth<=700)window.studyNavigation.closeFeature();
+    if(root().clientWidth<760)document.getElementById("workspace").dataset.compactView="chat";
   });
   function changeThreadProject(thread,id) {
     if (thread.project===id) return;
@@ -1494,6 +1510,7 @@
       const mode=hasResourcePanel && (label==="研究方法库" || label==="定时任务") ? "utility" : "page";
       if (answerTarget && mode==="page") spaces.showAnswerTarget(spaces.get(label),label,answerTarget);
       else if (current.mode===mode && current.page===label) return;
+      document.getElementById("workspace").dataset.compactView="content";
       current={mode,page:String(label),section:String(section || ""),thread:current.thread || "",maximized:false};
       render();
     },

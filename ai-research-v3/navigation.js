@@ -266,6 +266,7 @@
     return workspace.matches('.pane-tabs-open,.resources-open') ? '' : state.feature;
   }
   function syncFeatureSelection(){
+    if (hasSidebarPortal) showNavigationState();
     const feature=visibleFeature();
     for(const button of list.querySelectorAll('[data-nav="leaf"],[data-nav="page"]')){
       const selected=button.dataset.value===feature;
@@ -348,6 +349,7 @@
     catalog.style.setProperty('--portal-right',Math.max(8,bounds.right-anchor.right)+'px');
   }
   function syncPortal(){
+    if (hasSidebarPortal) showNavigationState();
     const side=state.catalog==='sidebar', toolbar=state.catalog==='toolbar';
     workspace.classList.toggle('portal-docked',toolbar && !state.feature);
     workspace.classList.toggle('portal-dropdown',side || (toolbar && !!state.feature));
@@ -410,17 +412,31 @@
   function functionExpanded(){
     return workspace.classList.contains('rc-function-expanded');
   }
+  function mainSplit(){
+    if (!hasSidebarPortal || functionExpanded()) return false;
+    if (workspace.classList.contains('pane-tabs-open'))
+      return workspace.querySelector('#pane-tabs-panel')?.dataset.maximized !== 'true';
+    if (workspace.classList.contains('resources-open'))
+      return workspace.querySelector('#resource-panel')?.dataset.view === 'all' &&
+        workspace.querySelector('#resource-panel')?.dataset.maximized !== 'true';
+    return !!workspace.querySelector('#rc-function-pane');
+  }
+  function autoCompact(){
+    return mainSplit() && workspace.clientWidth < 936;
+  }
   function navCollapsed(){
-    return state.collapsed || functionExpanded();
+    return state.collapsed || functionExpanded() || autoCompact();
   }
   function showNavigationState(){
     const collapsed=navCollapsed();
-    const canPin=!narrow.matches && !functionExpanded();
+    const canPin=!narrow.matches && !functionExpanded() && !autoCompact();
+    workspace.classList.toggle('has-main-split',mainSplit());
     workspace.classList.toggle('nav-collapsed',collapsed);
-    handle.hidden=!collapsed;
+    if (!collapsed) state.floating=false;
+    handle.hidden=hasSidebarPortal ? false : !collapsed;
     primary.hidden=collapsed&&!state.floating;
-    handle.setAttribute('aria-expanded',String(state.floating));
-    handle.setAttribute('aria-label',state.floating?(canPin?'固定导航':'关闭导航'):'展开导航');
+    handle.setAttribute('aria-expanded',String(!collapsed || state.floating));
+    handle.setAttribute('aria-label',!collapsed?'收起导航':state.floating?(canPin?'固定导航':'关闭导航'):'展开导航');
     handle.title=state.floating && canPin?'点击固定导航':handle.getAttribute('aria-label');
   }
   function render(){
@@ -474,11 +490,11 @@
     state.catalog=false;
     closeAccount();
     render();
-    const target=collapsed?handle:workspace.querySelector('#work [data-action="nav"]');
+    const target=hasSidebarPortal||collapsed?handle:workspace.querySelector('#work [data-action="nav"]');
     target?.focus({preventScroll:true});
   }
   function toggleNavigation(){
-    if(navCollapsed()&&(narrow.matches||functionExpanded())){
+    if(navCollapsed()&&(narrow.matches||functionExpanded()||autoCompact())){
       if(state.floating)hideFloating(true);else showFloating();
       return;
     }
@@ -656,7 +672,8 @@
     });
   }
   handle.addEventListener('click',event=>{
-    const floatingOnly=event.pointerType==='touch'||narrow.matches||functionExpanded();
+    if (hasSidebarPortal && !navCollapsed()) { changeDock(true); return; }
+    const floatingOnly=event.pointerType==='touch'||narrow.matches||functionExpanded()||autoCompact();
     if(!state.floating && (event.detail===0||floatingOnly)){
       showFloating();
       if(event.detail===0)searchTrigger.focus({preventScroll:true});
@@ -689,7 +706,10 @@
   document.addEventListener('click',event=>{
     if(state.catalog && (state.catalog==='sidebar' || state.feature || narrow.matches) && !event.composedPath().includes(catalog) && !event.target.closest('[data-portal-toggle], .nav-add-favorite, .nav-favorite-row, .nav-favorites-list'))closeCatalog();
   },{capture:hasSidebarPortal});
-  const portalObserver=new ResizeObserver(positionPortal);
+  const portalObserver=new ResizeObserver(()=>{
+    if (hasSidebarPortal) showNavigationState();
+    positionPortal();
+  });
   portalObserver.observe(workspace);
   portalObserver.observe(document.getElementById('work'));
   if(hasSidebarPortal){

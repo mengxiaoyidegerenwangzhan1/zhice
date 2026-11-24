@@ -28,7 +28,7 @@
 .workspace[data-conversation-position="right"].nav-collapsed > #resource-panel .rv-header {
   padding-inline-start: 48px;
 }
-@container (max-width: 700px) {
+@container (max-width: 759px) {
   .workspace[data-conversation-position="right"]:not(.rc-function-expanded) #work #rc-function-pane {
     border-inline-end: 0;
   }
@@ -38,4 +38,85 @@
     inset-inline: 0 auto;
     box-shadow: 6px 0 24px rgb(27 25 42 / 8%);
   }
+}
+
+/* The global navigation button is anchored to the fixed sidebar, not the chat pane. */
+.workspace {
+  --nav-size: clamp(176px,var(--nav-w,216px),336px);
+  --nav-used: var(--nav-size);
+}
+.workspace.has-main-split {
+  --nav-size: clamp(176px,var(--nav-w,216px),min(336px,calc(100% - 760px)));
+}
+.workspace.nav-collapsed { --nav-used: 0px; }
+.workspace:not(.nav-collapsed) > #primary-nav { flex-basis:var(--nav-size); width:var(--nav-size); }
+.workspace > #nav-handle { left:calc(var(--nav-used) + 14px); top:12px; }
+.workspace:not(.nav-collapsed) > #nav-handle:not(:hover):not(:focus-visible) { background:transparent; }
+#work .rc-nav-spacer { display:block; flex:0 0 32px; width:32px; height:32px; }
+.workspace[data-conversation-position="right"]:has(#rc-function-pane):not(.pane-tabs-open):not(.resources-open) #rc-page-assistant .rc-nav-spacer,
+.workspace[data-conversation-position="right"].pane-tabs-open #work .rc-nav-spacer,
+.workspace[data-conversation-position="right"].resources-open #work .rc-nav-spacer { display:none; }
+.workspace[data-conversation-position="right"]:not(.rc-function-expanded) #work #rc-function-pane .rc-function-head,
+.workspace.rc-function-expanded #work #rc-function-pane .rc-function-head { padding-inline-start:52px; }
+.workspace[data-conversation-position="right"] > #pane-tabs-panel > .pt-bar,
+.workspace[data-conversation-position="right"] > #resource-panel .rv-header,
+.workspace > #pane-tabs-panel[data-maximized="true"] > .pt-bar,
+.workspace > #resource-panel[data-maximized="true"] .rv-header { padding-inline-start:52px; }
+/* Main split has no 50% cap; a narrow chat remains useful alongside a large chart. */
+#work #rc-page-assistant { min-width:280px; }
+.workspace.pane-tabs-open #work .rc-business > #rc-page-assistant,
+.workspace.resources-open #work .rc-business > #rc-page-assistant { min-width:0; }
+.workspace > #pane-tabs-panel:not([data-maximized="true"]),
+.workspace > #resource-panel[data-view="all"]:not([data-maximized="true"]) {
+  --external-feature-size:clamp(480px,var(--function-w,calc((100% - var(--nav-used)) * 584 / 1224)),calc(100% - var(--nav-used) - 280px));
+  flex:0 0 var(--external-feature-size);
+  width:var(--external-feature-size);
+}
+.workspace > #resource-panel[data-view="rail"]:not([data-maximized="true"]) {
+  --resource-width:min(240px,calc(100% - var(--nav-used) - 280px));
+}
+.external-content-divider { z-index:5; }
+#work .rc-compact-switch { display:none; }
+@media (min-width:760px) and (max-width:800px) {
+  .workspace > #pane-tabs-panel,.workspace > #resource-panel { position:relative; inset:auto; box-shadow:none; max-width:none; }
+}
+@container (max-width:759px) {
+  .workspace:not(.pane-tabs-open):not(.resources-open):not(.rc-function-expanded) #work #rc-function-pane .rc-function-head { padding-inline-start:52px; }
+  .workspace:not(.pane-tabs-open):not(.resources-open):not(.rc-function-expanded) #work .rc-function-head .rc-compact-switch {
+    display:inline-flex; width:auto; padding:0 8px; font-size:13px; color:#6865a7; white-space:nowrap;
+  }
+  .workspace[data-compact-view="chat"]:not(.rc-function-expanded):not(.pane-tabs-open):not(.resources-open) #work #rc-function-pane { display:none; }
+  .workspace[data-compact-view="chat"]:not(.rc-function-expanded):not(.pane-tabs-open):not(.resources-open) #work #rc-page-assistant { min-width:0; }
+  .workspace[data-compact-view="chat"]:not(.rc-function-expanded):not(.pane-tabs-open):not(.resources-open) #work #rc-page-assistant .rc-nav-spacer { display:block; }
+  .workspace[data-compact-view="chat"]:not(.rc-function-expanded):not(.pane-tabs-open):not(.resources-open) #work #rc-page-assistant .rc-compact-switch {
+    display:inline-flex; width:auto; padding:0 5px; font-size:12px; color:#6865a7;
+  }
+}
+@media (max-width:759px) {
+  .workspace > #pane-tabs-panel:not([data-maximized="true"]),
+  .workspace > #resource-panel[data-view="all"]:not([data-maximized="true"]),
+  .workspace > #pane-tabs-panel[data-maximized="true"],
+  .workspace > #resource-panel[data-maximized="true"] { position:absolute; inset:0; width:100%; max-width:100%; }
+  .workspace > #pane-tabs-panel > .pt-bar,
+  .workspace > #resource-panel .rv-header { padding-inline-start:52px; }
+  .workspace.pane-tabs-open > #work,
+  .workspace.resources-open:has(>#resource-panel[data-view="all"]) > #work { display:none; }
+}
+@container research-view (max-width:399px) {
+  #work #rc-page-assistant .rc-welcome { padding:28px 12px 24px; }
+  #work #rc-page-assistant .rc-greeting h1 { font-size:20px; line-height:1.4; }
+  #work #rc-page-assistant .rc-intro { font-size:13px; }
+  #work #rc-page-assistant .rc-messages { padding-inline:12px; }
+  #work #rc-page-assistant .rc-compose-foot { padding:8px 12px 12px; }
+  #work #rc-page-assistant .rc-home-composer { padding:12px; }
+  #work #rc-page-assistant .rc-answer p { font-size:14px; }
+  #work #rc-page-assistant .rc-metric-table { overflow-x:auto; }
+  #work #rc-page-assistant .rc-allocation-table table { min-width:420px; }
+  #work #rc-page-assistant .rc-questions button { border-radius:12px; padding-inline:8px; }
+  #work #rc-page-assistant :is(.rc-toolbar,.rc-thread-head) { padding-inline:12px; gap:4px; }
+  #work #rc-page-assistant .rc-view-title { font-size:14px; }
+  #work #rc-page-assistant .rc-task-name { overflow:hidden;text-overflow:ellipsis;max-width:calc(100cqi - 80px); }
+}
+@container (max-width:279px) {
+  #work #rc-page-assistant { min-width:0; }
 }

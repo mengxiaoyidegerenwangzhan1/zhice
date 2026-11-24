@@ -1,7 +1,7 @@
 /* Research chat and its open tool share the workspace. */
 #work .rc-business {
   /* A 1440px canvas has 1224px beside the navigation: 640px for chat and 584px for the tool. */
-  --feature-size: clamp(320px, var(--function-w, calc(100% * 584 / 1224)), min(50%, calc(100% - 360px), 1200px));
+  --feature-size: clamp(480px, var(--function-w, calc(100% * 584 / 1224)), calc(100% - 280px));
 }
 #work #rc-page-assistant {
   container: research-view / inline-size;
@@ -207,7 +207,7 @@
 }
 #portal-catalog button:focus-visible { outline: 2px solid var(--nav-accent); outline-offset: -2px; }
 
-@container (max-width: 700px) {
+@container (max-width: 759px) {
   #work:not(.is-maximized) .rc-function-actions .portal-toggle { display:inline-flex; margin:0; }
   #work:not(.is-maximized) #rc-function-pane {
     position: absolute;
