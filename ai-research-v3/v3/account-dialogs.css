@@ -141,7 +141,7 @@
 }
 .account-layout-thumbnail {
   display: grid;
-  grid-template-columns: 16% 20% minmax(0, 1fr);
+  grid-template-columns: 16% 32% minmax(0, 1fr);
   gap: 4px;
   height: 116px;
   padding: 10px;
@@ -152,7 +152,7 @@
 .account-layout-nav { background: #e7e7eb; }
 .account-layout-chat { border: 1px solid #8985d0; background: #f4f4fc; }
 .account-layout-content { background: #fff; }
-.account-layout-thumbnail[data-position="right"] { grid-template-columns: 16% minmax(0, 1fr) 20%; }
+.account-layout-thumbnail[data-position="right"] { grid-template-columns: 16% minmax(0, 1fr) 32%; }
 .account-layout-thumbnail[data-position="right"] .account-layout-chat { order: 2; }
 @media (max-width: 560px) {
   .account-layout { padding: 12px; }

@@ -102,7 +102,7 @@
     section = 'menu';
     panel.setAttribute('role', 'menu');
     panel.setAttribute('aria-label', '账户菜单');
-    panel.innerHTML = options.map(([key, label, path]) =>
+    panel.innerHTML = options.filter(([key]) => !isV3 || key !== 'help').map(([key, label, path]) =>
       (key === 'help' ? '<hr class="account-divider" role="separator">' : '') +
       '<button type="button" role="menuitem" class="account-option" data-section="' + key + '">' + icon(path) +
       '<span class="account-option-title">' + label + '</span></button>'
