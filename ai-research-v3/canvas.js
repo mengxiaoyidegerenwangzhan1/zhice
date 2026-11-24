@@ -817,10 +817,10 @@
     const space = spaces.get(current.page);
     const tabs = window.studyWorkspaceTabs.header(current.page,space.tabs,space.active.id);
     const panel = space.tabs.length ? ' role="tabpanel" aria-label="'+esc(space.active.label)+'"' : '';
-    const close='<button type="button" class="rc-feature-close" data-action="close-feature" aria-label="收起功能页，返回 AI 对话" title="收起功能页，返回 AI 对话">'+icon("fold")+'</button>';
+    const close='<button type="button" class="rc-feature-close" data-action="close-feature" aria-label="关闭功能页" title="关闭功能页">'+icon("close")+'</button>';
     const maximize='<button type="button" data-action="maximize" aria-label="放大功能页" title="放大功能页">'+paneSizeIcon(false)+'</button>';
     return '<div class="rc-business"><aside id="rc-page-assistant" class="rc-business-assistant" aria-label="AI 对话"></aside>'+
-      '<section id="rc-function-pane" class="rc-business-page" aria-label="'+esc(current.page)+'功能页"><header class="rc-function-head">'+close+tabs+'<div class="rc-function-actions">'+portalButton()+maximize+'</div></header>'+
+      '<section id="rc-function-pane" class="rc-business-page" aria-label="'+esc(current.page)+'功能页"><header class="rc-function-head">'+tabs+'<div class="rc-function-actions">'+portalButton()+maximize+close+'</div></header>'+
       '<div class="rc-business-body" id="rc-feature-panel"'+panel+'>'+businessContent()+'</div></section>'+
       '<div class="pane-divider" data-resize="function" role="separator" tabindex="0" aria-orientation="vertical" aria-controls="rc-function-pane" aria-label="调整功能页宽度" aria-valuemin="320" aria-valuemax="612" aria-valuenow="584" title="拖动调整功能页宽度，双击恢复默认"></div></div>';
   }
