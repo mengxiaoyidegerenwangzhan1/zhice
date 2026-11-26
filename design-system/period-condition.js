@@ -3,7 +3,7 @@
   if (!host) return;
 
   const name = '时段条件';
-  const stylesheet = 'period-condition.css?v=20261126-period-condition';
+  const stylesheet = 'period-condition.css?v=20261126-period-range-white';
   const sample = document.createElement('div');
   sample.className = 'individual-component-sample';
   const widget = document.createElement('div');
@@ -277,7 +277,7 @@
     <div><dt>下拉菜单</dt><dd>距整组选框底边 8px，圆角 8px，选项行高 32px。时段贴左（92px），排名居中、指标值贴右（均为 220px）</dd></div>
     <div><dt>选择时段</dt><dd>可选近3个月、近6个月、近1年、近3年、近5年。同一指标下每个时段只能添加一次</dd></div>
     <div><dt>排名与指标值</dt><dd>选好时段后可分别打开，均为单选。可只填一项，也可同时设置。选择「不限」后恢复占位样式</dd></div>
-    <div><dt>自定义</dt><dd>输入一端或两端，按 Enter 或点「确定」。排名使用 0%～100% 的百分比区间，指标值沿用对应指标的单位与档位</dd></div>
+    <div><dt>自定义</dt><dd>输入框为白底。输入一端或两端，按 Enter 或点「确定」。排名使用 0%～100% 的百分比区间，指标值沿用对应指标的单位与档位</dd></div>
     <div><dt>示例状态</dt><dd>区间收益率，已选「近3个月」，展开排名菜单</dd></div>
   </dl>`;
 
