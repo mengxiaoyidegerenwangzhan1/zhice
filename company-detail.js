@@ -1,4 +1,6 @@
 import { companyData as company, fundCategories, managerRatingExamples } from './company-detail-data.js?v=20261123-affiliated-funds';
+import { companyList } from './company-list-data.js?v=20261125-company-abbreviation';
+import { getManagerListData } from './manager-list-data.js?v=20261126-period-conditions';
 import { mountCompanyCharts, ratingChartImage } from './company-charts.js?v=20261123-rating-counts';
 import {
   fundListCsv, fundListDefaults, fundListSnapshot, fundTypeOptions,
@@ -24,7 +26,6 @@ const stars = Array.from({ length: 5 }, (_, index) => index);
 const ratedFundHeaders = ['基金名称','基金星级','近3年年化收益','近3年收益','近3年最大回撤','申赎状态'];
 const ratedManagerHeaders = ['经理名称','代表基金','经理星级','近1年收益率','近3年收益率','任期最大回报率','任期最大回撤率'];
 const managerMetricKeys = ['return1y', 'return3y', 'maxReturn', 'drawdown'];
-const favoriteKey = 'zhice-company-favorite-essence';
 const defaults = {
   ...fundListDefaults,
   ...managerListDefaults,
@@ -81,7 +82,7 @@ function ratingDistribution(state) {
   });
 }
 
-function readFavorite() {
+function readFavorite(favoriteKey) {
   try { return localStorage.getItem(favoriteKey) === '1'; } catch { return false; }
 }
 
@@ -118,32 +119,73 @@ function actions(module) {
   ).join('')}</div>`;
 }
 
-function header() {
-  const website = escapeHtml(company.url);
+function getCompanyProfile(companyId) {
+  if (companyId === 'essence') return company;
+  const entry = companyList.find(item => item.id === companyId);
+  if (!entry) {
+    const { companies, managers } = getManagerListData();
+    const employer = companies.find(item => item.id === companyId);
+    if (!employer) return null;
+    return {
+      name: employer.name,
+      listedManagers: managers.filter(manager => manager.companyId === companyId),
+    };
+  }
+
+  const metrics = [
+    ['totalScale', '总规模', '亿'],
+    ['nonMoneyScale', '非货币理财规模', '亿'],
+    ['fundCount', '旗下基金数', '只'],
+    ['managerCount', '旗下基金经理数', '人'],
+  ].map(([key, label, unit]) => ({
+    label, unit, value: entry[key],
+    rank: companyList.filter(item => item[key] > entry[key]).length + 1,
+    total: companyList.length,
+  }));
+  return {
+    name: entry.name,
+    founded: entry.founded,
+    capital: entry.capital.toFixed(4),
+    legalRepresentative: entry.legalRepresentative || null,
+    metrics,
+  };
+}
+
+function emptyAnalysis(tab) {
+  const labels = tab === 'overview'
+    ? ['规模变化', '旗下产品结构', '基金星级分布']
+    : [tabs.find(([key]) => key === tab)[1]];
+  return labels.map(label => `<section class="company-panel" aria-label="${label}">
+    <div class="company-panel-head"><h2>${label}</h2></div>
+    <p class="company-empty" role="status">暂无${label}数据</p>
+  </section>`).join('');
+}
+
+function header(profile) {
+  const website = escapeHtml(profile.url);
   return `<div class="company-header-slot">
     <header class="company-header" aria-label="公司详情页头">
       <div class="company-header-top">
         <div class="company-identity">
-          <h1>${escapeHtml(company.name)}</h1>
-          <a class="company-compact-link" href="${website}" target="_blank" rel="noopener noreferrer">官网${icon('external-compact')}</a>
-          <div class="company-chips">
-            <span>成立日期：<b>${escapeHtml(company.founded)}</b></span>
-            <span>注册资本：<b>${escapeHtml(company.capital)}</b> 亿</span>
-          </div>
+          <h1>${escapeHtml(profile.name)}</h1>
+          ${profile.metrics ? `<div class="company-chips">
+            <span>成立日期：<b>${escapeHtml(profile.founded)}</b></span>
+            <span>注册资本：<b>${escapeHtml(profile.capital)}</b> 亿</span>
+          </div>` : ''}
         </div>
         <div class="company-header-actions">
           <button type="button" data-company-action="switch" title="切换公司" aria-label="切换公司">${icon('switch')}<span>切换</span></button>
           <button type="button" data-company-action="favorite" aria-label="收藏公司" aria-pressed="false">${icon('favorite')}<span>收藏</span></button>
         </div>
       </div>
-      <div class="company-facts-wrap">
+      ${profile.metrics ? `<div class="company-facts-wrap">
         <div class="company-facts">
           <div class="company-facts-left">
-            <div><span>法人代表：<b>${escapeHtml(company.legalRepresentative)}</b></span><span>总经理：<b>${escapeHtml(company.generalManager)}</b></span></div>
-            <div>官网：<a class="company-full-link" href="${website}" target="_blank" rel="noopener noreferrer">${website}${icon('external')}</a></div>
+            <div><span>法人代表：<b>${escapeHtml(profile.legalRepresentative)}</b></span><span>总经理：<b>${escapeHtml(profile.generalManager)}</b></span></div>
+            <div>官网：<span class="company-website-address">${website}</span></div>
           </div>
           <dl class="company-metrics">
-            ${company.metrics.map(metric => `<div><dt>${escapeHtml(metric.label)}</dt>
+            ${profile.metrics.map(metric => `<div><dt>${escapeHtml(metric.label)}</dt>
               <dd class="company-metric-readout">
                 <span class="company-metric-value">
                   <span class="company-metric-number">${escapeHtml(metric.unit === '亿' ? amount(metric.value) : metric.value)}</span>
@@ -157,7 +199,7 @@ function header() {
             </div>`).join('')}
           </dl>
         </div>
-      </div>
+      </div>` : ''}
       <div class="company-tabs" role="tablist" aria-label="公司详情">
         ${tabs.map(([key, label]) => `<button type="button" id="company-tab-${key}" role="tab" aria-controls="company-tab-panel" data-company-tab="${key}">${label}</button>`).join('')}
       </div>
@@ -165,7 +207,7 @@ function header() {
   </div>`;
 }
 
-function switchDialog() {
+function switchDialog(profile) {
   return `<dialog class="company-dialog zc-dialog" aria-labelledby="company-switch-title">
     <form method="dialog" class="zc-dialog-head">
       <h2 id="company-switch-title" class="zc-dialog-title">切换公司</h2>
@@ -175,7 +217,7 @@ function switchDialog() {
     </form>
     <div class="zc-dialog-body">
       <input class="zc-dialog-control" type="search" aria-label="搜索基金公司" placeholder="输入公司名称" data-company-search>
-      <button type="button" class="company-dialog-result" data-company-action="select-company">${escapeHtml(company.name)}${icon('check')}</button>
+      <button type="button" class="company-dialog-result" data-company-action="select-company">${escapeHtml(profile.name)}${icon('check')}</button>
       <p class="company-dialog-empty" hidden>暂无匹配公司</p>
     </div>
   </dialog>`;
@@ -192,6 +234,22 @@ function dataTable(headers, rows, { numeric = [], label, ratingMode, productKeys
       }, 'td')).join('')}</tr>`).join('')}</tbody>
     </table>
   </div>`;
+}
+
+function listedManagersPanel(managers) {
+  const label = '经理筛选收录的在职经理';
+  const rows = managers.map(manager => {
+    const name = escapeHtml(manager.name);
+    const sample = manager.isDemo && !manager.name.startsWith('示例') ? ' <small class="company-quiet">示例</small>' : '';
+    return [
+      { html: `<a class="company-list-name" href="#/manager/${encodeURIComponent(manager.id)}">${name}</a>${sample}` },
+      manager.product,
+    ];
+  });
+  return `<section class="company-panel" aria-label="${label}">
+    <div class="company-panel-head"><h2>${label}</h2></div>
+    ${dataTable(['经理名称', '代表基金'], rows, { label })}
+  </section>`;
 }
 
 function scaleRows(state) {
@@ -410,7 +468,6 @@ function attachHeaderScroll(root) {
   const header = root.querySelector('.company-header');
   const facts = root.querySelector('.company-facts-wrap');
   const title = header.querySelector('h1');
-  const compactLink = header.querySelector('.company-compact-link');
   const switchCompany = header.querySelector('[data-company-action="switch"]');
   const topbar = document.querySelector('.app-topbar');
   let compact = false;
@@ -425,11 +482,9 @@ function attachHeaderScroll(root) {
     header.classList.remove('is-metadata-hidden');
     const fits = title.scrollWidth <= title.clientWidth;
     header.classList.toggle('is-metadata-hidden', !fits);
-    return fits;
   }
 
   function measure() {
-    const linkHadFocus = compact && document.activeElement === compactLink;
     top = topbar?.offsetHeight ?? 0;
     root.style.setProperty('--company-sticky-top', `${top}px`);
     anchor = slot.getBoundingClientRect().top + window.scrollY - top;
@@ -437,8 +492,7 @@ function attachHeaderScroll(root) {
     header.classList.remove('is-compact');
     slot.style.height = `${header.offsetHeight}px`;
     header.classList.toggle('is-compact', compact);
-    const compactLinkVisible = compact && fitCompactMetadata();
-    if (linkHadFocus) (compactLinkVisible ? compactLink : switchCompany).focus({preventScroll:true});
+    if (compact) fitCompactMetadata();
     void header.offsetHeight;
     header.classList.remove('company-no-transition');
   }
@@ -450,12 +504,14 @@ function attachHeaderScroll(root) {
     }
     if (compact !== nextCompact) {
       compact = nextCompact;
-      const movingFocus = compact && facts.contains(document.activeElement);
+      const movingFocus = compact && facts?.contains(document.activeElement);
       header.classList.toggle('is-compact', compact);
-      const compactLinkVisible = compact && fitCompactMetadata();
-      facts.inert = compact;
-      facts.setAttribute('aria-hidden', String(compact));
-      if (movingFocus) (compactLinkVisible ? compactLink : switchCompany).focus({preventScroll:true});
+      if (compact) fitCompactMetadata();
+      if (facts) {
+        facts.inert = compact;
+        facts.setAttribute('aria-hidden', String(compact));
+      }
+      if (movingFocus) switchCompany.focus({preventScroll:true});
     }
   }
 
@@ -504,9 +560,15 @@ function attachHeaderScroll(root) {
   };
 }
 
-export function mountCompanyDetail(container, { initialTab = 'overview', onTabChange = () => {}, toast = () => {} } = {}) {
-  const state = { ...defaults, tab: tabs.some(([key]) => key === initialTab) ? initialTab : 'overview', favorite: readFavorite() };
-  container.innerHTML = `<div class="company-detail">${header()}<div class="company-content" id="company-tab-panel" role="tabpanel" tabindex="0"></div>${switchDialog()}</div>`;
+export function mountCompanyDetail(container, { companyId = 'essence', initialTab = 'overview', onTabChange = () => {}, toast = () => {} } = {}) {
+  const profile = getCompanyProfile(companyId);
+  if (!profile) {
+    container.innerHTML = '<div class="company-detail"><section class="company-panel"><p class="company-empty" role="status">没有找到这家公司。</p></section></div>';
+    return;
+  }
+  const favoriteKey = `zhice-company-favorite-${companyId}`;
+  const state = { ...defaults, tab: tabs.some(([key]) => key === initialTab) ? initialTab : 'overview', favorite: readFavorite(favoriteKey) };
+  container.innerHTML = `<div class="company-detail">${header(profile)}<div class="company-content" id="company-tab-panel" role="tabpanel" tabindex="0"></div>${switchDialog(profile)}</div>`;
   const root = container.firstElementChild;
   const content = root.querySelector('.company-content');
   const dialog = root.querySelector('.company-dialog');
@@ -536,6 +598,12 @@ export function mountCompanyDetail(container, { initialTab = 'overview', onTabCh
       button.setAttribute('aria-selected', String(active));
       button.tabIndex = active ? 0 : -1;
     });
+    if (companyId !== 'essence') {
+      content.innerHTML = profile.listedManagers && (state.tab === 'overview' || state.tab === 'managers')
+        ? listedManagersPanel(profile.listedManagers)
+        : emptyAnalysis(state.tab);
+      return;
+    }
     const isManagerList = state.tab === 'managers';
     const holdings = state.tab === 'holdings' ? holdingChartData(state) : null;
     const managerTypes = isManagerList ? [...new Set(company.managers.map(manager => manager.type).filter(Boolean))] : [];
@@ -943,7 +1011,7 @@ export function mountCompanyDetail(container, { initialTab = 'overview', onTabCh
   }
 
   function filterCompanies() {
-    result.hidden = !company.name.includes(search.value.trim());
+    result.hidden = !profile.name.includes(search.value.trim());
     dialog.querySelector('.company-dialog-empty').hidden = !result.hidden;
   }
 

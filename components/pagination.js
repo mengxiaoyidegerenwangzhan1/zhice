@@ -46,9 +46,9 @@ export function mountPagination(widget) {
       const pageButtons = slots().map(value => typeof value === 'number'
         ? `<button type="button" class="zc-pg-slot" data-pg-number="${value}" aria-label="第${value}页"${value === page ? ' aria-current="page"' : ''}>${value}</button>`
         : `<button type="button" class="zc-pg-slot" data-pg-skip="${value}" aria-label="${value === 'prev' ? '向前' : '向后'}跳过5页">${dots}</button>`).join('');
-      const sizeOptions = pageSizes.map(value => `<button type="button" class="zc-pg-option" role="option" data-pg-size-option="${value}" aria-selected="${value === size}">${value}条/页</button>`).join('');
+      const sizeOptions = pageSizes.map(value => `<button type="button" class="zc-pg-option" role="option" data-pg-size-option="${value}" aria-selected="${value === size}">${value}<span class="zc-pg-unit">条/页</span></button>`).join('');
       widget.innerHTML = `
-        <span class="zc-pg-count"><span>共</span><strong>${total}</strong><span>条</span></span>
+        <span class="zc-pg-count"><span>共</span><strong>${total}</strong><span class="zc-pg-unit">条</span></span>
         <div class="zc-pg-controls">
           <div class="zc-pg-pages">
             <button type="button" class="zc-pg-slot zc-pg-arrow" data-pg-direction="prev" aria-label="上一页"${page === 1 ? ' disabled' : ''}>${arrow('prev')}</button>
@@ -56,10 +56,10 @@ export function mountPagination(widget) {
             <button type="button" class="zc-pg-slot zc-pg-arrow" data-pg-direction="next" aria-label="下一页"${page === pages ? ' disabled' : ''}>${arrow('next')}</button>
           </div>
           <div class="zc-pg-size">
-            <button type="button" class="zc-pg-size-trigger" aria-label="每页条数" aria-haspopup="listbox" aria-expanded="${open}"><span class="zc-pg-size-label">${size}条/页</span>${down}</button>
+            <button type="button" class="zc-pg-size-trigger" aria-label="每页条数" aria-haspopup="listbox" aria-expanded="${open}"><span class="zc-pg-size-label">${size}<span class="zc-pg-unit">条/页</span></span>${down}</button>
             <div class="zc-pg-menu" role="listbox" aria-label="每页条数选项"${open ? '' : ' hidden'}>${sizeOptions}</div>
           </div>
-          ${module ? '' : `<label class="zc-pg-jump"><span>跳至</span><span class="zc-pg-jump-field"><input aria-label="跳至页码" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="9" autocomplete="off" value="${lastJump}"><span>页</span></span></label>`}
+          ${module ? '' : `<label class="zc-pg-jump"><span>跳至</span><span class="zc-pg-jump-field"><input aria-label="跳至页码" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="9" autocomplete="off" value="${lastJump}"><span class="zc-pg-unit">页</span></span></label>`}
         </div>
         <span class="zc-pg-live-status" role="status" aria-live="polite">第${page}页，共${pages}页，每页${size}条</span>`;
 

@@ -1,0 +1,137 @@
+.ml-page {
+  width: min(100%, 1808px);
+}
+
+.ml-results-toolbar {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.ml-results-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  max-width: 100%;
+  margin-inline-start: auto;
+}
+
+.ml-compare-button {
+  flex: none;
+  width: 98.5px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 99px;
+  background: transparent url("../assets/manager-list/compare-pk.png") center / contain no-repeat;
+  cursor: pointer;
+}
+
+.ml-compare-button[aria-disabled="false"]:is(:hover, :focus-visible) {
+  background-image: url("../assets/manager-list/compare-pk-hover.png");
+}
+
+.ml-compare-button[aria-disabled="true"] {
+  background-image: url("../assets/manager-list/compare-pk-disabled.png");
+  cursor: not-allowed;
+}
+
+.ml-page .cl-results-message[data-type="warning"] {
+  width: 340px;
+  padding-inline: 12px;
+}
+
+.ml-results-actions .ml-compare-tip {
+  position: absolute;
+  inset: calc(100% + 8px) 0 auto auto;
+  width: max-content;
+  max-width: calc(100vw - 48px);
+  font-size: 12px;
+  line-height: 18px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.ml-compare-button[aria-disabled="true"]:is(:hover, :focus-visible) + .ml-compare-tip {
+  visibility: visible;
+}
+
+.ml-page .ml-table {
+  --ml-checkbox-width: 38px;
+  --ml-sequence-width: 52px;
+  min-width: 1704px;
+}
+
+.ml-table td { white-space: nowrap; }
+.ml-table tbody td:not(.cl-empty) { height: 52px; }
+.ml-table :is(th, td):not(.cl-empty) { text-align: left; }
+
+.ml-table :is(.ml-cell-select, .ml-cell-sequence, .ml-cell-name) {
+  position: sticky;
+  z-index: 1;
+}
+
+.ml-table .ml-cell-select:first-child { left: 0; padding-inline: 12px; }
+.ml-table :is(th, td).ml-cell-sequence { left: var(--ml-checkbox-width); }
+.ml-table .ml-cell-name { left: calc(var(--ml-checkbox-width) + var(--ml-sequence-width)); }
+
+.ml-table thead :is(.ml-cell-select, .ml-cell-sequence, .ml-cell-name) { z-index: 3; }
+.ml-table .ml-cell-select .cl-checkbox { vertical-align: middle; }
+.ml-table .ml-cell-select .cl-checkbox:indeterminate {
+  background-image: url("../design-system/assets/table-reference/checkbox-indeterminate.png");
+}
+.ml-table .ml-cell-select .cl-checkbox:disabled { opacity: .45; cursor: default; }
+
+.cl-table-scroll.has-horizontal-overflow .ml-table :is(th, td).ml-cell-sequence::after { content: none; }
+
+.cl-table-scroll.has-horizontal-overflow .ml-table .ml-cell-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: 2px 0 12px rgb(0 0 0 / 6%);
+  clip-path: inset(0 -16px 0 100%);
+  pointer-events: none;
+}
+
+.ml-table .ml-cell-type,
+.ml-table .ml-cell-productType { padding-inline: 8px; }
+
+.ml-table .ml-cell-type .cl-type-tag,
+.ml-table .ml-cell-productType .cl-type-tag {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.ml-table .ml-ellipsize,
+.ml-manager-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.ml-demo-label { color: var(--cl-quiet); font-size: 11px; vertical-align: middle; }
+
+.ml-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  vertical-align: middle;
+}
+
+.ml-stars img {
+  display: block;
+  width: 16px;
+  height: auto;
+}
+
+.ml-return-up { color: var(--app-accent, #bf3a61); }
+.ml-return-down { color: var(--app-fall, #36b397); }
+
+.ml-table tbody .ml-selected-row td { background: #faf9ff; }
+.ml-table tbody .ml-selected-row:hover td:not(.cl-empty) { background: var(--cl-accent-soft); }

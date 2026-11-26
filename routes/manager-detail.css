@@ -1,0 +1,55 @@
+.md-back {
+  justify-self: start;
+}
+
+.md-back,
+.md-company-link {
+  color: var(--cl-link);
+  text-decoration: none;
+}
+
+.md-back:hover,
+.md-company-link:hover {
+  text-decoration: underline;
+}
+
+.md-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.md-detail h1 {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.md-detail h2 {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.md-demo-label {
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--cl-accent-soft);
+  color: var(--cl-accent);
+  font-size: 12px;
+}
+
+.md-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 164px), 1fr));
+  gap: 16px 24px;
+  margin: 16px 0 0;
+}
+
+.md-fields dt {
+  margin-bottom: 4px;
+  color: var(--cl-muted);
+}
+
+.md-fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

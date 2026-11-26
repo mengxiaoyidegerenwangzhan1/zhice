@@ -537,21 +537,21 @@ async function svgFor(element) {
       parts.push(vectorMarkup(node.outerHTML, x, y, rectangle.width, rectangle.height, style.color));
       return;
     }
+    if (node.matches('.audit-checkbox, [data-component-bitmap]')) {
+      const imageUrl = style.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/)?.[1];
+      if (imageUrl) {
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error('组件图像资源读取失败');
+        const bytes = new Uint8Array(await response.arrayBuffer());
+        const data = btoa(String.fromCharCode(...bytes));
+        parts.push('<image x="' + x + '" y="' + y + '" width="' + rectangle.width + '" height="' + rectangle.height + '" opacity="' + style.opacity + '" href="data:image/png;base64,' + data + '"/>');
+        return;
+      }
+    }
     if (node.tagName === 'INPUT' && node.type === 'checkbox') {
       const size = Math.min(rectangle.width, rectangle.height);
       const left = x + (rectangle.width - size) / 2;
       const top = y + (rectangle.height - size) / 2;
-      if (node.classList.contains('audit-checkbox')) {
-        const imageUrl = style.backgroundImage.match(/^url\(["']?(.*?)["']?\)$/)?.[1];
-        if (imageUrl) {
-          const response = await fetch(imageUrl);
-          if (!response.ok) throw new Error('多选框图片读取失败');
-          const bytes = new Uint8Array(await response.arrayBuffer());
-          const data = btoa(String.fromCharCode(...bytes));
-          parts.push('<image x="' + left + '" y="' + top + '" width="' + size + '" height="' + size + '" opacity="' + style.opacity + '" href="data:image/png;base64,' + data + '"/>');
-          return;
-        }
-      }
       const selected = node.checked || node.indeterminate;
       const accent = node.disabled ? '#CBCBCB' : '#6865A7';
       const radius = Math.min(size / 2, parseFloat(style.borderTopLeftRadius) || 0);
@@ -824,7 +824,7 @@ function installIndividualComponentActions() {
   }
 }
 
-function addIndividualActions(sample, name, specification, page) {
+function addIndividualActions(sample, name, specification, page, {exportCode = makeCode, exportSvg = svgFor} = {}) {
   const unit = document.createElement('section');
   unit.className = 'individual-component';
   sample.before(unit);
@@ -842,9 +842,9 @@ function addIndividualActions(sample, name, specification, page) {
       event.stopPropagation();
       const component = {name, html: sample.innerHTML, page};
       try {
-        if (action === 'svg') await copy(await svgFor(sample));
+        if (action === 'svg') await copy(await exportSvg(sample));
         if (action === 'code') {
-          codeValue = await makeCode(component);
+          codeValue = await exportCode(component);
           $('#dialog-title').textContent = name + ' · 开发代码';
           $('#code-text').textContent = codeValue;
           $('#code-dialog').showModal();

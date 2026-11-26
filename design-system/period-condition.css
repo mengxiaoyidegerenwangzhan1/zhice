@@ -1,0 +1,302 @@
+.period-condition {
+  --cl-accent: #6865a7;
+  --cl-accent-border: #b9b8d8;
+  --cl-ink: #333;
+  --cl-muted: #666;
+  --cl-quiet: #999;
+  --cl-line: #eaeaea;
+  --cl-shadow: 0 0 12px #00000014;
+  color: var(--cl-ink);
+  font: 14px/1.45 "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+#component-period-condition .period-condition {
+  padding-bottom: var(--period-menu-clearance, 0px);
+}
+
+.period-condition, .period-condition * { box-sizing: border-box; }
+.period-condition [hidden] { display: none !important; }
+.period-condition :is(button, input) { color: inherit; font: inherit; letter-spacing: 0; }
+.period-condition :is(button, input, [data-ml-custom-selected]):focus-visible {
+  outline: 2px solid var(--cl-accent);
+  outline-offset: 2px;
+}
+
+.period-condition .ml-perf-pairs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+  min-width: 0;
+  max-inline-size: 1042px;
+  container: period-condition-pairs / inline-size;
+}
+
+.period-condition .ml-perf-pairs:has([aria-expanded="true"]) { position: relative; z-index: 4; }
+
+.period-condition .ml-perf-pair {
+  --ml-segment-gap: 16px;
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  width: 336px;
+  max-width: 100%;
+  height: 32px;
+  padding-inline: 12px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: var(--cl-shadow);
+}
+
+.period-condition .ml-perf-segments {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 66fr) minmax(0, 87fr) minmax(0, 107fr);
+  gap: var(--ml-segment-gap);
+  min-width: 0;
+}
+
+.period-condition .ml-perf-select { min-width: 0; }
+
+.period-condition .ml-perf-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  min-width: 0;
+  min-height: 20px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  line-height: 20px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.period-condition .ml-perf-trigger:disabled { cursor: default; }
+
+.period-condition .ml-perf-placeholder,
+.period-condition .ml-perf-value {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.period-condition .ml-perf-placeholder { color: var(--cl-quiet); }
+.period-condition .ml-perf-value { color: var(--cl-accent); font-weight: 500; }
+.period-condition .cl-chevron {
+  width: 12px;
+  height: 12px;
+  margin-inline-start: auto;
+  flex: none;
+}
+
+.period-condition .ml-period-divider {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: calc(var(--ml-segment-gap) / -2);
+  width: 1px;
+  height: 14px;
+  background: #ebebeb;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.period-condition .ml-perf-pair[data-ml-custom-rank] { --ml-segment-gap: 10px; }
+.period-condition .ml-perf-pair[data-ml-custom-rank] .ml-perf-segments {
+  grid-template-columns: minmax(0, 66fr) minmax(0, 103fr) minmax(0, 103fr);
+}
+
+.period-condition .cl-value-remove {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--cl-quiet);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.period-condition .cl-value-remove:hover { background: #efedf9; color: var(--cl-accent); }
+.period-condition .ml-period-remove-icon { width: 12px; height: 12px; }
+
+.period-condition .ml-add-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cl-muted);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.period-condition .ml-period-add-icon { flex: none; width: 14px; height: 14px; }
+.period-condition .ml-add-pair:is(:hover, :focus-visible) { color: var(--cl-accent); }
+
+.period-condition .ml-single-menu {
+  position: absolute;
+  z-index: 10;
+  inset: calc(100% + 8px) auto auto 0;
+  width: min(92px, 100%);
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid var(--cl-accent-border);
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 7px 22px rgba(36, 31, 67, .13);
+  color: var(--cl-ink);
+  font-size: 14px;
+}
+
+.period-condition .ml-threshold-menu {
+  width: min(220px, 100%);
+  max-height: min(62vh, 280px);
+}
+
+.period-condition .ml-perf-threshold > .ml-threshold-menu { inset-inline: auto 0; }
+.period-condition .ml-perf-rank > .ml-threshold-menu {
+  inset-inline: 0;
+  margin-inline: auto;
+}
+
+.period-condition .cl-options { padding-block-start: 8px; }
+.period-condition .cl-options:last-child { padding-block-end: 8px; }
+.period-condition .cl-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.period-condition .cl-option:hover { background: #f6f6f8; }
+.period-condition .ml-single-menu :is(.cl-option[aria-selected="true"], [data-ml-custom-selected]) {
+  color: var(--cl-accent);
+  background: #f5f5ff;
+}
+.period-condition .ml-single-menu :is(.cl-option, [data-ml-custom-selected]):focus-visible { outline-offset: -2px; }
+.period-condition .ml-single-menu img { flex: none; margin-inline-start: auto; }
+
+.period-condition .ml-threshold-form { padding: 3px 0 9px; }
+.period-condition .ml-threshold-custom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 12px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+}
+
+.period-condition .ml-threshold-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+
+.period-condition .ml-threshold-bound {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+  height: 30px;
+  padding-inline: 12px;
+  border: 1px solid var(--cl-line);
+  border-radius: 99px;
+  color: var(--cl-quiet);
+  cursor: text;
+}
+
+.period-condition .ml-threshold-bound:focus-within { border-color: var(--cl-accent-border); }
+.period-condition .ml-threshold-bound input {
+  appearance: textfield;
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--cl-ink);
+}
+
+.period-condition .ml-threshold-bound input::placeholder { color: var(--cl-quiet); opacity: 1; }
+.period-condition .ml-threshold-bound input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+.period-condition .ml-threshold-bound input:focus-visible { outline: 0; }
+.period-condition .ml-threshold-dash { color: var(--cl-muted); }
+.period-condition [data-ml-custom-selected] :is(.ml-threshold-bound input, .ml-threshold-dash) { color: var(--cl-accent); }
+.period-condition .ml-threshold-error { margin: 6px 12px 0; color: #b63c58; font-size: 12px; }
+.period-condition .ml-threshold-error:empty { display: none; }
+
+.period-condition .ml-threshold-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin: 8px 12px 0;
+}
+
+.period-condition .ml-threshold-actions button {
+  min-height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--cl-line);
+  border-radius: 99px;
+  background: #fff;
+  color: var(--cl-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.period-condition .ml-threshold-actions button[type="submit"] {
+  border-color: var(--cl-accent);
+  background: var(--cl-accent);
+  color: #fff;
+}
+
+.period-condition .ml-threshold-actions button:disabled { opacity: .5; cursor: default; }
+
+@container period-condition-pairs (920px <= width < 1040px) {
+  .period-condition .ml-perf-pairs:has(> .ml-perf-pair:nth-child(3)) .ml-perf-pair {
+    --ml-segment-gap: 8px;
+    width: calc((100% - 32px) / 3);
+    padding-inline: 8px;
+  }
+
+  .period-condition .ml-perf-pairs:has(> .ml-perf-pair:nth-child(3)) .ml-perf-segments {
+    grid-template-columns: 65px minmax(0, 85fr) minmax(0, 101fr);
+  }
+
+  .period-condition .ml-perf-pairs:has(> .ml-perf-pair:nth-child(3)) .ml-perf-pair[data-ml-custom-rank] {
+    --ml-segment-gap: 6px;
+    gap: 5px;
+    padding-inline: 6px;
+  }
+}
+
+@media (max-width: 390px) {
+  .period-condition .ml-perf-pair { --ml-segment-gap: 10px; padding-inline: 8px; }
+  .period-condition .ml-perf-trigger { font-size: 12px; }
+}

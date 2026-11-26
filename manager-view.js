@@ -34,6 +34,7 @@
   let nextOrder = 0;
   let charts = [];
   let riskView = 'chart';
+  let renderGeneration = 0;
   const ranges = new Map();
   const subjects = { comprehensive: new Map(), representative: new Map() };
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
@@ -198,8 +199,8 @@
       : `<button type="button" data-manager-pin="${manager.id}" aria-label="钉住参照 ${manager.name}"><img src="./assets/compare-figma/47-50726_imgProperty3.svg" width="14" height="14" alt=""></button>`;
     return `<article class="zc-fund manager-slot ${manager.visible ? '' : 'is-hidden'} ${pinned ? 'is-reference' : ''}" style="--series:${manager.color}">
       <div class="zc-card-tools"><div>${pin}${pinned ? '' : `<button type="button" data-manager-eye="${manager.id}" aria-label="${manager.visible ? '隐藏' : '显示'} ${manager.name}" aria-pressed="${manager.visible}">${img(`eye-${manager.visible ? 'visible' : 'hidden'}`)}</button>`}</div><button type="button" data-manager-remove="${manager.id}" aria-label="移除 ${manager.name}"><img src="./assets/compare-figma/47-50726_imgFrame2036082637.svg" width="14" height="14" alt=""></button></div>
-      <div class="manager-identity"><i aria-hidden="true"></i><strong class="manager-name">${escape(manager.name)}</strong>${product ? `<strong class="manager-compact-product" title="${escape(product.name)}">${escape(product.name)}</strong>` : ''}<span>${manager.type}</span></div>
-      ${product ? productPicker(manager) : ''}
+      <div class="manager-identity"><i aria-hidden="true"></i><strong class="manager-name">${escape(manager.name)}</strong>${product ? `<strong class="manager-compact-product" title="${escape(product.name)}">${escape(product.name)}</strong>` : ''}${manager.type ? `<span>${escape(manager.type)}</span>` : ''}</div>
+      ${product ? manager.summaryOnly ? `<div class="manager-product"><span class="manager-product-title"><span title="${escape(product.name)}">${escape(product.name)}</span></span></div>` : productPicker(manager) : ''}
     </article>`;
   }
 
@@ -226,27 +227,58 @@
     return tabs[mode] === 2 ? window.CompareAllocationView : tabs[mode] === 3 ? window.CompareAttributionView : window.CompareRiskView;
   }
 
+  function summaryComparison() {
+    const representative = mode === 'representative';
+    const rows = representative ? [
+      ['基金经理', manager => manager.name],
+      ['代表基金', manager => selectedProduct(manager)?.name],
+      ['现任公司', manager => manager.company],
+      ['基金类型', manager => selectedProduct(manager)?.type],
+    ] : [
+      ['基金经理', manager => manager.name],
+      ['现任公司', manager => manager.company],
+      ['经理类型', manager => manager.type],
+      ['管理年限', manager => manager.tenure == null ? null : `${manager.tenure}年`],
+      ['在管规模', manager => manager.scale == null ? null : `${manager.scale}亿`],
+      ['代表基金', manager => selectedProduct(manager)?.name],
+    ];
+    const tableRows = rows.map(([label, value]) => `<tr><th scope="row">${label}</th>${managers.map(manager => {
+      const text = manager.visible ? value(manager) ?? '—' : '';
+      return `<td class="${manager.id === referenceId ? 'is-reference' : ''}">${escape(text)}</td>`;
+    }).join('')}</tr>`).join('');
+    return `<div class="zc-manager-overview"><section><div class="zc-mo-head"><h2>${representative ? '代表基金信息' : '基金经理信息'}</h2></div><div class="zc-mo-table-wrap"><table class="zc-mo-table"><colgroup><col style="width:120px">${'<col>'.repeat(managers.length)}</colgroup><tbody>${tableRows}</tbody></table></div></section></div>`;
+  }
+
   function render() {
     if (!host || !document.body.classList.contains('zc-manager-mode')) return;
     charts.forEach(chart => { if (!chart.isDisposed()) chart.dispose(); });
     charts = [];
     const ready = managers.length >= 2;
-    const selector = `<section class="zc-selector">${cards()}<div class="zc-actions"><button type="button" class="zc-primary" data-manager-start ${ready ? '' : 'disabled'}>开始比较</button><button type="button" class="zc-secondary" data-manager-clear>清空</button>${ready ? `<button type="button" class="zc-secondary" data-manager-export ${compared ? '' : 'disabled'}>导出对比</button>` : ''}</div></section>`;
+    const summaryOnly = managers.some(manager => manager.summaryOnly);
+    const hasSummary = tabs[mode] === 0;
+    const canExport = compared && (!summaryOnly || hasSummary);
+    const selector = `<section class="zc-selector">${cards()}<div class="zc-actions"><button type="button" class="zc-primary" data-manager-start ${ready ? '' : 'disabled'}>开始比较</button><button type="button" class="zc-secondary" data-manager-clear>清空</button>${ready ? `<button type="button" class="zc-secondary" data-manager-export ${canExport ? '' : 'disabled'}>导出对比</button>` : ''}</div></section>`;
     const view = moduleView();
-    const params = options();
-    let content = '';
+    let params;
+    let content;
     if (compared) {
-      if (mode === 'representative' && tabs[mode] === 1) {
-        Object.assign(params, riskOptions(), {
-          series: window.CompareRiskCharts.data(riskOptions()),
-          seriesBySection: Object.fromEntries(['overview', 'interval', 'forecast', 'rolling', 'drawdown', 'metrics'].map(key => [`risk-${key}`, window.CompareRiskCharts.data(riskOptions(key))])),
-        });
+      if (summaryOnly) {
+        content = hasSummary ? summaryComparison() : '<div class="zc-empty">所选基金经理暂无可比较的数据</div>';
+      } else {
+        params = options();
+        if (mode === 'representative' && tabs[mode] === 1) {
+          Object.assign(params, riskOptions(), {
+            series: window.CompareRiskCharts.data(riskOptions()),
+            seriesBySection: Object.fromEntries(['overview', 'interval', 'forecast', 'rolling', 'drawdown', 'metrics'].map(key => [`risk-${key}`, window.CompareRiskCharts.data(riskOptions(key))])),
+          });
+        }
+        content = view.render(params);
       }
-      content = `<div class="zc-results-card"><div class="zc-content">${view.render(params)}</div></div>`;
+      content = `<div class="zc-results-card"><div class="zc-content">${content}</div></div>`;
     } else content = empty();
     host.innerHTML = `<div class="zc-compare zc-manager ${compared ? 'has-results' : 'is-empty'} ${mode === 'representative' ? 'is-representative' : ''}">${compared ? '<div class="zc-sticky-region"><div class="zc-sticky-panel">' : '<div class="manager-initial-panel">'}${selector}${navigation()}</div>${compared ? '</div>' : ''}${content}</div>`;
     bind();
-    if (compared) {
+    if (params) {
       charts = mode === 'representative' && tabs[mode] === 1
         ? window.CompareRiskCharts.mount(host, { ...params, sectionOptions: riskOptions })
         : view.mount?.(host, params) || [];
@@ -375,9 +407,64 @@
     host.querySelectorAll('details[open]').forEach(menu => { if (!menu.contains(event.target)) menu.open = false; });
   });
   window.addEventListener('resize', () => charts.forEach(chart => { if (!chart.isDisposed()) chart.resize(); }));
+
+  function useManagers(entries) {
+    managers = entries.map((manager, order) => ({
+      ...manager, order, color: colors[order], visible: true, productCode: manager.products[0]?.code,
+    }));
+    nextOrder = managers.length;
+    compared = managers.length >= 2;
+    mode = 'comprehensive';
+    referenceId = null;
+    tabs.comprehensive = 0;
+    tabs.representative = 0;
+    riskView = 'chart';
+    ranges.clear();
+    Object.values(subjects).forEach(cache => cache.clear());
+    managers.forEach(manager => window.ManagerOverviewView.resetFundVisibility(manager.id));
+  }
+
+  async function loadManagers(target, managerIds, generation) {
+    target.innerHTML = '<div class="app-page" role="status">正在加载经理比较…</div>';
+    let entries;
+    try {
+      const { getManagerListData } = await import('./manager-list-data.js?v=20261125-manager-screen');
+      const data = getManagerListData();
+      const rows = new Map(data.managers.map(manager => [manager.id, manager]));
+      const companies = new Map(data.companies.map(company => [company.id, company.name]));
+      const catalogIds = new Map(catalog.map(manager => [`compare:${manager.id}`, manager]));
+      entries = [...new Set(managerIds)].map(id => rows.get(id)).filter(Boolean).slice(0, colors.length).map(row => {
+        return catalogIds.get(row.id) ?? {
+          ...row, company: companies.get(row.companyId), summaryOnly: true,
+          products: row.product ? [{ name: row.product, type: row.productType }] : [],
+        };
+      });
+    } catch (error) {
+      if (generation !== renderGeneration) return;
+      console.error('Selected managers could not be loaded', error);
+      target.innerHTML = '<div class="app-page" role="status">经理比较加载失败，请刷新页面重试。</div>';
+      return;
+    }
+    if (generation !== renderGeneration) return;
+    useManagers(entries);
+    render();
+  }
+
   window.ManagerCompareView = {
-    render(target) { host = target; window.CompareView.prepareHeader(target); render(); },
+    getCatalog() {
+      return catalog.map(({ id, name, company, type, products }) => ({
+        id, name, company, type, product: products[0]?.name ?? null, productType: products[0]?.type ?? null,
+      }));
+    },
+    render(target, { managerIds } = {}) {
+      const generation = ++renderGeneration;
+      host = target;
+      window.CompareView.prepareHeader(target);
+      if (Array.isArray(managerIds)) return loadManagers(target, managerIds, generation);
+      render();
+    },
     dispose() {
+      renderGeneration++;
       charts.forEach(chart => { if (!chart.isDisposed()) chart.dispose(); });
       charts = [];
     },

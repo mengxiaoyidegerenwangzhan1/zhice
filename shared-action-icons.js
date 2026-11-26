@@ -96,7 +96,7 @@
   }
 
   function normalize(button) {
-    if (button.closest(".fund-analysis-page")) return;
+    if (button.closest(".fund-analysis-page, .cl-results-toolbar")) return;
     const action = actionFor(button);
     if (!action) return;
     const previousAction = button.dataset.sharedAction;

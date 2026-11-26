@@ -18,8 +18,8 @@ const defaults = {
 let state = loadState();
 let sectionObserver;
 let routeScrollHandler;
-let disposeCompanyView;
-let companyRouteGeneration = 0;
+let disposeListView;
+let listRouteGeneration = 0;
 
 function loadState() {
   try {
@@ -1261,14 +1261,14 @@ function renderIndexDetail() {
 }
 
 function updateNav(module) {
-  const navKey = ({ screener: "fund-research", fund: "fund-research", compare: "fund-research", company: "fund-research", "manager-compare": "fund-research", index: "fund-research" })[module] || module;
+  const navKey = ({ screener: "fund-research", fund: "fund-research", compare: "fund-research", company: "fund-research", manager: "fund-research", "manager-screener": "fund-research", "manager-compare": "fund-research", index: "fund-research" })[module] || module;
   document.querySelectorAll('[data-route-nav]').forEach(a=>{const active=a.dataset.routeNav===navKey;a.classList.toggle('is-active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
-  document.querySelectorAll('[data-route-leaf]').forEach(a=>a.classList.toggle('is-active',a.dataset.routeLeaf===module));
+  document.querySelectorAll('[data-route-leaf]').forEach(a=>a.classList.toggle('is-active',a.dataset.routeLeaf===(module==='manager'?'manager-screener':module)));
 }
 function renderRoute(preserveScroll=false) {
-  const routeGeneration = ++companyRouteGeneration;
-  disposeCompanyView?.();
-  disposeCompanyView = undefined;
+  const routeGeneration = ++listRouteGeneration;
+  disposeListView?.();
+  disposeListView = undefined;
   window.ManagerCompareView?.dispose();
   window.FundLayout?.dispose();
   window.FundResponsive?.dispose();
@@ -1277,24 +1277,60 @@ function renderRoute(preserveScroll=false) {
   const y=preserveScroll?scrollY:0; disposeCharts(); const route=parseRoute(); absorbParams(route); const module=route.segments[0]||'home'; updateNav(module); document.getElementById('route-progress').classList.add('is-running');
   document.body.classList.toggle('zc-compare-mode',module==='compare'||module==='manager-compare');
   document.body.classList.toggle('zc-manager-mode',module==='manager-compare');
-  document.body.classList.toggle('company-site-mode',module==='company');
-  if(module==='company') {
+  const companyId = route.segments[1];
+  const isCompanyList = module === 'company' && (!companyId || companyId === 'list');
+  document.body.classList.toggle('company-site-mode',module==='company'||module==='manager-screener'||module==='manager');
+  if (module === 'manager-screener') {
+    view.innerHTML = '<div class="app-page" role="status">正在加载经理数据…</div>';
+    import('./manager-list.js?v=20261126-manager-table').then(({mountManagerList}) => {
+      if (routeGeneration !== listRouteGeneration) return;
+      disposeListView = mountManagerList(view);
+    }).catch(error => {
+      if (routeGeneration !== listRouteGeneration) return;
+      console.error('Manager list could not be loaded', error);
+      view.innerHTML = '<div class="app-page" role="status">经理数据加载失败，请刷新页面重试。</div>';
+    });
+  } else if (module === 'manager') {
+    view.innerHTML = '<div class="app-page" role="status">正在加载基金经理资料…</div>';
+    import('./manager-detail.js?v=20261126-manager-detail').then(({renderManagerDetail}) => {
+      if (routeGeneration !== listRouteGeneration) return;
+      renderManagerDetail(view, decodeURIComponent(route.segments[1] ?? ''));
+    }).catch(error => {
+      if (routeGeneration !== listRouteGeneration) return;
+      console.error('Manager detail could not be loaded', error);
+      view.innerHTML = '<div class="app-page" role="status">基金经理资料加载失败，请刷新页面重试。 <a href="#/manager-screener">返回经理筛选</a></div>';
+    });
+  } else if (isCompanyList) {
+    view.innerHTML = '<div class="app-page" role="status">正在加载公司数据…</div>';
+    import('./company-list.js?v=20261126-list-notice-layout').then(({mountCompanyList}) => {
+      if (routeGeneration !== listRouteGeneration) return;
+      disposeListView = mountCompanyList(view);
+    }).catch(error => {
+      if (routeGeneration !== listRouteGeneration) return;
+      console.error('Company list could not be loaded', error);
+      view.innerHTML = '<div class="app-page" role="status">公司数据加载失败，请刷新页面重试。</div>';
+    });
+  } else if(module==='company') {
     view.innerHTML = '<div class="app-page" role="status">正在加载公司详情…</div>';
-    import('./company-detail.js?v=20261124-asset-years').then(({mountCompanyDetail}) => {
-      if (routeGeneration !== companyRouteGeneration) return;
-      disposeCompanyView = mountCompanyDetail(view, {
+    import('./company-detail.js?v=20261126-manager-employers').then(({mountCompanyDetail}) => {
+      if (routeGeneration !== listRouteGeneration) return;
+      disposeListView = mountCompanyDetail(view, {
+        companyId: decodeURIComponent(companyId),
         initialTab: route.params.get('tab'),
         onTabChange: tab => setParams({tab:tab === 'overview' ? null : tab}),
         toast,
       });
     }).catch(error => {
-      if (routeGeneration !== companyRouteGeneration) return;
+      if (routeGeneration !== listRouteGeneration) return;
       console.error('Company detail could not be loaded', error);
       view.innerHTML = '<div class="app-page" role="status">公司详情加载失败，请刷新页面重试。</div>';
     });
   } else
-  if(module==='home')renderHome(); else if(module==='screener')renderScreener(); else if(module==='fund')renderFund(); else if(module==='compare')renderCompare(); else if(module==='manager-compare')window.ManagerCompareView.render(view); else if(module==='index'&&route.segments[1])renderIndexDetail(); else if(module==='index')renderIndexBrowse(); else if(module==='research-tools')renderResearchTools(); else { location.hash='#/home'; return; }
-  syncIcons(); document.title=`${({home:'首页',screener:'基金筛选',fund:'基金分析',compare:'基金比较','manager-compare':'经理比较',company:'公司详情',index:'指数选基'})[module]} - 智策研究工作台`; requestAnimationFrame(()=>{if(preserveScroll)scrollTo(0,y);else if(!(module==='fund'&&route.params.get('anchor')))scrollTo(0,0);document.getElementById('route-progress').classList.remove('is-running')});
+  if(module==='home')renderHome(); else if(module==='screener')renderScreener(); else if(module==='fund')renderFund(); else if(module==='compare')renderCompare(); else if(module==='manager-compare') {
+    const managerIds = route.params.getAll('manager');
+    window.ManagerCompareView.render(view, managerIds.length ? {managerIds} : undefined);
+  } else if(module==='index'&&route.segments[1])renderIndexDetail(); else if(module==='index')renderIndexBrowse(); else if(module==='research-tools')renderResearchTools(); else { location.hash='#/home'; return; }
+  syncIcons(); document.title=`${({home:'首页',screener:'基金筛选',fund:'基金分析',compare:'基金比较',manager:'基金经理详情','manager-screener':'经理筛选','manager-compare':'经理比较',company:isCompanyList?'公司筛选':'公司详情',index:'指数选基'})[module]} - 智策研究工作台`; requestAnimationFrame(()=>{if(preserveScroll)scrollTo(0,y);else if(!(module==='fund'&&route.params.get('anchor')))scrollTo(0,0);document.getElementById('route-progress').classList.remove('is-running')});
 }
 window.addEventListener('hashchange',()=>renderRoute()); window.addEventListener('resize',()=>charts.forEach(c=>c.resize()));
 document.querySelectorAll('[data-soon]').forEach(btn=>btn.addEventListener('click',()=>toast(`「${btn.dataset.soon}」功能规划中，敬请期待`)));
