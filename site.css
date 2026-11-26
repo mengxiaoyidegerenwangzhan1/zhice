@@ -1,5 +1,5 @@
-@import url("./routes/home.css?v=18");
-@import url("./routes/screener.css?v=44");
+@import url("./routes/home.css?v=20261126-page-gutter");
+@import url("./routes/screener.css?v=20261126-page-gutter");
 @import url("./routes/fund.css?v=35");
 @import url("./routes/compare.css?v=6");
 @import url("./routes/index.css?v=6");
@@ -20,6 +20,11 @@
   --app-accent: #bf3a61;
   --app-canvas: #f3f5f8;
   --app-max: 1440px;
+  --workbench-page-gutter: 32px;
+}
+
+@media (max-width: 800px) {
+  :root { --workbench-page-gutter: 16px; }
 }
 
 .app-body { background: #f6f7f9; color: var(--app-ink); }
@@ -90,7 +95,7 @@ body { min-width: 0; background: #f6f7f9; }
 .route-progress { position: fixed; z-index: 110; top: 50px; left: 0; width: 0; height: 2px; background: var(--app-blue); opacity: 0; transition: width .18s ease, opacity .18s ease; }
 .route-progress.is-running { width: 72%; opacity: 1; }
 #route-view { min-height: calc(100vh - 52px); outline: 0; }
-.app-page { max-width: var(--app-max); margin: 0 auto; padding: 34px 24px 76px; }
+.app-page { margin: 0 auto; padding: 34px var(--workbench-page-gutter) 76px; }
 .route-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid var(--app-soft); }
 .route-heading p { margin: 0 0 4px; color: var(--app-blue); font-size: 11px; line-height: 1.3; font-weight: 700; letter-spacing: .08em; }
 .route-heading h1 { margin: 0; font-size: 24px; line-height: 1.35; font-weight: 600; }
@@ -144,7 +149,7 @@ body { min-width: 0; background: #f6f7f9; }
 .back-link svg { width: 14px; height: 14px; }
 
 @media (max-width: 1279px) {
-  .app-topbar-inner, .app-page { padding-right: 18px; padding-left: 18px; }
+  .app-topbar-inner { padding-right: 18px; padding-left: 18px; }
   .app-topbar-inner { gap: 14px; }
   .app-brand span { display: none; }
   .app-nav .nav-link { padding-right: 11px; padding-left: 11px; }
@@ -154,7 +159,7 @@ body { min-width: 0; background: #f6f7f9; }
 }
 
 @media (min-width: 1600px) {
-  .app-topbar-inner, .app-page { padding-right: 0; padding-left: 0; }
+  .app-topbar-inner { padding-right: 0; padding-left: 0; }
   .app-page { padding-top: 42px; padding-bottom: 88px; }
 }
 
@@ -176,7 +181,7 @@ body { min-width: 0; background: #f6f7f9; }
   .nav-col + .nav-col { border-top: 1px solid var(--app-soft); border-left: 0; }
   .app-actions { margin-left: 0; gap: 0; }
   .app-icon-button { width: 28px; height: 28px; }
-  .app-page { padding: 24px 16px 60px; }
+  .app-page { padding-block: 24px 60px; }
   .route-heading { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 22px; padding-bottom: 14px; }
   .route-heading h1 { font-size: 20px; }
   .route-trail { white-space: normal; }

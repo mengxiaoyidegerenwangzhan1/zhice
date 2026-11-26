@@ -19,7 +19,6 @@ let state = loadState();
 let sectionObserver;
 let routeScrollHandler;
 let disposeListView;
-let listRouteGeneration = 0;
 
 function loadState() {
   try {
@@ -33,7 +32,10 @@ function loadState() {
     return s;
   } catch { return structuredClone(defaults); }
 }
-function saveState() { sessionStorage.setItem(storageKey, JSON.stringify(state)); }
+function saveState() {
+  try { sessionStorage.setItem(storageKey, JSON.stringify(state)); }
+  catch { /* Embedded previews may disable storage. The current view still uses in-memory state. */ }
+}
 function signed(value, digits = 2, unit = "%") { return `${value > 0 ? "+" : ""}${Number(value).toFixed(digits)}${unit}`; }
 function tone(value) { return value > 0 ? "is-rise" : value < 0 ? "is-fall" : ""; }
 function icon(name) { return `<i data-lucide="${name}" aria-hidden="true"></i>`; }
@@ -1265,8 +1267,16 @@ function updateNav(module) {
   document.querySelectorAll('[data-route-nav]').forEach(a=>{const active=a.dataset.routeNav===navKey;a.classList.toggle('is-active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
   document.querySelectorAll('[data-route-leaf]').forEach(a=>a.classList.toggle('is-active',a.dataset.routeLeaf===(module==='manager'?'manager-screener':module)));
 }
+function mountResearchRoute(mount, errorMessage, returnToManagers = false) {
+  try {
+    disposeListView = mount(window.ZhiceResearchRoutes);
+  } catch (error) {
+    console.error(errorMessage, error);
+    view.innerHTML = `<div class="app-page" role="status">${errorMessage}请刷新页面重试。${returnToManagers ? ' <a href="#/manager-screener">返回经理筛选</a>' : ''}</div>`;
+  }
+}
+
 function renderRoute(preserveScroll=false) {
-  const routeGeneration = ++listRouteGeneration;
   disposeListView?.();
   disposeListView = undefined;
   window.ManagerCompareView?.dispose();
@@ -1281,50 +1291,25 @@ function renderRoute(preserveScroll=false) {
   const isCompanyList = module === 'company' && (!companyId || companyId === 'list');
   document.body.classList.toggle('company-site-mode',module==='company'||module==='manager-screener'||module==='manager');
   if (module === 'manager-screener') {
-    view.innerHTML = '<div class="app-page" role="status">正在加载经理数据…</div>';
-    import('./manager-list.js?v=20261126-manager-table').then(({mountManagerList}) => {
-      if (routeGeneration !== listRouteGeneration) return;
-      disposeListView = mountManagerList(view);
-    }).catch(error => {
-      if (routeGeneration !== listRouteGeneration) return;
-      console.error('Manager list could not be loaded', error);
-      view.innerHTML = '<div class="app-page" role="status">经理数据加载失败，请刷新页面重试。</div>';
-    });
+    mountResearchRoute(({mountManagerList}) => mountManagerList(view), '经理数据加载失败，');
   } else if (module === 'manager') {
-    view.innerHTML = '<div class="app-page" role="status">正在加载基金经理资料…</div>';
-    import('./manager-detail.js?v=20261126-manager-detail').then(({renderManagerDetail}) => {
-      if (routeGeneration !== listRouteGeneration) return;
-      renderManagerDetail(view, decodeURIComponent(route.segments[1] ?? ''));
-    }).catch(error => {
-      if (routeGeneration !== listRouteGeneration) return;
-      console.error('Manager detail could not be loaded', error);
-      view.innerHTML = '<div class="app-page" role="status">基金经理资料加载失败，请刷新页面重试。 <a href="#/manager-screener">返回经理筛选</a></div>';
-    });
+    mountResearchRoute(
+      ({renderManagerDetail}) => renderManagerDetail(view, decodeURIComponent(route.segments[1] ?? '')),
+      '基金经理资料加载失败，',
+      true,
+    );
   } else if (isCompanyList) {
-    view.innerHTML = '<div class="app-page" role="status">正在加载公司数据…</div>';
-    import('./company-list.js?v=20261126-list-notice-layout').then(({mountCompanyList}) => {
-      if (routeGeneration !== listRouteGeneration) return;
-      disposeListView = mountCompanyList(view);
-    }).catch(error => {
-      if (routeGeneration !== listRouteGeneration) return;
-      console.error('Company list could not be loaded', error);
-      view.innerHTML = '<div class="app-page" role="status">公司数据加载失败，请刷新页面重试。</div>';
-    });
+    mountResearchRoute(({mountCompanyList}) => mountCompanyList(view), '公司数据加载失败，');
   } else if(module==='company') {
-    view.innerHTML = '<div class="app-page" role="status">正在加载公司详情…</div>';
-    import('./company-detail.js?v=20261126-manager-employers').then(({mountCompanyDetail}) => {
-      if (routeGeneration !== listRouteGeneration) return;
-      disposeListView = mountCompanyDetail(view, {
+    mountResearchRoute(
+      ({mountCompanyDetail}) => mountCompanyDetail(view, {
         companyId: decodeURIComponent(companyId),
         initialTab: route.params.get('tab'),
         onTabChange: tab => setParams({tab:tab === 'overview' ? null : tab}),
         toast,
-      });
-    }).catch(error => {
-      if (routeGeneration !== listRouteGeneration) return;
-      console.error('Company detail could not be loaded', error);
-      view.innerHTML = '<div class="app-page" role="status">公司详情加载失败，请刷新页面重试。</div>';
-    });
+      }),
+      '公司详情加载失败，',
+    );
   } else
   if(module==='home')renderHome(); else if(module==='screener')renderScreener(); else if(module==='fund')renderFund(); else if(module==='compare')renderCompare(); else if(module==='manager-compare') {
     const managerIds = route.params.getAll('manager');

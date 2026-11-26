@@ -4,14 +4,6 @@
   let lastChartWidth = 0;
   const number = value => Number.parseFloat(value) || 0;
 
-  // These are the fund-comparison breakpoints, including its 1440px desktop canvas.
-  function geometry(viewport) {
-    const scaled = viewport > 1200;
-    const scale = scaled ? Math.min(1, viewport / 1440) : 1;
-    return {scale, padding: scaled ? 56 : viewport > 800 ? 32 : 16,
-      canvas: scaled ? 1440 : viewport};
-  }
-
   function prepareHeading(head) {
     const controls = head.querySelector(':scope > .fund-panel-controls');
     if (!controls || controls.dataset.responsivePrepared) return;
@@ -91,14 +83,16 @@
     const page = activePage;
     if (!page || !page.isConnected) return;
     const viewport = document.documentElement.clientWidth;
-    const g = geometry(viewport);
-    page.style.setProperty('--fund-responsive-scale', String(g.scale));
-    document.body.style.setProperty('--fund-responsive-scale', String(g.scale));
-    page.style.setProperty('--fund-responsive-padding', g.padding + 'px');
+    const scale = viewport > 1200 ? Math.min(1, viewport / 1440) : 1;
+    page.style.setProperty('--fund-responsive-scale', String(scale));
+    document.body.style.setProperty('--fund-responsive-scale', String(scale));
     const rect = page.getBoundingClientRect();
-    const actualScale = page.offsetWidth ? rect.width / page.offsetWidth : g.scale;
-    const cardLeft = rect.left + g.padding * actualScale;
-    const cardWidth = rect.width - 2 * g.padding * actualScale;
+    const actualScale = page.offsetWidth ? rect.width / page.offsetWidth : scale;
+    const style = getComputedStyle(page);
+    const paddingLeft = number(style.paddingLeft) * actualScale;
+    const paddingRight = number(style.paddingRight) * actualScale;
+    const cardLeft = rect.left + paddingLeft;
+    const cardWidth = rect.width - paddingLeft - paddingRight;
     const navigation = document.querySelector('body > .app-topbar:not(#zc-header)');
     const navBottom = navigation?.getBoundingClientRect().bottom || 52;
     // Fixed descendants inherit CSS zoom; convert viewport pixels back to their local pixels.

@@ -11,9 +11,9 @@
   display: grid;
   align-content: start;
   gap: 16px;
-  width: min(100%, 1440px);
+  width: 100%;
   margin-inline: auto;
-  padding: 20px clamp(12px, 2.2vw, 32px) 32px;
+  padding: 20px var(--workbench-page-gutter) 32px;
   color: var(--cl-ink);
   font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   font-size: 14px;

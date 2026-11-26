@@ -424,12 +424,10 @@
     managers.forEach(manager => window.ManagerOverviewView.resetFundVisibility(manager.id));
   }
 
-  async function loadManagers(target, managerIds, generation) {
-    target.innerHTML = '<div class="app-page" role="status">正在加载经理比较…</div>';
+  function loadManagers(target, managerIds, generation) {
     let entries;
     try {
-      const { getManagerListData } = await import('./manager-list-data.js?v=20261125-manager-screen');
-      const data = getManagerListData();
+      const data = window.ZhiceResearchRoutes.getManagerListData();
       const rows = new Map(data.managers.map(manager => [manager.id, manager]));
       const companies = new Map(data.companies.map(company => [company.id, company.name]));
       const catalogIds = new Map(catalog.map(manager => [`compare:${manager.id}`, manager]));

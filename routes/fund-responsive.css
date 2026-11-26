@@ -1,13 +1,13 @@
-/* The same desktop canvas and fluid breakpoints used by fund comparison. */
+/* Share the comparison pages' viewport gutter, including when the page is zoomed. */
 body.fund-sketch-mode {--fund-responsive-scale:1;overflow-x:hidden;}
 body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view] {
-  box-sizing:border-box;width:100%;max-width:1440px;min-width:0;margin:0 auto;
-  padding:16px 32px 56px;zoom:1;
+  box-sizing:border-box;width:auto;max-width:none;min-width:0;margin:0 auto;
+  padding:16px var(--workbench-page-gutter) 56px;zoom:1;
 }
 body.fund-sketch-mode .app-topbar-inner {width:100%;max-width:1440px;padding-inline:32px;}
 body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view].is-header-compact>.fund-identity-panel {
-  position:fixed;inset:auto;top:var(--fund-fixed-top,52px);left:var(--fund-fixed-left,32px);
-  width:var(--fund-fixed-width,calc(100vw - 64px));right:auto;border-radius:0;
+  position:fixed;inset:auto;top:var(--fund-fixed-top,52px);left:var(--fund-fixed-left,var(--workbench-page-gutter));
+  width:var(--fund-fixed-width,calc(100% - 2 * var(--workbench-page-gutter)));right:auto;border-radius:0;
 }
 
 /* Former artboard dimensions must not constrain the live page. */
@@ -60,7 +60,7 @@ body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view].
 
 @media(min-width:1201px) {
   body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view] {
-    width:1440px;max-width:none;padding:16px 56px 56px;zoom:var(--fund-responsive-scale,1);
+    padding-inline:calc(var(--workbench-page-gutter) / var(--fund-responsive-scale,1));zoom:var(--fund-responsive-scale,1);
   }
   body.fund-sketch-mode>.app-topbar:not(#zc-header) {zoom:var(--fund-responsive-scale,1);}
   body.fund-sketch-mode .app-topbar-inner {width:1440px;max-width:1440px;padding-inline:32px;}
@@ -92,7 +92,6 @@ body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view].
   .fund-page.fund-analysis-page[data-fund-view] .fund-responsive-filters {grid-column:1/-1;grid-row:2;}
 }
 @media(max-width:800px) {
-  body.fund-sketch-mode #route-view>.fund-page.fund-analysis-page[data-fund-view] {padding-inline:16px;}
   body.fund-sketch-mode .app-topbar-inner {padding-inline:16px;}
   .fund-page.fund-analysis-page[data-fund-view] .fund-identity-metrics>div {border-bottom:0;}
 }

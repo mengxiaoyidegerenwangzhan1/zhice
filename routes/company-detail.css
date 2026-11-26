@@ -3,7 +3,7 @@
 }
 
 .company-detail {
-  --company-gutter: clamp(12px, 3.9vw, 56px);
+  --company-gutter: var(--workbench-page-gutter);
   --company-inner: 20px;
   --company-sticky-top: 52px;
   --company-text: #333;
@@ -13,7 +13,7 @@
   --company-link: #6078d9;
   --company-tint: #f4f4fc;
   --company-shadow: 0 0 12px #00000014;
-  width: min(100%, 1440px);
+  width: 100%;
   margin: 0 auto;
   padding: 16px var(--company-gutter) 48px;
   color: var(--company-text);
@@ -45,7 +45,7 @@
   top: var(--company-sticky-top);
   inset-inline: 0;
   z-index: 80;
-  width: min(1328px, calc(100% - 2 * var(--company-gutter)));
+  width: calc(100% - 2 * var(--company-gutter));
   margin-inline: auto;
   border-radius: 0;
   box-shadow: 0 4px 5px #00000010;

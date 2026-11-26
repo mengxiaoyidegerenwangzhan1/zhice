@@ -12,7 +12,7 @@
   --home-cool: #f6f8fb;
   max-width: none;
   margin: 0;
-  padding: 24px max(24px, calc(50vw - 696px)) 76px;
+  padding: 24px var(--workbench-page-gutter) 76px;
   min-height: calc(100vh - 52px);
   background: #f6f7f9;
   color: var(--home-ink);

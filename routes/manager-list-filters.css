@@ -373,11 +373,8 @@
   .ml-filters .ml-filter-modes button { text-align: left; }
 }
 
-@media (min-width: 1440px) {
-  .ml-page { padding-inline: clamp(12px, (100% - 1376px) / 2, 32px); }
-}
-
-@container period-pairs (920px <= width < 1040px) {
+/* Allow three on the design-width canvas even with a classic scrollbar. */
+@container period-pairs (1024px <= width < 1040px) {
   .ml-perf-pair {
     --ml-segment-gap: 8px;
     width: calc((100% - 32px) / 3);
