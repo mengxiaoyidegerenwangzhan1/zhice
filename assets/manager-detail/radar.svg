@@ -1,0 +1,31 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="132" height="132" viewBox="0 0 132 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 2036083175" clip-path="url(#clip0_0_90)">
+<mask id="stroke0_0_90" fill="white">
+<path d="M64.5653 5.5L128.7 52.0963L104.202 127.491H24.9281L0.430984 52.0963L64.5653 5.5Z"/>
+</mask>
+<path id="Polygon 19" d="M64.5653 5.5L128.7 52.0963L104.202 127.491H24.9281L0.430984 52.0963L64.5653 5.5Z" stroke-width="2.2" stroke="#EBEBEB" mask="url(#stroke0_0_90)"/>
+<mask id="stroke1_0_90" fill="white">
+<path d="M64.5652 25.0497L110.106 58.1372L92.7111 111.674H36.4194L19.0242 58.1372L64.5652 25.0497Z"/>
+</mask>
+<path id="Polygon 24" d="M64.5652 25.0497L110.106 58.1372L92.7111 111.674H36.4194L19.0242 58.1372L64.5652 25.0497Z" stroke-width="2.2" stroke="#F4F4F4" mask="url(#stroke1_0_90)"/>
+<mask id="stroke2_0_90" fill="white">
+<path d="M64.7518 52.6749L84.0193 66.6736L76.6598 89.3239H52.8438L45.4842 66.6736L64.7518 52.6749Z"/>
+</mask>
+<path id="Polygon 23" d="M64.7518 52.6749L84.0193 66.6736L76.6598 89.3239H52.8438L45.4842 66.6736L64.7518 52.6749Z" stroke-width="2.64" stroke="#F4F4F4" mask="url(#stroke2_0_90)"/>
+<path id="Union" d="M64.9533 71.7222L127.682 51.8765L128.014 52.9253L65.2854 72.772L104.013 126.719L103.12 127.361L64.7893 73.9673L25.8694 127.157L24.9817 126.507L64.2141 72.8901H63.8537V72.5347L1.17698 52.8511L1.50608 51.8022L63.8537 71.3823V6.89014H64.9533V71.7222ZM64.9533 72.4321L65.008 72.3931L64.9533 72.2192V72.4321Z" fill="#EBEBEB"/>
+<path id="Vector 2" opacity="0.7" d="M64.6226 6.8938L31.6623 61.4306L52.8227 87.7729L84.6803 101.041L94.8984 63.3576L64.6226 6.8938Z" fill="#EBEAFE"/>
+<path id="Vector 3" d="M31.6623 61.4306L64.6226 6.8938L94.7002 63.6085L84.6803 101.177L52.8227 87.7729L31.6623 61.4306Z" stroke-width="1.32" stroke="#6865A7"/>
+<g id="Group 15">
+<circle id="Ellipse 45" cx="64.5651" cy="6.89146" r="1.98" fill="white" stroke-width="1.32" stroke="#6865A7"/>
+<circle id="Ellipse 46" cx="31.6623" cy="61.7631" r="1.98" fill="white" stroke-width="1.32" stroke="#6865A7"/>
+<circle id="Ellipse 47" cx="95.1834" cy="63.3798" r="1.98" fill="white" stroke-width="1.32" stroke="#6865A7"/>
+<circle id="Ellipse 48" cx="52.4848" cy="88.3124" r="1.98" fill="white" stroke-width="1.32" stroke="#6865A7"/>
+<circle id="Ellipse 49" cx="85.0108" cy="101.103" r="1.98" fill="white" stroke-width="1.32" stroke="#6865A7"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_90">
+<rect width="132" height="132" fill="white"/>
+</clipPath>
+</defs>
+</svg>

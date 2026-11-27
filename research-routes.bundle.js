@@ -147,13 +147,13 @@ var ZhiceResearchRoutes = (() => {
     { name: "\u90ED\u6210\u4E1C", fundType: "\u6DF7\u5408\u578B", rating: 1, return1y: -31.89, return3y: -46.29, maxReturn: 46.21, drawdown: 66.07 },
     { name: "\u8C2D\u73CF\u5A1C", fundType: "\u6DF7\u5408\u578B", rating: null, return1y: -28.66, return3y: -23.12, maxReturn: 138.75, drawdown: 58.41 }
   ];
-  var managerRatingExamples = companyData.managerRatings.flatMap(({ rating, exampleCount }) => {
-    const seeds = managerRatingSeeds.filter((manager) => manager.rating === rating).map((manager) => ({
+  var managerRatingExamples = companyData.managerRatings.flatMap(({ rating: rating2, exampleCount }) => {
+    const seeds = managerRatingSeeds.filter((manager) => manager.rating === rating2).map((manager) => ({
       ...manager,
       product: companyData.managers.find((item) => item.name === manager.name).product
     }));
     const remaining = Array.from({ length: exampleCount - seeds.length }, (_, index) => {
-      const grade = rating ?? 0;
+      const grade = rating2 ?? 0;
       const id = `${grade}${String(index + 1).padStart(2, "0")}`;
       const { label: fundType } = companyData.products[index % companyData.products.length];
       const moneyMarket = fundType === "\u8D27\u5E01\u578B";
@@ -161,7 +161,7 @@ var ZhiceResearchRoutes = (() => {
         name: `\u793A\u4F8B\u7ECF\u7406 ${id}`,
         product: `\u793A\u4F8B${fundType}\u57FA\u91D1 ${id}`,
         fundType,
-        rating,
+        rating: rating2,
         return1y: moneyMarket ? 1.25 + index % 8 / 20 : grade * 3.2 - 11 + index % 9 * 1.14,
         return3y: moneyMarket ? 4.5 + index % 7 / 10 : grade * 11.4 - 24 + index % 11 * 2.18,
         maxReturn: moneyMarket ? 6.7 + index % 11 / 10 : grade * 38.2 + 30 + index % 17 * 3.25,
@@ -1979,241 +1979,101 @@ var ZhiceResearchRoutes = (() => {
     };
   }
 
-  // dist/manager-list-data.js?v=20261125-manager-screen
-  var additionalCompanies2 = [
-    { id: "shangzheng", name: "\u5C1A\u6B63\u57FA\u91D1\u7BA1\u7406\u6709\u9650\u516C\u53F8", shortName: "\u5C1A\u6B63\u57FA\u91D1" },
-    { id: "guolianan", name: "\u56FD\u8054\u5B89\u57FA\u91D1\u7BA1\u7406\u6709\u9650\u516C\u53F8", shortName: "\u56FD\u8054\u5B89\u57FA\u91D1" },
-    { id: "morgan", name: "\u6469\u6839\u57FA\u91D1", shortName: "\u6469\u6839\u57FA\u91D1" },
-    { id: "invesco-greatwall", name: "\u666F\u987A\u957F\u57CE\u57FA\u91D1\u7BA1\u7406\u6709\u9650\u516C\u53F8", shortName: "\u666F\u987A\u957F\u57CE\u57FA\u91D1" },
-    { id: "changjiang-asset", name: "\u957F\u6C5F\u8D44\u7BA1", shortName: "\u957F\u6C5F\u8D44\u7BA1" },
-    { id: "demo-asset", name: "\u793A\u4F8B\u57FA\u91D1\u7BA1\u7406\u516C\u53F8", shortName: "\u793A\u4F8B\u57FA\u91D1" }
-  ];
-  var companiesByName2 = new Map([...companyList, ...additionalCompanies2].flatMap((company) => [
-    [company.name, company],
-    [company.shortName, company]
-  ]));
-  var companyDetails2 = new Set(companyList.map((company) => company.id));
-  var essenceRatings2 = new Map(managerRatingExamples.map((manager) => [manager.name, manager]));
-  var compareProfiles2 = {
-    a: { rating: 2, scale: 1.46, tenure: 7 },
-    b: { rating: 1, scale: 324.99, tenure: 17, representativeAnnualized: 2.91 },
-    c: { rating: 1, scale: 12.07, tenure: 7 }
-  };
-  var demonstrationProfiles2 = [
-    {
-      id: "demo:xu-jie",
-      name: "\u5F90\u5A55",
-      company: "\u957F\u6C5F\u8D44\u7BA1",
-      type: "\u504F\u80A1\u578B",
-      rating: 3,
-      careerYears: 25,
-      years: 7,
-      days: 227,
-      scale: 1.52,
-      product: "\u957F\u6C5F\u6DFB\u5229\u6DF7\u5408A",
-      productType: "\u504F\u503A\u6DF7\u5408\u578B",
-      representativeAnnualized: 2.82,
-      indexTotal: 214.37,
-      returns: { representative: [-1.7, 1.38, 2.82, 8.68, 12.86], index: [-2.78, -1.28, 0.82, 15.03, 19.82] },
-      risk: { representative: { drawdown: 9, volatility: 12, beta: 0.55 }, index: { drawdown: 16, volatility: 18, beta: 0.82 } }
-    },
-    {
-      id: "demo:equity",
-      name: "\u793A\u4F8B\u7ECF\u7406 A",
-      company: "\u793A\u4F8B\u57FA\u91D1",
-      type: "\u504F\u80A1\u578B",
-      rating: 4,
-      careerYears: 14,
-      years: 8,
-      days: 160,
-      scale: 58.3,
-      fundCount: 5,
-      product: "\u793A\u4F8B\u6210\u957F\u6DF7\u5408A",
-      productType: "\u504F\u80A1\u6DF7\u5408\u578B",
-      productStyle: "\u5927\u76D8-\u6210\u957F\u578B",
-      productThemes: ["\u79D1\u6280", "\u9AD8\u7AEF\u5236\u9020"],
-      representativeAnnualized: 12.68,
-      indexTotal: 135.06,
-      returns: { representative: [5.8, 9.4, 13.6, 42.5, 84.2], index: [4.15, 11.4, 18.85, 38.62, 72.44] },
-      risk: { representative: { drawdown: 21, volatility: 26, beta: 1.15 }, index: { drawdown: 18, volatility: 22, beta: 1.07 } }
-    },
-    {
-      id: "demo:bond",
-      name: "\u793A\u4F8B\u7ECF\u7406 B",
-      company: "\u793A\u4F8B\u57FA\u91D1",
-      type: "\u504F\u503A\u578B",
-      rating: 5,
-      careerYears: 18,
-      years: 12,
-      days: 56,
-      scale: 146.1,
-      fundCount: 8,
-      product: "\u793A\u4F8B\u7A33\u5065\u503A\u5238A",
-      productType: "\u4E2D\u957F\u671F\u7EAF\u503A\u578B",
-      productStyle: "\u4E2D\u76D8-\u4EF7\u503C\u578B",
-      productThemes: ["\u91D1\u878D\u5730\u4EA7"],
-      representativeAnnualized: 5.41,
-      indexTotal: 49.33,
-      returns: { representative: [1.9, 2.65, 5.92, 16.9, 28.8], index: [1.36, 3.33, 5.74, 18.21, 25.23] },
-      risk: { representative: { drawdown: 2.6, volatility: 3.9, beta: 0.22 }, index: { drawdown: 2.3, volatility: 3.2, beta: 0.18 } }
-    },
-    {
-      id: "demo:index",
-      name: "\u793A\u4F8B\u7ECF\u7406 C",
-      company: "\u793A\u4F8B\u57FA\u91D1",
-      type: "\u6307\u6570\u578B",
-      rating: 2,
-      careerYears: 10,
-      years: 6,
-      days: 98,
-      scale: 29.7,
-      fundCount: 3,
-      product: "\u793A\u4F8B\u5747\u8861\u6307\u6570A",
-      productType: "\u88AB\u52A8\u6307\u6570\u80A1\u7968\u578B",
-      productStyle: "\u5C0F\u76D8-\u5E73\u8861\u578B",
-      productThemes: ["\u6D88\u8D39", "\u533B\u836F"],
-      representativeAnnualized: -1.42,
-      indexTotal: 22.8,
-      returns: { representative: [-3.65, -1.72, -2.14, 8.15, 9.28], index: [-1.92, -3.47, -3.61, 6.92, 16.82] },
-      risk: { representative: { drawdown: 26, volatility: 28, beta: 1.3 }, index: { drawdown: 24, volatility: 27, beta: 1.22 } }
+  // dist/components/detail-header-scroll.js
+  function attachDetailHeaderScroll(root, { tabScrollEvent = "company-tab-scroll", onCompact = () => {
+  }, revealTallHeader = false } = {}) {
+    const slot = root.querySelector(".company-header-slot");
+    const header3 = root.querySelector(".company-header");
+    const facts = root.querySelector(".company-facts-wrap");
+    const title = header3.querySelector("h1");
+    const switchAction = header3.querySelector('[data-company-action="switch"], [data-md-action="switch"]');
+    const topbar = document.querySelector(".app-topbar");
+    let compact = false;
+    let pinned = false;
+    let previousY = 0;
+    let accumulated = 0;
+    let frame = 0;
+    let top = 52;
+    let anchor = 0;
+    function fitCompactMetadata() {
+      header3.classList.remove("is-metadata-hidden");
+      const fits = title.scrollWidth <= title.clientWidth;
+      header3.classList.toggle("is-metadata-hidden", !fits);
     }
-  ];
-  var rankPeriods2 = [
-    { id: "3m", years: 0.25, drawdownWeight: 0.58, benchmark: 1.7 },
-    { id: "6m", years: 0.5, drawdownWeight: 0.75, benchmark: 3.1 },
-    { id: "1y", years: 1, drawdownWeight: 1, benchmark: 5.4 },
-    { id: "3y", years: 3, drawdownWeight: 1.42, benchmark: 6.2 },
-    { id: "5y", years: 5, drawdownWeight: 1.72, benchmark: 6.5 }
-  ];
-  var lowerIsBetter2 = /* @__PURE__ */ new Set(["maxDrawdown", "volatility", "downsideRisk"]);
-  function demonstrationMetrics2(demo, scope, period, position) {
-    const totalReturn = demo.returns[scope][position];
-    const cagr = ((1 + totalReturn / 100) ** (1 / period.years) - 1) * 100;
-    const excessCagr = cagr - period.benchmark;
-    const risk = demo.risk[scope];
-    const volatility = risk.volatility * (0.9 + 0.05 * position);
-    const maxDrawdown = risk.drawdown * period.drawdownWeight;
-    const downsideRisk = volatility * (totalReturn < 0 ? 0.72 : 0.54);
-    const excessRiskFree = cagr - 1.5;
-    return {
-      return: totalReturn,
-      cagr,
-      excessCagr,
-      maxDrawdown,
-      volatility,
-      downsideRisk,
-      sharpe: excessRiskFree / volatility,
-      informationRatio: excessCagr / (volatility * 0.6),
-      calmar: cagr / maxDrawdown,
-      sortino: excessRiskFree / downsideRisk,
-      treynor: excessRiskFree / risk.beta
-    };
-  }
-  function demonstrationPerformance2() {
-    const profiles = new Map(demonstrationProfiles2.map(({ id }) => [id, {
-      performance: { representative: {}, index: {} },
-      performanceValues: { representative: {}, index: {} }
-    }]));
-    for (const scope of ["representative", "index"]) {
-      rankPeriods2.forEach((period, periodIndex) => {
-        const sample = demonstrationProfiles2.map((demo) => ({ id: demo.id, metrics: demonstrationMetrics2(demo, scope, period, periodIndex) }));
-        for (const metric2 of Object.keys(sample[0].metrics)) {
-          const direction = lowerIsBetter2.has(metric2) ? 1 : -1;
-          const ranked = [...sample].sort((left, right) => direction * (left.metrics[metric2] - right.metrics[metric2]));
-          ranked.forEach(({ id, metrics }, position) => {
-            const { performance, performanceValues } = profiles.get(id);
-            const ranks2 = performance[scope];
-            const values = performanceValues[scope];
-            ranks2[metric2] ??= {};
-            values[metric2] ??= {};
-            ranks2[metric2][period.id] = 100 * (position + 0.5) / sample.length;
-            values[metric2][period.id] = metrics[metric2];
-          });
+    function measure() {
+      top = topbar?.offsetHeight ?? 0;
+      root.style.setProperty("--company-sticky-top", `${top}px`);
+      anchor = slot.getBoundingClientRect().top + window.scrollY - top;
+      header3.classList.add("company-no-transition");
+      header3.classList.remove("is-compact");
+      const expandedHeight = header3.offsetHeight;
+      slot.style.height = `${expandedHeight}px`;
+      if (revealTallHeader) {
+        anchor += Math.max(0, top + expandedHeight - window.innerHeight + 8);
+      }
+      header3.classList.toggle("is-compact", compact);
+      if (compact) fitCompactMetadata();
+      void header3.offsetHeight;
+      header3.classList.remove("company-no-transition");
+    }
+    function draw(nextCompact, nextPinned) {
+      if (pinned !== nextPinned) {
+        pinned = nextPinned;
+        header3.classList.toggle("is-pinned", pinned);
+      }
+      if (compact !== nextCompact) {
+        compact = nextCompact;
+        const movingFocus = compact && facts?.contains(document.activeElement);
+        header3.classList.toggle("is-compact", compact);
+        if (compact) fitCompactMetadata();
+        if (facts) {
+          facts.inert = compact;
+          facts.setAttribute("aria-hidden", String(compact));
         }
-      });
+        if (movingFocus) switchAction?.focus({ preventScroll: true });
+        if (compact) onCompact();
+      }
     }
-    return profiles;
-  }
-  var samplePerformance2 = demonstrationPerformance2();
-  var blankMetrics2 = {
-    product: null,
-    productType: null,
-    productStyle: null,
-    type: null,
-    tenure: null,
-    tenureDays: null,
-    careerYears: null,
-    scale: null,
-    fundCount: null,
-    rating: null,
-    representativeAnnualized: null,
-    indexTotal: null,
-    index3m: null,
-    index1y: null,
-    index3y: null
-  };
-  function getManagerListData2() {
-    const companies = /* @__PURE__ */ new Map();
-    function useCompany(companyName) {
-      const { id, name, shortName } = companiesByName2.get(companyName) ?? { id: companyName, name: companyName, shortName: companyName };
-      companies.set(id, { id, name, shortName, hasDetail: companyDetails2.has(id) });
-      return id;
+    function tick() {
+      frame = 0;
+      if (!root.isConnected) return;
+      const y = Math.max(0, window.scrollY);
+      const delta = y - previousY;
+      previousY = y;
+      if (delta !== 0) accumulated = Math.sign(delta) === Math.sign(accumulated) ? accumulated + delta : delta;
+      const atAnchor = y <= Math.max(0, anchor + 2);
+      const nextPinned = !atAnchor;
+      let nextCompact = compact;
+      if (atAnchor || accumulated <= -28) nextCompact = false;
+      else if (y >= anchor + 48 && accumulated >= 14) nextCompact = true;
+      draw(nextCompact, nextPinned);
     }
-    const essenceId = useCompany(companyData.name);
-    const essenceManagers = companyData.managers.map((manager) => {
-      const rated = essenceRatings2.get(manager.name);
-      return {
-        ...blankMetrics2,
-        id: `${essenceId}:${manager.name}`,
-        name: manager.name,
-        companyId: essenceId,
-        type: manager.type ?? null,
-        product: manager.product ?? null,
-        productType: rated?.fundType ?? null,
-        tenure: manager.tenure ?? null,
-        tenureDays: Number.isFinite(manager.tenure) ? Math.round(manager.tenure * 365) : null,
-        careerYears: manager.experience ?? null,
-        scale: manager.scale ?? null,
-        fundCount: manager.count ?? null,
-        rating: rated?.rating ?? null,
-        representativeAnnualized: manager.annual ?? null
-      };
-    });
-    const compareCatalog = window.ManagerCompareView?.getCatalog() ?? [];
-    const compareManagers = compareCatalog.map(({ id, name, company, product, productType, type }) => {
-      const profile = compareProfiles2[id];
-      return {
-        ...blankMetrics2,
-        ...profile,
-        id: `compare:${id}`,
-        name,
-        companyId: useCompany(company),
-        product: product ?? null,
-        productType: productType ?? null,
-        type: type ?? null,
-        tenureDays: Number.isFinite(profile?.tenure) ? profile.tenure * 365 : null
-      };
-    });
-    const demoManagers = demonstrationProfiles2.map(({ company, years, days, returns, risk, ...profile }) => ({
-      ...blankMetrics2,
-      ...profile,
-      companyId: useCompany(company),
-      tenure: years + days / 365,
-      tenureDays: years * 365 + days,
-      tenureLabel: `${years}\u5E74${days}\u5929`,
-      index3m: returns.index[0],
-      index1y: returns.index[2],
-      index3y: returns.index[3],
-      isDemo: true,
-      ...samplePerformance2.get(profile.id)
-    }));
-    const managers = [...essenceManagers, ...compareManagers, ...demoManagers].map((manager) => ({
-      ...manager,
-      productThemes: manager.productThemes ?? [],
-      performance: manager.performance ?? { representative: {}, index: {} },
-      performanceValues: manager.performanceValues ?? { representative: {}, index: {} }
-    }));
-    return { companies: [...companies.values()], managers };
+    function onScroll() {
+      if (frame) return;
+      frame = requestAnimationFrame(tick);
+    }
+    function onResize() {
+      if (!root.isConnected) return;
+      measure();
+      onScroll();
+    }
+    measure();
+    tick();
+    function resetDirection() {
+      previousY = Math.max(0, window.scrollY);
+      accumulated = 0;
+      onScroll();
+    }
+    root.addEventListener(tabScrollEvent, resetDirection);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onResize, { passive: true });
+    document.fonts?.ready.then(onResize);
+    return () => {
+      root.removeEventListener(tabScrollEvent, resetDirection);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }
 
   // dist/manager-detail.js
@@ -2223,14 +2083,372 @@ var ZhiceResearchRoutes = (() => {
   });
   var escapeHtml3 = (value) => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
   var backLink = '<a class="md-back" href="#/manager-screener">\u8FD4\u56DE\u7ECF\u7406\u7B5B\u9009</a>';
+  var tabs = [
+    ["overview", "\u4EBA\u7269\u6982\u89C8"],
+    ["funds", "\u65D7\u4E0B\u57FA\u91D1"],
+    ["returns", "\u6536\u76CA"],
+    ["risk", "\u98CE\u9669"],
+    ["holdings", "\u6301\u4ED3\u5206\u6790"],
+    ["profile", "\u57FA\u672C\u4FE1\u606F"]
+  ];
   function withUnit(value, unit, formatter2 = String) {
     return Number.isFinite(value) ? `${formatter2(value)}${unit}` : null;
   }
   function field(label, value) {
     return `<div><dt>${label}</dt><dd>${value ?? "\u2014"}</dd></div>`;
   }
-  function renderManagerDetail(view, managerId) {
-    const { companies, managers } = getManagerListData2();
+  function managerHref(id) {
+    return `#/manager/${encodeURIComponent(id)}`;
+  }
+  var headerAssets = "./assets/manager-detail";
+  var evaluationPeriods = [["1y", "\u8FD11\u5E74"], ["3y", "\u8FD13\u5E74"], ["5y", "\u8FD15\u5E74"]];
+  var evaluationDimensions = ["\u76C8\u5229\u80FD\u529B", "\u4E1A\u7EE9\u7A33\u5B9A\u6027", "\u884C\u4E1A\u7A33\u5B9A\u6027", "\u56DE\u64A4\u63A7\u5236", "\u590F\u666E\u7387"];
+  var designSummaryGroups = [
+    ["\u7BA1\u7406\u7ECF\u9A8C", [
+      '\u6700\u65B0\u8BC4\u7EA7<span class="is-fall">2\u661F</span>\uFF0C\u8F83\u4E0A\u4E00\u5B63\u5EA6<span class="is-fall">\u4E0B\u964D1\u661F</span>\u3002',
+      "\u516C\u52DF\u57FA\u91D1\u7BA1\u7406\u5E74\u96508.7\u5E74\uFF0C\u76EE\u524D\u5728\u7BA1\u57FA\u91D18\u53EA\uFF0C\u5728\u7BA1\u89C4\u6A211.61\u4EBF\u5143\u3002",
+      "\u4EE3\u8868\u57FA\u91D1\uFF1A<strong>\u56FD\u8054\u5B89\u4E2D\u8BC1\u5168\u6307\u534A\u5BFC\u4F53\u4EA7\u54C1\u4E0E\u8BBE\u5907ETF</strong>",
+      "\u4E3B\u8981\u5728\u7BA1\u57FA\u91D1\u7C7B\u578B\u4E3A<strong>\u80A1\u7968\u578B</strong>\u3002"
+    ]],
+    ["\u4E1A\u7EE9\u8868\u73B0", [
+      '<span class="is-fall">\u535A\u53D6\u6536\u76CA\u80FD\u529B\u5F31</span>\uFF0C<strong>\u63A7\u5236\u98CE\u9669\u80FD\u529B\u4E2D\u7B49</strong>\u3002',
+      '\u8FD15\u5E74\uFF0C\u5E74\u5316\u6536\u76CA\u7387\u4E3A\u22128.19%\uFF0C<span class="is-fall">\u5DEE\u4E8E</span>\u6CAA\u6DF1300\u3002\u6700\u5927\u56DE\u64A4\u4E3A46.84%\uFF0C<span class="is-fall">\u5DEE\u4E8E</span>\u6CAA\u6DF1300\u3002',
+      '\u5728\u80A1\u5E02\u725B\u5E02\u4E2D\u6536\u76CA\u8868\u73B0<span class="is-fall">\u8F83\u5DEE</span>\uFF0C\u718A\u5E02\u4E2D\u98CE\u63A7\u8868\u73B0<strong>\u4E2D\u7B49</strong>\u3002'
+    ]],
+    ["\u6295\u8D44\u504F\u597D", [
+      "\u6295\u8D44<strong>\u504F\u91CD\u80A1\u7968</strong>\uFF0C\u6574\u4F53\u98CE\u683C\u4E3A<strong>\u5927\u76D8\u2013\u5E73\u8861\u578B</strong>\u3002",
+      "\u80A1\u7968\u884C\u4E1A\u504F\u597D<strong>\u5206\u6563</strong>\uFF0C\u524D\u4E09\u5927\u4E3A<strong>\u5176\u4ED6\u2013\u79D1\u521B\u677F\u3001\u7535\u5B50\u3001\u5176\u4ED6\u2013\u6E2F\u80A1</strong>\u3002\u91CD\u4ED3\u80A1\u7968<strong>\u6301\u6709\u65F6\u95F4\u77ED</strong>\u3002\u884C\u4E1A\u5206\u5E03<strong>\u7A33\u5B9A</strong>\u3002",
+      "\u503A\u5238\u6295\u8D44\u4E2D\u504F\u597D\u7684\u5238\u79CD\u4E3A\u53EF\u8F6C\u6362\u503A\u5238\u3002"
+    ]],
+    ["\u57FA\u91D1\u516C\u53F8", [
+      "\u5F18\u6BC5\u8FDC\u65B9\u57FA\u91D1\u7BA1\u7406\u6709\u9650\u516C\u53F8\u6210\u7ACB\u4E8E2018\u5E74\u3002\u5F53\u524D\u7BA1\u7406\u89C4\u6A21\u4E3A9.0\u4EBF\u5143\uFF0C\u89C4\u6A21<strong>\u8F83\u5C0F</strong>\u3002\u65D7\u4E0B\u57FA\u91D1\u4EE5<strong>\u6DF7\u5408\u578B</strong>\u4E3A\u4E3B\uFF0C\u536054%\u3002\u65D7\u4E0B\u57FA\u91D1\u7ECF\u7406\u51715\u540D\uFF0C\u56E2\u961F<strong>\u8F83\u5C0F</strong>\u3002\u5728\u667A\u541B\u7ECF\u7406\u8BC4\u7EA7\u4E2D\u83B7\u5F974\u661F\u53CA\u4EE5\u4E0A\u7684\u67091\u4EBA\uFF0C\u6570\u91CF<strong>\u8F83\u5C11</strong>\u3002"
+    ]]
+  ];
+  var sampleHeaders = {
+    "demo:xu-jie": {
+      summaryGroups: designSummaryGroups,
+      companyName: "\u957F\u6C5F\u8BC1\u5238(\u4E0A\u6D77)\u8D44\u4EA7\u7BA1\u7406\u6709\u9650\u516C\u53F8",
+      avatar: headerAssets + "/avatar.png",
+      degree: "\u535A\u58EB",
+      industries: "\u975E\u94F6\u91D1\u878D\u3001\u94F6\u884C\u3001\u57FA\u7840\u5316\u5DE5",
+      awards: "\u91D1\u725B\u5956\u3001\u660E\u661F\u57FA\u91D1\u5956",
+      tenureLabel: "8\u5E74",
+      nonCurrencyScale: 1.52,
+      fundCount: 6,
+      totalFundCount: 7,
+      representativeAnnualized: 2.75,
+      representativeBenchmark: -3.2,
+      evaluation: { "3y": [58.49, 96.09, 69.03, 94.87, 46.07] }
+    },
+    "compare:b": {
+      summaryGroups: designSummaryGroups,
+      avatar: headerAssets + "/huang-xin.png",
+      rating: null,
+      degree: "\u7855\u58EB",
+      industries: "\u5176\u4ED6-\u79D1\u521B\u677F\u3001\u7535\u5B50",
+      awards: "\u82F1\u534E\u5956",
+      tenureLabel: "17\u5E74",
+      careerYears: 24,
+      scale: 327.35,
+      nonCurrencyScale: 327.35,
+      fundCount: 26,
+      totalFundCount: 34,
+      representativeAnnualized: 3.99,
+      representativeBenchmark: 0.87,
+      evaluation: {
+        "1y": [86.25, 14.42, 8.7, 17.6, 79.33],
+        "3y": [90.72, 6.58, 3.6, 10.15, 83.4],
+        "5y": [93.98, 1.61, 0, 4.82, 86.35]
+      }
+    }
+  };
+  function rating(stars2) {
+    if (!Number.isInteger(stars2) || stars2 < 1 || stars2 > 5) return "";
+    const icons = Array.from({ length: 5 }, (_, index) => {
+      const state2 = index >= stars2 ? "star-background" : index === 2 ? "star-foreground" : "star-default";
+      return `<img src="${headerAssets}/${state2}.svg" width="14.8" height="14.8" alt="">`;
+    });
+    return `<span class="md-stars" role="img" aria-label="\u667A\u541B\u8BC4\u7EA7 ${stars2} \u661F">${icons.join("")}</span>`;
+  }
+  function metricValue(value, unit) {
+    return `<span class="company-metric-value">
+    <span class="company-metric-number">${escapeHtml3(value ?? "\u2014")}</span>${unit && value != null ? `<span class="company-metric-unit">${unit}</span>` : ""}
+  </span>`;
+  }
+  function metricNote(label, value, unit = "", secondary = false) {
+    const benchmark = secondary ? " md-benchmark" : "";
+    return `<span class="md-metric-note${benchmark}"><span>${label}</span><span class="md-note-value">${escapeHtml3(value ?? "\u2014")}${unit && value != null ? `<span class="company-metric-unit">${unit}</span>` : ""}</span></span>`;
+  }
+  function metaField(label, value) {
+    return `<span class="md-meta-field"><span class="md-meta-label">${label}\uFF1A</span> ${value ?? "\u2014"}</span>`;
+  }
+  function number(value) {
+    return Number.isFinite(value) ? formatNumber.format(value) : null;
+  }
+  function header(manager, companyValue) {
+    const compare = new URLSearchParams({ manager: manager.id });
+    const annualized = withUnit(manager.representativeAnnualized, "%", number);
+    const benchmark = withUnit(manager.representativeBenchmark, "%", number);
+    const tenure = manager.tenureLabel || withUnit(manager.tenure, "\u5E74");
+    const career = withUnit(manager.careerYears, "\u5E74");
+    const showDemoLabel = manager.isDemo && !manager.avatar;
+    return `<div class="company-header-slot"><header class="company-header md-header" aria-labelledby="md-title">
+    <div class="company-header-top md-header-top">
+      <div class="company-identity md-identity">
+        <span class="md-avatar" aria-hidden="true">${manager.avatar ? `<img src="${manager.avatar}" width="40" height="40" alt="">` : escapeHtml3(Array.from(manager.name)[0] ?? "\u57FA")}</span>
+        <div class="md-heading">
+          <h1 id="md-title">${escapeHtml3(manager.name)}</h1>
+          ${manager.type || showDemoLabel ? `<div class="company-chips">${manager.type ? `<span>${escapeHtml3(manager.type)}</span>` : ""}${showDemoLabel ? "<span>\u793A\u4F8B</span>" : ""}</div>` : ""}
+          ${rating(manager.rating)}
+        </div>
+      </div>
+      <div class="company-header-actions md-actions">
+        <a class="md-compare" href="#/manager-compare?${compare}" aria-label="\u7ECF\u7406PK" title="\u7ECF\u7406PK"><span>\u7ECF\u7406</span><img src="${headerAssets}/pk.svg" width="26.6162" height="13.9651" alt=""></a>
+        <button type="button" aria-label="\u5207\u6362\u7ECF\u7406" title="\u5207\u6362\u7ECF\u7406" aria-expanded="false" aria-controls="md-switch-panel" data-md-action="switch">
+          <span class="md-switch-artwork" aria-hidden="true">
+            <img src="${headerAssets}/switch-default.png" width="46" height="20" alt="">
+            <img src="${headerAssets}/switch-hover.png" width="46" height="20" alt="">
+          </span>
+        </button>
+        <div id="md-switch-panel" class="md-switch-panel" hidden>
+          <input type="search" class="md-switch-search" aria-label="\u641C\u7D22\u57FA\u91D1\u7ECF\u7406" aria-controls="md-switch-results" placeholder="\u8F93\u5165\u7ECF\u7406\u59D3\u540D" autocomplete="off">
+          <div id="md-switch-results" class="md-switch-results" role="group" aria-label="\u57FA\u91D1\u7ECF\u7406\u641C\u7D22\u7ED3\u679C" hidden></div>
+        </div>
+      </div>
+    </div>
+    <div class="company-facts-wrap md-facts-wrap">
+      <div class="md-header-body">
+        <div class="md-meta">
+          ${metaField("\u73B0\u4EFB\u516C\u53F8", companyValue)}
+          ${metaField("\u5B66\u5386", manager.degree && escapeHtml3(manager.degree))}
+          ${metaField("\u7BA1\u7406/\u4ECE\u4E1A\u5E74\u9650", tenure || career ? `${escapeHtml3(tenure ?? "\u2014")}/${escapeHtml3(career ?? "\u2014")}` : null)}
+          ${metaField("\u504F\u7231\u884C\u4E1A", manager.industries && escapeHtml3(manager.industries))}
+          ${metaField("\u83B7\u5956", manager.awards && escapeHtml3(manager.awards))}
+        </div>
+        <dl class="company-metrics md-metrics">
+          <div class="md-metric--scale"><dt>\u5728\u7BA1\u89C4\u6A21</dt>
+            <dd class="company-metric-readout">${metricValue(number(manager.scale), "\u4EBF")}${metricNote("\u5254\u9664\u8D27\u5E01\u89C4\u6A21", number(manager.nonCurrencyScale), "\u4EBF")}</dd>
+          </div>
+          <div class="md-metric--products"><dt>\u5728\u7BA1\u4EA7\u54C1</dt>
+            <dd class="company-metric-readout">${metricValue(manager.fundCount, "\u4E2A")}${metricNote("\u7D2F\u8BA1", manager.totalFundCount, "\u4E2A")}</dd>
+          </div>
+          <div class="md-metric--representative"><dt>\u4EE3\u8868\u4EA7\u54C1</dt>
+            <dd class="company-metric-readout">
+              ${manager.product ? `<span class="md-representative-name" title="${escapeHtml3(manager.product)}">${escapeHtml3(manager.product)}</span>` : '<span class="md-representative-name md-representative-missing">\u2014</span>'}
+              <span class="md-representative-notes">${metricNote("\u5E74\u5316\u56DE\u62A5", annualized)}${metricNote("\u540C\u671F\u5927\u76D8", benchmark, "", true)}</span>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+    <div class="company-tabs md-tabs" role="tablist" aria-label="\u7ECF\u7406\u8BE6\u60C5">
+      ${tabs.map(([key, label]) => `<button type="button" role="tab" id="md-tab-${key}" aria-controls="md-tab-panel" data-md-tab="${key}">${label}</button>`).join("")}
+    </div>
+  </header></div>`;
+  }
+  function section(title, fields2, empty) {
+    return `<section class="cl-card md-detail">
+    <h2>${title}</h2>
+    ${fields2.length ? `<dl class="md-fields">${fields2.map(([label, value]) => field(label, value)).join("")}</dl>` : `<p class="md-empty">${empty}</p>`}
+  </section>`;
+  }
+  function summaryGroup(title, lines) {
+    const copy = lines.filter(Boolean).map((line) => `<p>${line}</p>`).join("");
+    return `<section class="md-summary-group">
+    <h3>${title}</h3>
+    <div class="md-summary-copy">${copy || "<p>\u6682\u65E0\u6570\u636E</p>"}</div>
+  </section>`;
+  }
+  function managerSummaryGroups(manager, company, companyValue) {
+    if (manager.summaryGroups) return manager.summaryGroups;
+    const tenure = manager.tenureLabel || withUnit(manager.tenure, "\u5E74");
+    const fundCount = withUnit(manager.fundCount, "\u53EA");
+    const scale = withUnit(manager.scale, "\u4EBF\u5143", number);
+    const experience = [
+      tenure && `\u516C\u52DF\u57FA\u91D1\u7BA1\u7406\u5E74\u9650${escapeHtml3(tenure)}`,
+      fundCount && `\u76EE\u524D\u5728\u7BA1\u57FA\u91D1${fundCount}`,
+      scale && `\u5728\u7BA1\u89C4\u6A21${scale}`
+    ].filter(Boolean).join("\uFF0C");
+    const annualized = withUnit(manager.representativeAnnualized, "%", number);
+    const benchmark = withUnit(manager.representativeBenchmark, "%", number);
+    const performance = [
+      annualized && `\u4EE3\u8868\u57FA\u91D1\u5E74\u5316\u56DE\u62A5${annualized}`,
+      benchmark && `\u540C\u671F\u5927\u76D8${benchmark}`
+    ].filter(Boolean).join("\uFF0C");
+    const difference = Number.isFinite(manager.representativeAnnualized) && Number.isFinite(manager.representativeBenchmark) ? Number((manager.representativeAnnualized - manager.representativeBenchmark).toFixed(2)) : null;
+    const comparison = difference == null ? "" : difference === 0 ? "\u4EE3\u8868\u57FA\u91D1\u4E0E\u540C\u671F\u5927\u76D8\u5E74\u5316\u56DE\u62A5\u6301\u5E73\u3002" : `\u4EE3\u8868\u57FA\u91D1\u5E74\u5316\u56DE\u62A5<span class="${difference > 0 ? "is-rise" : "is-fall"}">${difference > 0 ? "\u9AD8\u4E8E" : "\u4F4E\u4E8E"}</span>\u540C\u671F\u5927\u76D8 ${number(Math.abs(difference))} \u4E2A\u767E\u5206\u70B9\u3002`;
+    const companyDetails2 = companyList.find((entry) => entry.id === company?.id);
+    const companyMetrics = companyDetails2 ? [
+      companyDetails2.founded && `\u6210\u7ACB\u4E8E${escapeHtml3(companyDetails2.founded)}`,
+      Number.isFinite(companyDetails2.totalScale) && `\u7BA1\u7406\u89C4\u6A21${number(companyDetails2.totalScale)}\u4EBF\u5143`,
+      Number.isFinite(companyDetails2.fundCount) && `\u65D7\u4E0B\u57FA\u91D1${companyDetails2.fundCount}\u53EA`,
+      Number.isFinite(companyDetails2.managerCount) && `\u57FA\u91D1\u7ECF\u7406${companyDetails2.managerCount}\u540D`
+    ].filter(Boolean).join("\uFF0C") : "";
+    return [
+      ["\u7BA1\u7406\u7ECF\u9A8C", [
+        Number.isInteger(manager.rating) && `\u6700\u65B0\u8BC4\u7EA7${manager.rating}\u661F\u3002`,
+        experience && `${experience}\u3002`,
+        manager.product && `\u4EE3\u8868\u57FA\u91D1\uFF1A<strong>${escapeHtml3(manager.product)}</strong>\u3002`,
+        manager.productType && `\u4EE3\u8868\u57FA\u91D1\u7C7B\u578B\u4E3A<strong>${escapeHtml3(manager.productType)}</strong>\u3002`
+      ]],
+      ["\u4E1A\u7EE9\u8868\u73B0", [performance && `${performance}\u3002`, comparison]],
+      ["\u6295\u8D44\u504F\u597D", [
+        manager.industries && `\u504F\u7231\u884C\u4E1A\u4E3A<strong>${escapeHtml3(manager.industries)}</strong>\u3002`,
+        manager.productStyle && `\u4EE3\u8868\u57FA\u91D1\u98CE\u683C\u4E3A<strong>${escapeHtml3(manager.productStyle)}</strong>\u3002`,
+        manager.productThemes?.length && `\u4EE3\u8868\u57FA\u91D1\u4E3B\u9898\u4E3A<strong>${escapeHtml3(manager.productThemes.join("\u3001"))}</strong>\u3002`
+      ]],
+      ["\u57FA\u91D1\u516C\u53F8", [
+        companyValue && `\u73B0\u4EFB\u516C\u53F8\uFF1A${companyValue}\u3002`,
+        companyMetrics && `${companyMetrics}\u3002`
+      ]]
+    ];
+  }
+  function managerSummary(manager, company, companyValue) {
+    const groups2 = managerSummaryGroups(manager, company, companyValue);
+    const summary = document.createElement("section");
+    summary.className = "cl-card md-summary";
+    summary.setAttribute("aria-labelledby", "md-summary-title");
+    summary.innerHTML = `
+    <div class="md-summary-head">
+      <h2 id="md-summary-title">\u6838\u5FC3\u603B\u7ED3</h2>
+      <div class="md-summary-periods" role="group" aria-label="\u8BC4\u4F30\u65F6\u6BB5">
+        ${evaluationPeriods.map(([key, label]) => `<button type="button" data-md-summary-period="${key}" aria-controls="md-summary-scores" aria-pressed="${key === "3y"}">${label}</button>`).join("")}
+      </div>
+    </div>
+    <dl class="md-summary-scores" id="md-summary-scores" aria-live="polite">
+      ${evaluationDimensions.map((label) => `<div><dt>${label}</dt><dd>\u2014</dd></div>`).join("")}
+    </dl>
+    <div class="md-summary-details" id="md-summary-details" hidden>
+      ${groups2.map(([title, lines]) => summaryGroup(title, lines)).join("")}
+    </div>
+    <button type="button" class="md-summary-toggle" aria-controls="md-summary-details" aria-expanded="false" aria-label="\u5C55\u5F00">
+      <span class="md-summary-expand-art" aria-hidden="true">
+        <img src="${headerAssets}/summary-expand-default.png" width="42" height="28" alt="">
+        <img src="${headerAssets}/summary-expand-hover.png" width="42" height="28" alt="">
+      </span>
+      <span class="md-summary-collapse-art" aria-hidden="true">
+        <img src="${headerAssets}/summary-collapse-default.png" width="42" height="28" alt="">
+        <img src="${headerAssets}/summary-collapse-hover.png" width="42" height="28" alt="">
+      </span>
+    </button>`;
+    const periods2 = summary.querySelectorAll("[data-md-summary-period]");
+    const scores = summary.querySelectorAll(".md-summary-scores dd");
+    function selectPeriod(period) {
+      const values = manager.evaluation?.[period];
+      periods2.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.mdSummaryPeriod === period)));
+      scores.forEach((score, index) => {
+        score.textContent = number(values?.[index]) ?? "\u2014";
+      });
+    }
+    periods2.forEach((button) => button.addEventListener("click", () => selectPeriod(button.dataset.mdSummaryPeriod)));
+    selectPeriod("3y");
+    const details = summary.querySelector(".md-summary-details");
+    const toggle = summary.querySelector(".md-summary-toggle");
+    toggle.addEventListener("click", () => {
+      const expanded = details.hidden;
+      details.hidden = !expanded;
+      toggle.setAttribute("aria-expanded", String(expanded));
+      toggle.setAttribute("aria-label", expanded ? "\u6536\u8D77" : "\u5C55\u5F00");
+    });
+    return summary;
+  }
+  function bindManagerSwitch(root, currentManager, managers, companies) {
+    const trigger = root.querySelector('[data-md-action="switch"]');
+    const panel = root.querySelector(".md-switch-panel");
+    const search = panel.querySelector(".md-switch-search");
+    const results = panel.querySelector(".md-switch-results");
+    const employers = new Map(companies.map((company) => [company.id, company]));
+    const otherManagers = managers.filter((entry) => entry.id !== currentManager.id);
+    function showManagers() {
+      const query = search.value.trim();
+      if (!query) {
+        results.hidden = true;
+        results.replaceChildren();
+        return;
+      }
+      const keyword = query.replace(/[.*+?^$(){}|[\]\\]/g, "\\$&");
+      const match = new RegExp("(" + keyword + ")", "iu");
+      const matching = otherManagers.filter((entry) => match.test(entry.name));
+      const onlyCurrent = matching.length === 0 && match.test(currentManager.name);
+      results.hidden = onlyCurrent;
+      if (onlyCurrent) {
+        results.replaceChildren();
+        return;
+      }
+      results.innerHTML = matching.map((entry) => {
+        const company = employers.get(entry.companyId);
+        const employer = company?.shortName ?? company?.name ?? "\u2014";
+        const type = entry.type ?? "\u2014";
+        const name = entry.name.split(match).map((part, index) => {
+          const safePart = escapeHtml3(part);
+          return index % 2 ? "<strong>" + safePart + "</strong>" : safePart;
+        }).join("");
+        return `<a class="md-switch-result" href="${managerHref(entry.id)}">
+        <span class="md-switch-name" title="${escapeHtml3(entry.name)}">${name}</span>
+        <span class="md-switch-employer" title="${escapeHtml3(employer)}">${escapeHtml3(employer)}</span>
+        <span class="md-switch-type" title="${escapeHtml3(type)}">${escapeHtml3(type)}</span>
+      </a>`;
+      }).join("") || '<p class="md-switch-empty" role="status">\u672A\u627E\u5230\u5339\u914D\u7684\u57FA\u91D1\u7ECF\u7406</p>';
+      results.scrollTop = 0;
+    }
+    function close(restoreFocus = false) {
+      if (panel.hidden) return;
+      panel.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+      if (restoreFocus) trigger.focus({ preventScroll: true });
+    }
+    trigger.addEventListener("click", () => {
+      if (!panel.hidden) {
+        close(true);
+        return;
+      }
+      search.value = "";
+      showManagers();
+      panel.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      search.focus({ preventScroll: true });
+    });
+    search.addEventListener("input", showManagers);
+    results.addEventListener("click", (event) => {
+      const result = event.target.closest(".md-switch-result");
+      if (!result || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
+      close();
+    });
+    panel.addEventListener("keydown", (event) => {
+      if (event.isComposing || !["ArrowDown", "ArrowUp", "Enter"].includes(event.key)) return;
+      const entries = [...results.querySelectorAll(".md-switch-result")];
+      if (!entries.length) return;
+      if (event.key === "Enter") {
+        if (event.target === search) {
+          event.preventDefault();
+          entries[0].click();
+        }
+        return;
+      }
+      event.preventDefault();
+      const current = entries.indexOf(event.target);
+      const next = current + (event.key === "ArrowDown" ? 1 : -1);
+      const target = next < 0 ? search : entries[Math.min(next, entries.length - 1)];
+      target.focus();
+    });
+    root.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape" || event.isComposing || panel.hidden) return;
+      event.preventDefault();
+      close(true);
+    });
+    function dismissOutside(event) {
+      if (!panel.contains(event.target) && !trigger.contains(event.target)) close();
+    }
+    document.addEventListener("pointerdown", dismissOutside);
+    document.addEventListener("focusin", dismissOutside);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside);
+      document.removeEventListener("focusin", dismissOutside);
+    };
+  }
+  function renderManagerDetail(view, managerId, { initialTab, onTabChange = () => {
+  } } = {}) {
+    const { companies, managers } = getManagerListData();
     const manager = managers.find((entry) => entry.id === managerId);
     if (!manager) {
       view.innerHTML = `<div class="cl-page md-page">${backLink}
@@ -2241,39 +2459,94 @@ var ZhiceResearchRoutes = (() => {
       return;
     }
     const company = companies.find((entry) => entry.id === manager.companyId);
-    const companyName = company ? escapeHtml3(company.name) : null;
-    const companyValue = company?.hasDetail ? `<a class="md-company-link" href="#/company/${encodeURIComponent(company.id)}">${companyName}</a>` : companyName;
+    const headerManager = { ...manager, ...sampleHeaders[manager.id] };
+    const companyValue = company ? `<a class="md-company-link" href="#/company/${encodeURIComponent(company.id)}">${escapeHtml3(headerManager.companyName ?? company.name)}</a>` : null;
     const details = [
       ["\u73B0\u4EFB\u516C\u53F8", companyValue],
       ["\u7ECF\u7406\u7C7B\u578B", manager.type && escapeHtml3(manager.type)],
-      ["\u7EFC\u5408\u8BC4\u7EA7", withUnit(manager.rating, "\u661F")],
-      ["\u4ECE\u4E1A\u5E74\u9650", withUnit(manager.careerYears, "\u5E74")],
-      ["\u7BA1\u7406\u5E74\u9650", manager.tenureLabel ? escapeHtml3(manager.tenureLabel) : withUnit(manager.tenure, "\u5E74")],
-      ["\u5728\u7BA1\u89C4\u6A21", withUnit(manager.scale, "\u4EBF", (value) => formatNumber.format(value))],
-      ["\u5728\u7BA1\u57FA\u91D1\u6570", withUnit(manager.fundCount, "\u53EA")],
+      ["\u7EFC\u5408\u8BC4\u7EA7", withUnit(headerManager.rating, "\u661F")],
+      ["\u4ECE\u4E1A\u5E74\u9650", withUnit(headerManager.careerYears, "\u5E74")],
+      ["\u7BA1\u7406\u5E74\u9650", headerManager.tenureLabel ? escapeHtml3(headerManager.tenureLabel) : withUnit(manager.tenure, "\u5E74")],
+      ["\u5728\u7BA1\u89C4\u6A21", withUnit(headerManager.scale, "\u4EBF", number)],
+      ["\u5728\u7BA1\u57FA\u91D1\u6570", withUnit(headerManager.fundCount, "\u53EA")],
       ["\u4EE3\u8868\u57FA\u91D1", manager.product && escapeHtml3(manager.product)],
       ["\u57FA\u91D1\u7C7B\u578B", manager.productType && escapeHtml3(manager.productType)]
     ];
     const returns = [
-      ["\u4EE3\u8868\u57FA\u91D1\u5E74\u5316\u56DE\u62A5", manager.representativeAnnualized],
+      ["\u4EE3\u8868\u57FA\u91D1\u5E74\u5316\u56DE\u62A5", headerManager.representativeAnnualized],
       ["\u7ECF\u7406\u6307\u6570\u603B\u56DE\u62A5", manager.indexTotal],
       ["\u7ECF\u7406\u6307\u6570\u8FD13\u6708", manager.index3m],
       ["\u7ECF\u7406\u6307\u6570\u8FD11\u5E74", manager.index1y],
       ["\u7ECF\u7406\u6307\u6570\u8FD13\u5E74", manager.index3y]
-    ].filter(([, value]) => Number.isFinite(value));
-    view.innerHTML = `<div class="cl-page md-page">${backLink}
-    <section class="cl-card md-detail" aria-labelledby="md-title">
-      <header class="md-heading">
-        <h1 id="md-title">${escapeHtml3(manager.name)}</h1>
-        ${manager.isDemo ? '<span class="md-demo-label">\u793A\u4F8B</span>' : ""}
-      </header>
-      <dl class="md-fields">${details.map(([label, value]) => field(label, value)).join("")}</dl>
-    </section>
-    ${returns.length ? `<section class="cl-card md-detail" aria-labelledby="md-returns">
-      <h2 id="md-returns">\u4E1A\u7EE9\u6307\u6807</h2>
-      <dl class="md-fields">${returns.map(([label, value]) => field(label, withUnit(value, "%", (number) => formatNumber.format(number)))).join("")}</dl>
-    </section>` : ""}
+    ].filter(([, value]) => Number.isFinite(value)).map(([label, value]) => [label, withUnit(value, "%", (number2) => formatNumber.format(number2))]);
+    view.innerHTML = `<div class="cl-page md-page">
+    ${header(headerManager, companyValue)}
+    <div class="md-content" id="md-tab-panel" role="tabpanel" tabindex="0"></div>
+    ${backLink}
   </div>`;
+    const root = view.firstElementChild;
+    const panel = root.querySelector(".md-content");
+    const scrollHeader = root.querySelector(".md-header");
+    const tabList = root.querySelector(".md-tabs");
+    const tabButtons = [...tabList.querySelectorAll("[data-md-tab]")];
+    const disposeSwitch = bindManagerSwitch(root, manager, managers, companies);
+    const summary = managerSummary(headerManager, company, companyValue);
+    const profiles = section("\u57FA\u672C\u4FE1\u606F", details);
+    const performance = section("\u4E1A\u7EE9\u6307\u6807", returns, "\u6682\u65E0\u4E1A\u7EE9\u6570\u636E");
+    const fundFields = manager.product ? [["\u4EE3\u8868\u57FA\u91D1", escapeHtml3(manager.product)], ["\u57FA\u91D1\u7C7B\u578B", manager.productType && escapeHtml3(manager.productType)]] : [];
+    const risk = manager.performanceValues.representative;
+    const riskFields = [["\u6700\u5927\u56DE\u64A4", risk.maxDrawdown?.["1y"]], ["\u5E74\u5316\u6CE2\u52A8\u7387", risk.volatility?.["1y"]], ["\u4E0B\u884C\u98CE\u9669", risk.downsideRisk?.["1y"]]].filter(([, value]) => Number.isFinite(value)).map(([label, value]) => [label, withUnit(value, "%", (number2) => formatNumber.format(number2))]);
+    const panels = {
+      overview: profiles + (returns.length ? performance : ""),
+      funds: section("\u4EE3\u8868\u57FA\u91D1", fundFields, "\u6682\u65E0\u4EE3\u8868\u57FA\u91D1\u6570\u636E"),
+      returns: performance,
+      risk: section(riskFields.length ? "\u4EE3\u8868\u57FA\u91D1\u8FD1\u4E00\u5E74\u98CE\u9669" : "\u98CE\u9669", riskFields, "\u6682\u65E0\u98CE\u9669\u6570\u636E"),
+      holdings: section("\u6301\u4ED3\u5206\u6790", [], "\u6682\u65E0\u6301\u4ED3\u6570\u636E"),
+      profile: profiles
+    };
+    function showTab(button) {
+      for (const item of tabButtons) {
+        const selected = item === button;
+        item.setAttribute("aria-selected", String(selected));
+        item.tabIndex = selected ? 0 : -1;
+      }
+      panel.setAttribute("aria-labelledby", button.id);
+      panel.innerHTML = panels[button.dataset.mdTab];
+      if (button.dataset.mdTab === "overview") panel.prepend(summary);
+      const listBounds = tabList.getBoundingClientRect();
+      const tabBounds = button.getBoundingClientRect();
+      const leftOverflow = Math.min(0, tabBounds.left - listBounds.left);
+      const rightOverflow = Math.max(0, tabBounds.right - listBounds.right);
+      tabList.scrollLeft += leftOverflow + rightOverflow;
+    }
+    function selectTab(button) {
+      showTab(button);
+      onTabChange(button.dataset.mdTab);
+      if (scrollHeader.classList.contains("is-pinned") && panel.getBoundingClientRect().top < scrollHeader.getBoundingClientRect().bottom) {
+        const y = window.scrollY + panel.getBoundingClientRect().top - scrollHeader.getBoundingClientRect().bottom - 10;
+        window.scrollTo({ top: Math.max(0, y), behavior: "instant" });
+      }
+      root.dispatchEvent(new Event("md-tab-scroll"));
+    }
+    tabList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-md-tab]");
+      if (button) selectTab(button);
+    });
+    tabList.addEventListener("keydown", (event) => {
+      const index = tabButtons.indexOf(event.target);
+      if (index === -1 || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === "Home" ? 0 : event.key === "End" ? tabButtons.length - 1 : (index + (event.key === "ArrowLeft" ? -1 : 1) + tabButtons.length) % tabButtons.length;
+      const button = tabButtons[next];
+      selectTab(button);
+      button.focus({ preventScroll: true });
+    });
+    showTab(tabButtons.find((button) => button.dataset.mdTab === initialTab) ?? tabButtons[0]);
+    const disposeScroll = attachDetailHeaderScroll(root, { tabScrollEvent: "md-tab-scroll", revealTallHeader: true });
+    return () => {
+      disposeScroll();
+      disposeSwitch();
+    };
   }
 
   // dist/company-list.js
@@ -2585,8 +2858,8 @@ var ZhiceResearchRoutes = (() => {
       if (aggregateActive) visibleColumns.splice(4, 0, ["aggregateScale", "\u6240\u9009\u7C7B\u578B\u5408\u8BA1\u89C4\u6A21\uFF5C\u6392\u540D", 190]);
       const totalWidth = visibleColumns.reduce((total, [, , width]) => total + width, 0);
       root.querySelector("colgroup").innerHTML = visibleColumns.map(([key, , width]) => `<col${key === "aggregateScale" ? ' class="cl-aggregate-column"' : ""} style="width:${width / totalWidth * 100}%">`).join("");
-      const header2 = root.querySelector("thead");
-      header2.innerHTML = `<tr>${visibleColumns.map(([key, label]) => {
+      const header3 = root.querySelector("thead");
+      header3.innerHTML = `<tr>${visibleColumns.map(([key, label]) => {
         const sort = state.sort.key === key ? state.sort.direction === 1 ? "ascending" : "descending" : null;
         const sortable = sortKeys.has(key);
         const numeric = !["name", "founded"].includes(key);
@@ -3171,15 +3444,15 @@ var ZhiceResearchRoutes = (() => {
   }
   function returnCell(value) {
     if (value == null || value === "") return '<td class="num">\u2014</td>';
-    const number = Number(String(value).replace(/^−/, "-").replace(/[%+,]/g, ""));
-    const className = number > 0 ? " is-rise" : number < 0 ? " is-fall" : "";
+    const number2 = Number(String(value).replace(/^−/, "-").replace(/[%+,]/g, ""));
+    const className = number2 > 0 ? " is-rise" : number2 < 0 ? " is-fall" : "";
     return `<td class="num${className}">${escapeText(valueWithUnit(value, "%", 2))}</td>`;
   }
   function ratingCell2(value) {
     if (value == null || value === "") return "<td>\u2014</td>";
-    const rating = Number(value);
-    if (!Number.isInteger(rating) || rating < 1 || rating > 5) return "<td>\u2014</td>";
-    return `<td><span class="company-stars" role="img" aria-label="${rating} \u661F"><span aria-hidden="true">${"\u2605".repeat(rating)}<span class="company-stars-muted">${"\u2605".repeat(5 - rating)}</span></span></span></td>`;
+    const rating2 = Number(value);
+    if (!Number.isInteger(rating2) || rating2 < 1 || rating2 > 5) return "<td>\u2014</td>";
+    return `<td><span class="company-stars" role="img" aria-label="${rating2} \u661F"><span aria-hidden="true">${"\u2605".repeat(rating2)}<span class="company-stars-muted">${"\u2605".repeat(5 - rating2)}</span></span></span></td>`;
   }
   var fundColumns = [
     ["name", "\u57FA\u91D1\u540D\u79F0/\u4EE3\u7801"],
@@ -3323,7 +3596,7 @@ var ZhiceResearchRoutes = (() => {
     <div class="company-fund-page-controls">
       <div class="company-fund-pages">
         <button type="button" class="company-fund-page" data-company-list-page="${page - 1}" data-company-list-page-step="prev" aria-label="\u4E0A\u4E00\u9875"${page === 1 ? " disabled" : ""}>${fundChevron()}</button>
-        ${listPageNumbers(page, last).map((number) => number == null ? '<span class="company-fund-page" aria-hidden="true">\u2026</span>' : `<button type="button" class="company-fund-page" data-company-list-page="${number}" aria-label="\u7B2C ${number} \u9875"${number === page ? ' aria-current="page"' : ""}>${number}</button>`).join("")}
+        ${listPageNumbers(page, last).map((number2) => number2 == null ? '<span class="company-fund-page" aria-hidden="true">\u2026</span>' : `<button type="button" class="company-fund-page" data-company-list-page="${number2}" aria-label="\u7B2C ${number2} \u9875"${number2 === page ? ' aria-current="page"' : ""}>${number2}</button>`).join("")}
         <button type="button" class="company-fund-page" data-company-list-page="${page + 1}" data-company-list-page-step="next" aria-label="\u4E0B\u4E00\u9875"${page === last ? " disabled" : ""}>${fundChevron()}</button>
       </div>
       <label class="company-fund-page-size"><select data-company-control="${pageSizeControl}" aria-label="\u6BCF\u9875\u6761\u6570">${[5, 10, 20, 50].map((size) => `<option value="${size}"${size === pageSize ? " selected" : ""}>${size}\u6761/\u9875</option>`).join("")}</select></label>
@@ -3669,7 +3942,7 @@ var ZhiceResearchRoutes = (() => {
     <div class="company-fund-page-controls">
       <div class="company-fund-pages">
         <button type="button" class="company-fund-page" data-company-list-page="${page - 1}" data-company-list-page-step="prev" aria-label="\u4E0A\u4E00\u9875"${page === 1 ? " disabled" : ""}>${fundChevron2()}</button>
-        ${listPageNumbers2(page, last).map((number) => number == null ? '<span class="company-fund-page" aria-hidden="true">\u2026</span>' : `<button type="button" class="company-fund-page" data-company-list-page="${number}" aria-label="\u7B2C ${number} \u9875"${number === page ? ' aria-current="page"' : ""}>${number}</button>`).join("")}
+        ${listPageNumbers2(page, last).map((number2) => number2 == null ? '<span class="company-fund-page" aria-hidden="true">\u2026</span>' : `<button type="button" class="company-fund-page" data-company-list-page="${number2}" aria-label="\u7B2C ${number2} \u9875"${number2 === page ? ' aria-current="page"' : ""}>${number2}</button>`).join("")}
         <button type="button" class="company-fund-page" data-company-list-page="${page + 1}" data-company-list-page-step="next" aria-label="\u4E0B\u4E00\u9875"${page === last ? " disabled" : ""}>${fundChevron2()}</button>
       </div>
       <label class="company-fund-page-size"><select data-company-control="${pageSizeControl}" aria-label="\u6BCF\u9875\u6761\u6570">${[5, 10, 20, 50].map((size) => `<option value="${size}"${size === pageSize ? " selected" : ""}>${size}\u6761/\u9875</option>`).join("")}</select></label>
@@ -4352,7 +4625,7 @@ var ZhiceResearchRoutes = (() => {
   }
 
   // dist/company-detail.js
-  var tabs = [
+  var tabs2 = [
     ["overview", "\u516C\u53F8\u6982\u89C8"],
     ["funds", "\u65D7\u4E0B\u57FA\u91D1"],
     ["managers", "\u5728\u804C\u7ECF\u7406"],
@@ -4400,8 +4673,8 @@ var ZhiceResearchRoutes = (() => {
     const numeric = Number(String(value).replace(/[%,]/g, "").replace("\u2212", "-"));
     return numeric > 0 ? "is-rise" : numeric < 0 ? "is-fall" : "";
   }
-  function ratingKey(rating) {
-    return rating == null ? "unrated" : String(rating);
+  function ratingKey(rating2) {
+    return rating2 == null ? "unrated" : String(rating2);
   }
   function ratingGrade(key) {
     return key === "unrated" ? "\u6682\u65E0\u661F\u7EA7" : `${key}\u661F`;
@@ -4414,9 +4687,9 @@ var ZhiceResearchRoutes = (() => {
     if (state2.ratingMode !== "manager") return companyData.ratings;
     if (state2.ratingType === "all") return companyData.managerRatings;
     const managers = managerRatingExamples.filter((manager) => manager.fundType === state2.ratingType);
-    return companyData.managerRatings.map(({ rating }) => {
-      const exampleCount = managers.filter((manager) => manager.rating === rating).length;
-      return { rating, exampleCount, percent: managers.length ? Math.round(exampleCount * 100 / managers.length) : 0 };
+    return companyData.managerRatings.map(({ rating: rating2 }) => {
+      const exampleCount = managers.filter((manager) => manager.rating === rating2).length;
+      return { rating: rating2, exampleCount, percent: managers.length ? Math.round(exampleCount * 100 / managers.length) : 0 };
     });
   }
   function readFavorite(favoriteKey) {
@@ -4488,13 +4761,13 @@ var ZhiceResearchRoutes = (() => {
     };
   }
   function emptyAnalysis(tab) {
-    const labels = tab === "overview" ? ["\u89C4\u6A21\u53D8\u5316", "\u65D7\u4E0B\u4EA7\u54C1\u7ED3\u6784", "\u57FA\u91D1\u661F\u7EA7\u5206\u5E03"] : [tabs.find(([key]) => key === tab)[1]];
+    const labels = tab === "overview" ? ["\u89C4\u6A21\u53D8\u5316", "\u65D7\u4E0B\u4EA7\u54C1\u7ED3\u6784", "\u57FA\u91D1\u661F\u7EA7\u5206\u5E03"] : [tabs2.find(([key]) => key === tab)[1]];
     return labels.map((label) => `<section class="company-panel" aria-label="${label}">
     <div class="company-panel-head"><h2>${label}</h2></div>
     <p class="company-empty" role="status">\u6682\u65E0${label}\u6570\u636E</p>
   </section>`).join("");
   }
-  function header(profile) {
+  function header2(profile) {
     const website = escapeHtml5(profile.url);
     return `<div class="company-header-slot">
     <header class="company-header" aria-label="\u516C\u53F8\u8BE6\u60C5\u9875\u5934">
@@ -4534,7 +4807,7 @@ var ZhiceResearchRoutes = (() => {
         </div>
       </div>` : ""}
       <div class="company-tabs" role="tablist" aria-label="\u516C\u53F8\u8BE6\u60C5">
-        ${tabs.map(([key, label]) => `<button type="button" id="company-tab-${key}" role="tab" aria-controls="company-tab-panel" data-company-tab="${key}">${label}</button>`).join("")}
+        ${tabs2.map(([key, label]) => `<button type="button" id="company-tab-${key}" role="tab" aria-controls="company-tab-panel" data-company-tab="${key}">${label}</button>`).join("")}
       </div>
     </header>
   </div>`;
@@ -4670,10 +4943,10 @@ var ZhiceResearchRoutes = (() => {
     const choices = [["all", "\u5168\u90E8"], ...grades.map((key) => [key, ratingGrade(key)])];
     return dropdown("rating", state2.rating, choices, { label, asHeading: true, value: ratingLabel(state2) });
   }
-  function rowStars(rating) {
-    if (rating == null) return "\u6682\u65E0\u661F\u7EA7";
-    return `<span class="company-stars" role="img" aria-label="${rating} \u661F">${stars.map(
-      (i) => `<span${i >= rating ? ' class="company-stars-muted"' : ""}>${icon("star")}</span>`
+  function rowStars(rating2) {
+    if (rating2 == null) return "\u6682\u65E0\u661F\u7EA7";
+    return `<span class="company-stars" role="img" aria-label="${rating2} \u661F">${stars.map(
+      (i) => `<span${i >= rating2 ? ' class="company-stars-muted"' : ""}>${icon("star")}</span>`
     ).join("")}</span>`;
   }
   function ratingsPanel(state2) {
@@ -4787,95 +5060,6 @@ var ZhiceResearchRoutes = (() => {
       active = next;
     };
   }
-  function attachHeaderScroll(root) {
-    const slot = root.querySelector(".company-header-slot");
-    const header2 = root.querySelector(".company-header");
-    const facts = root.querySelector(".company-facts-wrap");
-    const title = header2.querySelector("h1");
-    const switchCompany = header2.querySelector('[data-company-action="switch"]');
-    const topbar = document.querySelector(".app-topbar");
-    let compact = false;
-    let pinned = false;
-    let previousY = 0;
-    let accumulated = 0;
-    let frame = 0;
-    let top = 52;
-    let anchor = 0;
-    function fitCompactMetadata() {
-      header2.classList.remove("is-metadata-hidden");
-      const fits = title.scrollWidth <= title.clientWidth;
-      header2.classList.toggle("is-metadata-hidden", !fits);
-    }
-    function measure() {
-      top = topbar?.offsetHeight ?? 0;
-      root.style.setProperty("--company-sticky-top", `${top}px`);
-      anchor = slot.getBoundingClientRect().top + window.scrollY - top;
-      header2.classList.add("company-no-transition");
-      header2.classList.remove("is-compact");
-      slot.style.height = `${header2.offsetHeight}px`;
-      header2.classList.toggle("is-compact", compact);
-      if (compact) fitCompactMetadata();
-      void header2.offsetHeight;
-      header2.classList.remove("company-no-transition");
-    }
-    function draw(nextCompact, nextPinned) {
-      if (pinned !== nextPinned) {
-        pinned = nextPinned;
-        header2.classList.toggle("is-pinned", pinned);
-      }
-      if (compact !== nextCompact) {
-        compact = nextCompact;
-        const movingFocus = compact && facts?.contains(document.activeElement);
-        header2.classList.toggle("is-compact", compact);
-        if (compact) fitCompactMetadata();
-        if (facts) {
-          facts.inert = compact;
-          facts.setAttribute("aria-hidden", String(compact));
-        }
-        if (movingFocus) switchCompany.focus({ preventScroll: true });
-      }
-    }
-    function tick() {
-      frame = 0;
-      if (!root.isConnected) return;
-      const y = Math.max(0, window.scrollY);
-      const delta = y - previousY;
-      previousY = y;
-      if (delta !== 0) accumulated = Math.sign(delta) === Math.sign(accumulated) ? accumulated + delta : delta;
-      const atAnchor = y <= Math.max(0, anchor + 2);
-      const nextPinned = !atAnchor;
-      let nextCompact = compact;
-      if (atAnchor || accumulated <= -28) nextCompact = false;
-      else if (y >= anchor + 48 && accumulated >= 14) nextCompact = true;
-      draw(nextCompact, nextPinned);
-    }
-    function onScroll() {
-      if (frame) return;
-      frame = requestAnimationFrame(tick);
-    }
-    function onResize() {
-      if (!root.isConnected) return;
-      measure();
-      onScroll();
-    }
-    measure();
-    tick();
-    function resetDirection() {
-      previousY = Math.max(0, window.scrollY);
-      accumulated = 0;
-      onScroll();
-    }
-    root.addEventListener("company-tab-scroll", resetDirection);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize, { passive: true });
-    document.fonts?.ready.then(onResize);
-    return () => {
-      root.removeEventListener("company-tab-scroll", resetDirection);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }
   function mountCompanyDetail(container, { companyId = "essence", initialTab = "overview", onTabChange = () => {
   }, toast = () => {
   } } = {}) {
@@ -4885,8 +5069,8 @@ var ZhiceResearchRoutes = (() => {
       return;
     }
     const favoriteKey = `zhice-company-favorite-${companyId}`;
-    const state2 = { ...defaults, tab: tabs.some(([key]) => key === initialTab) ? initialTab : "overview", favorite: readFavorite(favoriteKey) };
-    container.innerHTML = `<div class="company-detail">${header(profile)}<div class="company-content" id="company-tab-panel" role="tabpanel" tabindex="0"></div>${switchDialog(profile)}</div>`;
+    const state2 = { ...defaults, tab: tabs2.some(([key]) => key === initialTab) ? initialTab : "overview", favorite: readFavorite(favoriteKey) };
+    container.innerHTML = `<div class="company-detail">${header2(profile)}<div class="company-content" id="company-tab-panel" role="tabpanel" tabindex="0"></div>${switchDialog(profile)}</div>`;
     const root = container.firstElementChild;
     const content = root.querySelector(".company-content");
     const dialog = root.querySelector(".company-dialog");
@@ -4979,9 +5163,9 @@ var ZhiceResearchRoutes = (() => {
       state2.tab = tab;
       onTabChange(tab);
       renderContent();
-      const header2 = root.querySelector(".company-header");
-      if (header2.classList.contains("is-pinned") && content.getBoundingClientRect().top < header2.getBoundingClientRect().bottom) {
-        const y = window.scrollY + content.getBoundingClientRect().top - header2.getBoundingClientRect().bottom - 10;
+      const header3 = root.querySelector(".company-header");
+      if (header3.classList.contains("is-pinned") && content.getBoundingClientRect().top < header3.getBoundingClientRect().bottom) {
+        const y = window.scrollY + content.getBoundingClientRect().top - header3.getBoundingClientRect().bottom - 10;
         window.scrollTo({ top: Math.max(0, y), behavior: "instant" });
       }
       root.dispatchEvent(new Event("company-tab-scroll"));
@@ -5312,10 +5496,10 @@ var ZhiceResearchRoutes = (() => {
       const button = event.target.closest("[data-company-tab]");
       if (button && ["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
         event.preventDefault();
-        const current = tabs.findIndex(([key]) => key === button.dataset.companyTab);
-        const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (current + (event.key === "ArrowLeft" ? -1 : 1) + tabs.length) % tabs.length;
-        setTab(tabs[next][0]);
-        root.querySelector(`[data-company-tab="${tabs[next][0]}"]`).focus();
+        const current = tabs2.findIndex(([key]) => key === button.dataset.companyTab);
+        const next = event.key === "Home" ? 0 : event.key === "End" ? tabs2.length - 1 : (current + (event.key === "ArrowLeft" ? -1 : 1) + tabs2.length) % tabs2.length;
+        setTab(tabs2[next][0]);
+        root.querySelector(`[data-company-tab="${tabs2[next][0]}"]`).focus();
       }
       const trigger = event.target.closest("[data-company-dropdown]");
       if (trigger && ["ArrowDown", "ArrowUp"].includes(event.key)) {
@@ -5365,7 +5549,7 @@ var ZhiceResearchRoutes = (() => {
     window.addEventListener("resize", positionFundMenu);
     updateFavorite();
     renderContent();
-    const disposeScroll = attachHeaderScroll(root);
+    const disposeScroll = attachDetailHeaderScroll(root);
     return () => {
       disposeScroll();
       disposeCharts();

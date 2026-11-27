@@ -1294,7 +1294,10 @@ function renderRoute(preserveScroll=false) {
     mountResearchRoute(({mountManagerList}) => mountManagerList(view), '经理数据加载失败，');
   } else if (module === 'manager') {
     mountResearchRoute(
-      ({renderManagerDetail}) => renderManagerDetail(view, decodeURIComponent(route.segments[1] ?? '')),
+      ({renderManagerDetail}) => renderManagerDetail(view, decodeURIComponent(route.segments[1] ?? ''), {
+        initialTab: route.params.get('tab'),
+        onTabChange: tab => setParams({tab:tab === 'overview' ? null : tab}),
+      }),
       '基金经理资料加载失败，',
       true,
     );
